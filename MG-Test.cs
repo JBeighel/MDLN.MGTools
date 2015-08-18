@@ -30,10 +30,11 @@ namespace MGTest
 	{
 		private GraphicsDeviceManager graphics;
 		private SpriteBatch spriteBatch;
-		private Texture2D background, ConsoleRect;
+		private Texture2D background, ConsoleRect, CardImage, CardBack;
 		private int Transparency;
 		private KeyboardState PriorKeyState;
 		private Console DevConsole;
+		private TextureFont cFont;
 
 		private int FrameNum;
 
@@ -68,9 +69,13 @@ namespace MGTest
 			spriteBatch = new SpriteBatch(GraphicsDevice);
 
 			background = Content.Load<Texture2D>("DiceTexture.png");
+			CardImage = Content.Load<Texture2D>("Fighter.png");
+			CardBack = Content.Load<Texture2D>("CardBack.png");
 
 			ConsoleRect = new Texture2D(graphics.GraphicsDevice, 1, 1);
 			ConsoleRect.SetData(new[] { Color.DarkGray });
+
+			cFont = new TextureFont(Content.Load<Texture2D>("Font.png"));
 		}
 
 		/// <summary>
@@ -143,7 +148,21 @@ namespace MGTest
 					break;
 			}
 			
-			
+			spriteBatch.Draw(CardBack, new Rectangle(10, 10, CardBack.Width, CardBack.Height), Color.White);
+
+			spriteBatch.Draw(CardImage, new Rectangle(20, 40, 14 * 16, 195 - 40 - 10), Color.White);
+
+			cFont.WriteText(spriteBatch, "Card Name", 20, 20, Color.DarkBlue);
+			cFont.WriteText(spriteBatch, "Card Details 1", 195, 20, Color.DarkBlue);
+			cFont.WriteText(spriteBatch, "Line 2", 195 + cFont.CharacterHeight, 20, Color.DarkBlue);
+			cFont.WriteText(spriteBatch, "Line 3", 195 + (cFont.CharacterHeight * 2), 20, Color.DarkBlue);
+			cFont.WriteText(spriteBatch, "Line 4", 195 + (cFont.CharacterHeight * 3), 20, Color.DarkBlue);
+			cFont.WriteText(spriteBatch, "Line 5", 195 + (cFont.CharacterHeight * 4), 20, Color.DarkBlue);
+			cFont.WriteText(spriteBatch, "Line 6", 195 + (cFont.CharacterHeight * 5), 20, Color.DarkBlue);
+			cFont.WriteText(spriteBatch, "Line 7", 195 + (cFont.CharacterHeight * 6), 20, Color.DarkBlue);
+			cFont.WriteText(spriteBatch, "Line 8", 195 + (cFont.CharacterHeight * 7), 20, Color.DarkBlue);
+			cFont.WriteText(spriteBatch, "Line 9", 195 + (cFont.CharacterHeight * 8), 20, Color.DarkBlue);
+			cFont.WriteText(spriteBatch, "Line 10", 195 + (cFont.CharacterHeight * 9), 20, Color.DarkBlue);
 
 			spriteBatch.End();
 

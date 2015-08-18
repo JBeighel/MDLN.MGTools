@@ -1,5 +1,5 @@
 #Project values
-DEPS = MDLN.MGTools.Console.dll
+DEPS = MDLN.MGTools.Console.dll MDLN.MGTools.TextureFont.dll
 KEY = 
 APP = MG-Test.exe
 CCARGS = 
@@ -27,7 +27,7 @@ ifeq ($(OS),Windows_NT)
     else
     	ENV = Windows/.Net
 		CC = C:\Windows\Microsoft.NET\Framework\v4.0.30319\csc.exe
-		REGASM = C:\Windows\Microsoft.NET\Framework64\v4.0.30319\regasm.exe		
+		#REGASM = C:\Windows\Microsoft.NET\Framework64\v4.0.30319\regasm.exe		
 		AL = C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Bin\al.exe
 		#GACUTIL = C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Bin\NETFX 4.0 Tools\gacutil.exe
 		SN = C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Bin\sn.exe

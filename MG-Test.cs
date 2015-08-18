@@ -33,8 +33,11 @@ namespace MGTest
 		private Texture2D background, ConsoleRect, CardImage, CardBack;
 		private int Transparency;
 		private KeyboardState PriorKeyState;
+		private MouseState PriorMouseState;
 		private Console DevConsole;
+		private Container TestCont;
 		private TextureFont cFont;
+		private bool cMouseOverCard;
 
 		private int FrameNum;
 
@@ -76,6 +79,10 @@ namespace MGTest
 			ConsoleRect.SetData(new[] { Color.DarkGray });
 
 			cFont = new TextureFont(Content.Load<Texture2D>("Font.png"));
+
+			TestCont = new Container(GraphicsDevice, background, 20, 250, 100, 200);
+			TestCont.OpenEffect = DisplayEffect.SlideRight;
+			TestCont.CloseEffect = DisplayEffect.SlideLeft;
 		}
 
 		/// <summary>
@@ -92,6 +99,7 @@ namespace MGTest
 		protected override void Update(GameTime gameTime) {
 			int Seconds = gameTime.TotalGameTime.Seconds;
 			KeyboardState KeyState = Keyboard.GetState();
+			MouseState CurrMouse = Mouse.GetState();
 
 			if ((PriorKeyState.IsKeyDown(Keys.OemTilde) == false) && (KeyState.IsKeyDown(Keys.OemTilde) == true)) {
 				DevConsole.ToggleVisible();
@@ -99,11 +107,29 @@ namespace MGTest
 
 			DevConsole.Update(gameTime.TotalGameTime, Keyboard.GetState());
 
+			if ((PriorMouseState.LeftButton == ButtonState.Released) && (CurrMouse.LeftButton == ButtonState.Pressed)) {
+				DevConsole.AddText("Left mouse clicked, X=" + CurrMouse.X + " Y=" + CurrMouse.Y);
+			}
+
+			if (new Rectangle(10, 10, CardBack.Width, CardBack.Height).Contains(CurrMouse.X, CurrMouse.Y)) {
+				if (cMouseOverCard == false) {
+					DevConsole.AddText("Mouse entered card");
+					cMouseOverCard = true;
+					TestCont.Visible = true;
+				}
+			} else {
+				if (cMouseOverCard == true) {
+					DevConsole.AddText("Mouse exited card");
+					cMouseOverCard = false;
+					TestCont.Visible = false;
+				}
+			}
+
+			TestCont.Update(gameTime);
+
+			PriorMouseState = CurrMouse;
 			PriorKeyState = KeyState;
 
-			if (Seconds % 6 + 1 != FrameNum) {
-				DevConsole.AddText("Advance frame...");
-			}
 			FrameNum = (Seconds % 6) + 1;
 
 			if (gameTime.TotalGameTime.Milliseconds <= 500) {
@@ -167,6 +193,8 @@ namespace MGTest
 			spriteBatch.End();
 
 			DevConsole.Draw();
+			TestCont.Draw();
+
 
 			base.Draw(gameTime);
 		}

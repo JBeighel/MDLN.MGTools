@@ -1,5 +1,5 @@
 #Project values
-DEPS = MDLN.MGTools.Console.dll MDLN.MGTools.TextureFont.dll
+DEPS = MDLN.MGTools.Console.dll MDLN.MGTools.TextureFont.dll MDLN.MGTools.Container.dll
 KEY = 
 APP = MG-Test.exe
 CCARGS = 
@@ -8,8 +8,8 @@ REFS = /reference:MonoGame.Framework.dll
 #default values
 WINMONO = 0
 CC = 
-#TARGET = exe 
-TARGET = winexe
+TARGET = exe 
+#TARGET = winexe
 
 #determine Operating system to set environment
 ifndef OS

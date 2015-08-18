@@ -254,11 +254,10 @@ namespace MDLN.MGTools {
 			}
 
 			Rectangle LetterPos = new Rectangle(0, 0, cTextureColWidth, cTextureRowHeight);
-			Color AlphaOverlay = new Color(255, 255, 255, cBackColor.A);
 
 			cDrawBatch.Begin(SpriteSortMode.Immediate, BlendState.NonPremultiplied);
 
-			cDrawBatch.Draw(cBackTexture, cDrawRegion, AlphaOverlay);
+			cDrawBatch.Draw(cBackTexture, cDrawRegion, Color.White);
 
 			//Draw the current command
 			LetterPos.X = cDrawRegion.X;
@@ -301,7 +300,7 @@ namespace MDLN.MGTools {
 
 		protected void CreateBackTexture() {
 			cBackTexture = new Texture2D(cGraphicsDevice, 1, 1);
-			cBackTexture.SetData(new[] { Color.DarkGray });
+			cBackTexture.SetData(new[] { cBackColor });
 		}
 
 		protected Rectangle GetCharacterTextureRegion(byte Ascii) {

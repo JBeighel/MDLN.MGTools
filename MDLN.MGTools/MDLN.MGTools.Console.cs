@@ -6,62 +6,36 @@ using System;
 using System.Collections.Generic;
 
 namespace MDLN.MGTools {
-	public class Console {
-		private Rectangle cDrawRegion;
-		private Color cBackColor, cFontColor;
-		private Texture2D cBackTexture, cFontTexture;
+	public class Console : Container {
+		private Color cFontColor;
+		private TextureFont cFont;
 		private KeyboardState cPriorKeys;
-		private GraphicsDevice cGraphicsDevice;
-		private bool cShowConsole, cClosingConsole, cCursorOn;
-		private SpriteBatch cDrawBatch;
+		private bool cCursorOn;
 		private string cCommand;
-		private int cTextureColWidth, cTextureRowHeight, cMaxLines, cFinalTop, cFinalLeft, cSlideStepX, cSlideStepY;
+		private int cMaxLines;
 		private List<string> cLines;
-		private SlideEffect cSlideOpen, cSlideClosed;
 
 		public Console(GraphicsDevice GraphicsDev, ContentManager ContentMgr, string FontFile, int Top, int Left, int Width, int Height) : this(GraphicsDev, ContentMgr, FontFile, new Rectangle(Left, Top, Width, Height)) { }
 
 		public Console(GraphicsDevice GraphicsDev, ContentManager ContentMgr, string FontFile, int Width, int Height) : this(GraphicsDev, ContentMgr, FontFile, new Rectangle(0, 0, Width, Height)) { }
 
-		public Console(GraphicsDevice GraphicsDev, ContentManager ContentMgr, string FontFile, Rectangle Region) {
-			cGraphicsDevice = GraphicsDev;
-			cDrawRegion = Region;
-			cFinalTop = Region.Y;
-			cFinalLeft = Region.X;
+		public Console(GraphicsDevice GraphicsDev, ContentManager ContentMgr, string FontFile, Rectangle Region) : base(GraphicsDev, null, Region) {
+			cFont = new TextureFont();
 
-			cSlideStepX = Region.Width / 10;
-			cSlideStepY = Region.Height / 10;
-
-			cBackColor = new Color(Color.DarkGray, 0.75f);
 			cFontColor = new Color(Color.LightBlue, 1.0f);
+			BackgroundColor = new Color(Color.DarkGray, 0.75f);
 
-			CreateBackTexture();
-			cFontTexture = ContentMgr.Load<Texture2D>(FontFile);
-			cTextureColWidth = cFontTexture.Width / 16;
-			cTextureRowHeight = cFontTexture.Height / 16;
-			cMaxLines = (cDrawRegion.Height / cTextureRowHeight) - 1; //Remove 1 line for the command input
+			cFont.FontTexture = ContentMgr.Load<Texture2D>(FontFile);
+
+			cMaxLines = (ClientRegion.Height / cFont.CharacterHeight) - 1; //Remove 1 line for the command input
 
 			cPriorKeys = new KeyboardState();
-			cShowConsole = false;
-
-			cDrawBatch = new SpriteBatch(cGraphicsDevice);
 
 			cCommand = "> ";
 			cLines = new List<string>();
 		}
 
 		public event CommandSentEventHandler CommandSent;
-
-		public Color BackgroundColor {
-			get {
-				return cBackColor;
-			}
-
-			set {
-				cBackColor = value;
-				CreateBackTexture();
-			}
-		}
 
 		public Color FontColor {
 			get {
@@ -70,52 +44,6 @@ namespace MDLN.MGTools {
 
 			set {
 				cFontColor = value;
-			}
-		}
-
-		public bool Visible {
-			get {
-				return cShowConsole;
-			}
-
-			set {
-				if ((cShowConsole == true) && (value == false)) {
-					cClosingConsole = true;
-				} else if ((cShowConsole == false) && (value == true)) {
-					RestartSlideEffect();
-				}
-
-				cShowConsole = value;
-			}
-		}
-
-		public SlideEffect SlideOpen {
-			get {
-				return cSlideOpen;
-			}
-
-			set {
-				cSlideOpen = value;
-			}
-		}
-
-		public SlideEffect SlideClosed {
-			get {
-				return cSlideClosed;
-			}
-
-			set {
-				cSlideClosed = value;
-			}
-		}
-
-		public void ToggleVisible() {
-			if (cShowConsole == true) {
-				cShowConsole = false;
-				cClosingConsole = true;
-			} else {
-				cShowConsole = true;
-				RestartSlideEffect();
 			}
 		}
 
@@ -131,33 +59,36 @@ namespace MDLN.MGTools {
 			while (cLines.Count > cMaxLines) {
 				cLines.RemoveAt(0);
 			}
+
+			HasChanged = true;
 		}
 
 		public void ClearText() {
 			cLines.Clear();
 		}
 
-		public void Update(TimeSpan TotalTime, KeyboardState CurrKeys) {
-			if ((cShowConsole == false) && (cClosingConsole == false)) { //If console isn't shown, do nothing
-				cPriorKeys = CurrKeys;
-				return;
-			}
-
+		public override void UpdateContents(GameTime TotalTime, KeyboardState CurrKeys, MouseState CurrMouse) {
 			Keys[] PressedList = CurrKeys.GetPressedKeys();
 			string NewKeys = "";
 			bool ShiftDown = false;
 
-			UpdateSlideEffect();
-			
 			if ((CurrKeys.IsKeyDown(Keys.LeftShift) == true) || (CurrKeys.IsKeyDown(Keys.RightShift) == true)) {
 				ShiftDown = true;
 			} else {
 				ShiftDown = false;
 			}
 
-			if (TotalTime.Milliseconds <= 500) {
+			if (TotalTime.TotalGameTime.Milliseconds <= 500) {
+				if (cCursorOn == false) {
+					HasChanged = true;
+				}
+
 				cCursorOn = true;
 			} else {
+				if (cCursorOn == true) {
+					HasChanged = true;
+				}
+
 				cCursorOn = false;
 			}
 
@@ -225,6 +156,8 @@ namespace MDLN.MGTools {
 			}
 
 			if (NewKeys.CompareTo("") != 0) {
+				HasChanged = true;
+
 				if (NewKeys.CompareTo("\b") == 0) {
 					if (cCommand.Length > 2) {
 						cCommand = cCommand.Substring(0, cCommand.Length - 1);
@@ -244,166 +177,28 @@ namespace MDLN.MGTools {
 			cPriorKeys = CurrKeys;
 		}
 
-		public void Draw() {
-			if ((cShowConsole == false) && (cClosingConsole == false)) { //If console isn't shown, do nothing
-				return;
-			}
-
-			Rectangle LetterPos = new Rectangle(0, 0, cTextureColWidth, cTextureRowHeight);
-
-			cDrawBatch.Begin(SpriteSortMode.Immediate, BlendState.NonPremultiplied);
-
-			cDrawBatch.Draw(cBackTexture, cDrawRegion, Color.White);
+		public override void DrawContents(GameTime CurrTime) {
+			Rectangle LetterPos = new Rectangle(0, 0, cFont.CharacterHeight, cFont.CharacterWidth);
 
 			//Draw the current command
-			LetterPos.X = cDrawRegion.X;
-			LetterPos.Y = (cDrawRegion.Height + cDrawRegion.Top) - cTextureRowHeight;
-			foreach(byte CurrChar in System.Text.Encoding.UTF8.GetBytes(cCommand)) {
-				if (LetterPos.X + cTextureColWidth > cDrawRegion.X + cDrawRegion.Width) {
-					cCursorOn = false;
-					break; //Stop drawing to avoid writing outside the draw region
-				}
-
-				cDrawBatch.Draw(cFontTexture, LetterPos, GetCharacterTextureRegion(CurrChar), cFontColor);
-				LetterPos.X += cTextureColWidth;
-			}
+			LetterPos.Y = ClientRegion.Height - cFont.CharacterHeight;
+			cFont.WriteText(cDrawBatch, cCommand, LetterPos.Y, LetterPos.X, cFontColor);
 
 			if (cCursorOn == true) {
-				cDrawBatch.Draw(cFontTexture, LetterPos, GetCharacterTextureRegion(220), cFontColor);
+				cFont.WriteAsciiCharacter(cDrawBatch, new byte[] { 220 }, cFont.CharacterHeight, LetterPos.Y, cFont.DetermineRenderWidth(cCommand), cFontColor);
 			}
 
 			//Draw all text lines in reverse order (bottom to top)
 			if (cLines.Count > 0) {
-				LetterPos.X = cDrawRegion.X;
-				LetterPos.Y -= cTextureRowHeight;
+				LetterPos.Y -= cFont.CharacterHeight;
 				for (int Ctr = cLines.Count - 1; Ctr >= 0; Ctr--) {
-					foreach(byte CurrChar in System.Text.Encoding.UTF8.GetBytes(cLines[Ctr])) {
-						if (LetterPos.X + cTextureColWidth > cDrawRegion.X + cDrawRegion.Width) {
-							break; //Stop drawing to avoid writing outside the draw region
-						}
+					cFont.WriteText(cDrawBatch, cLines[Ctr], LetterPos.Y, LetterPos.X, cFontColor);
 
-						cDrawBatch.Draw(cFontTexture, LetterPos, GetCharacterTextureRegion(CurrChar), cFontColor);
-						LetterPos.X += cTextureColWidth;
-					}
-
-					LetterPos.X = cDrawRegion.X;
-					LetterPos.Y -= cTextureRowHeight;
-				}
-			}
-
-			cDrawBatch.End();
-		}
-
-		protected void CreateBackTexture() {
-			cBackTexture = new Texture2D(cGraphicsDevice, 1, 1);
-			cBackTexture.SetData(new[] { cBackColor });
-		}
-
-		protected Rectangle GetCharacterTextureRegion(byte Ascii) {
-			int TexRow, TexCol;
-
-			TexRow = Ascii / 16;
-			TexCol = Ascii % 16;
-
-			return new Rectangle(TexCol * cTextureColWidth, TexRow * cTextureRowHeight, cTextureColWidth, cTextureRowHeight);
-		}
-
-		private void RestartSlideEffect() {
-			cDrawRegion.X = cFinalLeft;
-			cDrawRegion.Y = cFinalTop;
-
-			switch (cSlideOpen) {
-				case SlideEffect.SlideUp:
-					cDrawRegion.Y = cFinalLeft + cDrawRegion.Height;
-					break;
-				case SlideEffect.SlideDown:
-					cDrawRegion.Y = cFinalLeft - cDrawRegion.Height;
-					break;
-				case SlideEffect.SlideLeft:
-					cDrawRegion.X = cFinalLeft + cDrawRegion.Width;
-					break;
-				case SlideEffect.SlideRight:
-					cDrawRegion.X = cFinalLeft - cDrawRegion.Width;
-					break;
-				default:
-					break;
-			}
-		}
-
-		private void UpdateSlideEffect() {
-			if (cClosingConsole == false) { //Slide console open
-				if (cDrawRegion.X < cFinalLeft) {
-					cDrawRegion.X += cSlideStepX;
-
-					if (cDrawRegion.X > cFinalLeft) {
-						cDrawRegion.X = cFinalLeft;
-					}
-				} else if (cDrawRegion.X > cFinalLeft) {
-					cDrawRegion.X -= cSlideStepX;
-
-					if (cDrawRegion.X < cFinalLeft) {
-						cDrawRegion.X = cFinalLeft;
-					}
-				}
-
-				if (cDrawRegion.Y < cFinalTop) {
-					cDrawRegion.Y += cSlideStepY;
-
-					if (cDrawRegion.Y > cFinalTop) {
-						cDrawRegion.Y = cFinalTop;
-					}
-				} else if (cDrawRegion.Y > cFinalTop) {
-					cDrawRegion.X -= cSlideStepY;
-
-					if (cDrawRegion.Y < cFinalTop) {
-						cDrawRegion.Y = cFinalTop;
-					}
-				}
-			} else { //Slide console closed
-				switch (cSlideClosed) {
-					case SlideEffect.SlideUp:
-						cDrawRegion.Y -= cSlideStepY;
-
-						if (cDrawRegion.Y <= cFinalTop - cDrawRegion.Height) {
-							cClosingConsole = false;
-						}
-						break;
-					case SlideEffect.SlideDown:
-						cDrawRegion.Y += cSlideStepY;
-
-						if (cDrawRegion.Y >= cFinalTop + cDrawRegion.Height) {
-							cClosingConsole = false;
-						}
-						break;
-					case SlideEffect.SlideLeft:
-						cDrawRegion.X -= cSlideStepX;
-
-						if (cDrawRegion.X <= cFinalLeft - cDrawRegion.Width) {
-							cClosingConsole = false;
-						}
-						break;
-					case SlideEffect.SlideRight:
-						cDrawRegion.X += cSlideStepX;
-
-						if (cDrawRegion.X >= cFinalLeft + cDrawRegion.Width) {
-							cClosingConsole = false;
-						}
-						break;
-					default:
-						cClosingConsole = false;
-						break;
+					LetterPos.Y -= cFont.CharacterHeight;
 				}
 			}
 		}
 	}
 
 	public delegate void CommandSentEventHandler(object Sender, string EventCommand);
-
-	public enum SlideEffect {
-		None,
-		SlideDown,
-		SlideRight,
-		SlideUp,
-		SlideLeft
-	}
 }

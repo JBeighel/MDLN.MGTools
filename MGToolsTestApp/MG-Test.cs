@@ -57,8 +57,8 @@ namespace MGTest
 
 			DevConsole = new Console(GraphicsDevice, Content, "Font.png", 0, 0, GraphicsDevice.Viewport.Bounds.Width, GraphicsDevice.Viewport.Bounds.Height / 2);
 			DevConsole.CommandSent += CommandSentEventHandler;
-			DevConsole.SlideOpen = SlideEffect.SlideDown;
-			DevConsole.SlideClosed = SlideEffect.SlideUp;
+			DevConsole.OpenEffect = DisplayEffect.SlideDown;
+			DevConsole.CloseEffect = DisplayEffect.SlideUp;
 
 			//Initializes monogame
 			base.Initialize();
@@ -105,7 +105,7 @@ namespace MGTest
 				DevConsole.ToggleVisible();
 			}
 
-			DevConsole.Update(gameTime.TotalGameTime, Keyboard.GetState());
+			DevConsole.Update(gameTime, Keyboard.GetState(), Mouse.GetState());
 
 			if ((PriorMouseState.LeftButton == ButtonState.Released) && (CurrMouse.LeftButton == ButtonState.Pressed)) {
 				DevConsole.AddText("Left mouse clicked, X=" + CurrMouse.X + " Y=" + CurrMouse.Y);

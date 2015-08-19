@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System;
 
 namespace MDLN.MGTools {
@@ -17,6 +18,8 @@ namespace MDLN.MGTools {
 
 		protected GraphicsDevice cGraphicsDevice;
 		protected SpriteBatch cDrawBatch;
+
+		public Container(GraphicsDevice GraphDev, int Height, int Width) : this (GraphDev, null, new Rectangle(0, 0, Width, Height)) { }
 
 		public Container(GraphicsDevice GraphDev, Texture2D Background, int Height, int Width) : this (GraphDev, Background, new Rectangle(0, 0, Width, Height)) { }
 
@@ -48,6 +51,13 @@ namespace MDLN.MGTools {
 
 			set {
 				cBackTexture = value;
+			}
+		}
+
+		public Color BackgroundColor {
+			set {
+				cBackTexture = new Texture2D(cGraphicsDevice, 1, 1);
+				cBackTexture.SetData (new[] { value });
 			}
 		}
 
@@ -155,12 +165,16 @@ namespace MDLN.MGTools {
 		}
 
 		public void Update(GameTime CurrTime) {
+			Update(CurrTime, Keyboard.GetState(), Mouse.GetState());
+		}
+
+		public void Update(GameTime CurrTime, KeyboardState CurrKeyboard, MouseState CurrMouse) {
 			if ((cIsVisible == false) && (cIsClosing == false)) { //Only draw if container is shown
 				return;
 			}
 
 			UpdateEffect();
-			UpdateContents (CurrTime);
+			UpdateContents (CurrTime, CurrKeyboard, CurrMouse);
 
 			if (cHasChanges == true) { //Don't recreate the texture unless changes need drawn
 				//Render container to texture
@@ -183,11 +197,13 @@ namespace MDLN.MGTools {
 
 				//Restore render targets
 				cGraphicsDevice.SetRenderTargets (RenderTargets);
+
+				cHasChanges = false;
 			}
 		}
 
 		public virtual void DrawContents(GameTime CurrTime) { }
-		public virtual void UpdateContents(GameTime CurrTime) { }
+		public virtual void UpdateContents(GameTime CurrTime, KeyboardState CurrKeyboard, MouseState CurrMouse) { }
 
 		public void Draw() {
 			if ((cIsVisible == false) && (cIsClosing == false)) { //Only draw if container is shown
@@ -204,8 +220,6 @@ namespace MDLN.MGTools {
 			cDrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
 			cDrawBatch.Draw(cRenderToBuffer, DrawRegion, cCurrDrawRegion, cAlphaOverlay);
 			cDrawBatch.End();
-
-			cHasChanges = false;
 		}
 
 		private void CalculateEffectSteps() {

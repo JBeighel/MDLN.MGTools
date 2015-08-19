@@ -10,11 +10,10 @@ namespace MDLN.MGTools {
 		private Texture2D cFontTexture;
 		private int cTextureColWidth, cTextureRowHeight;
 
-		public TextureFont(Texture2D FontTexture) {
-			cFontTexture = FontTexture;
+		public TextureFont() : this(null) { }
 
-			cTextureColWidth = cFontTexture.Width / 16;
-			cTextureRowHeight = cFontTexture.Height / 16;
+		public TextureFont(Texture2D FontTexture) {
+			UpdateFontTexture(FontTexture);
 		}
 
 		public int CharacterWidth {
@@ -29,6 +28,16 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		public Texture2D FontTexture {
+			get {
+				return cFontTexture;
+			}
+
+			set {
+				UpdateFontTexture(value);
+			}
+		}
+
 		public void WriteText(SpriteBatch DrawBatch, string Text, int Top, int Left, Color FontColor) {
 			WriteText (DrawBatch, Text, cTextureRowHeight, Top, Left, FontColor);
 		}
@@ -36,15 +45,33 @@ namespace MDLN.MGTools {
 		public void WriteText(SpriteBatch DrawBatch, string Text, int FontHeight, int Top, int Left, Color FontColor) {
 			Rectangle LetterPos = new Rectangle(Left, Top, cTextureColWidth, cTextureRowHeight);
 
-			if (FontHeight != cTextureRowHeight) {
-				LetterPos.Height = FontHeight;
-				LetterPos.Width = (int)(((float)FontHeight / (float)cTextureRowHeight) * (float)cTextureRowHeight);
-			}
+			LetterPos.Height = FontHeight;
+			LetterPos.Width = GetCharacterWidth(FontHeight);
 
 			foreach(byte CurrChar in System.Text.Encoding.UTF8.GetBytes(Text)) {
 				DrawBatch.Draw(cFontTexture, LetterPos, GetCharacterTextureRegion(CurrChar), FontColor);
 				LetterPos.X += LetterPos.Width;
 			}
+		}
+
+		public void WriteAsciiCharacter(SpriteBatch DrawBatch, byte[] AsciiChars, int FontHeight, int Top, int Left, Color FontColor) {
+			Rectangle LetterPos = new Rectangle(Left, Top, cTextureColWidth, cTextureRowHeight);
+
+			LetterPos.Height = FontHeight;
+			LetterPos.Width = GetCharacterWidth(FontHeight);
+
+			foreach(byte CurrChar in AsciiChars) {
+				DrawBatch.Draw(cFontTexture, LetterPos, GetCharacterTextureRegion(CurrChar), FontColor);
+				LetterPos.X += LetterPos.Width;
+			}
+		}
+
+		public int DetermineRenderWidth(string Text) {
+			return DetermineRenderWidth(Text, cTextureColWidth);
+		}
+
+		public int DetermineRenderWidth(string Text, int FontHeight) {
+			return Text.Length * GetCharacterWidth(FontHeight);
 		}
 
 		protected Rectangle GetCharacterTextureRegion(byte Ascii) {
@@ -54,6 +81,23 @@ namespace MDLN.MGTools {
 			TexCol = Ascii % 16;
 
 			return new Rectangle(TexCol * cTextureColWidth, TexRow * cTextureRowHeight, cTextureColWidth, cTextureRowHeight);
+		}
+
+		private void UpdateFontTexture(Texture2D NewTexture) {
+			cFontTexture = NewTexture;
+
+			if (cFontTexture != null) {
+				cTextureColWidth = cFontTexture.Width / 16;
+				cTextureRowHeight = cFontTexture.Height / 16;
+			}
+		}
+
+		private int GetCharacterWidth(int CharHeight) {
+			if (CharHeight == cTextureRowHeight) {
+				return cTextureColWidth;
+			} else {
+				return (int)(((float)CharHeight / (float)cTextureRowHeight) * (float)cTextureRowHeight);
+			}
 		}
 	}
 }

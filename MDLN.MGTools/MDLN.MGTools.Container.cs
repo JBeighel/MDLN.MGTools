@@ -10,9 +10,10 @@ namespace MDLN.MGTools {
 		private Texture2D cBackTexture;
 		private int cSlideStepX, cSlideStepY;
 		private byte cFadeStep;
-		private bool cIsVisible, cIsClosing;
+		private bool cIsVisible, cIsClosing, cHasChanges;
 		private DisplayEffect cCloseEffect, cOpenEffect;
 		private RenderTarget2D cRenderToBuffer;
+		private Vector2 cOrigin;
 
 		protected GraphicsDevice cGraphicsDevice;
 		protected SpriteBatch cDrawBatch;
@@ -32,6 +33,10 @@ namespace MDLN.MGTools {
 			cDrawBatch = new SpriteBatch(cGraphicsDevice);
 			cIsVisible = false;
 			cIsClosing = false;
+			cHasChanges = true;
+
+			cOrigin.X = cFullDrawRegion.X;
+			cOrigin.Y = cFullDrawRegion.Y;
 
 			CalculateEffectSteps();
 		}
@@ -83,6 +88,41 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		public int Top {
+			get {
+				return cFullDrawRegion.Y;
+			}
+
+			set {
+				cFullDrawRegion.Y = value;
+				cOrigin.Y = cFullDrawRegion.Y;
+			}
+		}
+
+		public int Left {
+			get {
+				return cFullDrawRegion.X;
+			}
+
+			set {
+				cFullDrawRegion.X = value;
+				cOrigin.X = cFullDrawRegion.X;
+			}
+		}
+
+		public Vector2 TopLeft {
+			get {
+				return cOrigin;
+			}
+
+			set {
+				cOrigin = value;
+
+				cFullDrawRegion.X = (int)cOrigin.X;
+				cFullDrawRegion.Y = (int)cOrigin.Y;
+			}
+		}
+
 		protected Rectangle ClientRegion {
 			get {
 				Rectangle Region = new Rectangle();
@@ -93,6 +133,16 @@ namespace MDLN.MGTools {
 				Region.Height = cFullDrawRegion.Height;
 
 				return Region;
+			}
+		}
+
+		protected bool HasChanged {
+			get {
+				return cHasChanges;
+			}
+
+			set {
+				cHasChanges = value;
 			}
 		}
 
@@ -110,30 +160,34 @@ namespace MDLN.MGTools {
 			}
 
 			UpdateEffect();
+			UpdateContents (CurrTime);
 
-			//Render container to texture
-			RenderTargetBinding[] RenderTargets;
+			if (cHasChanges == true) { //Don't recreate the texture unless changes need drawn
+				//Render container to texture
+				RenderTargetBinding[] RenderTargets;
 
-			//Save render targets to restore later
-			RenderTargets = cGraphicsDevice.GetRenderTargets();
+				//Save render targets to restore later
+				RenderTargets = cGraphicsDevice.GetRenderTargets ();
 
-			//Set to render to buffer
-			cGraphicsDevice.SetRenderTarget(cRenderToBuffer);
+				//Set to render to buffer
+				cGraphicsDevice.SetRenderTarget (cRenderToBuffer);
 
-			//Do drawing
-			cGraphicsDevice.Clear(new Color(255, 255, 255, 0)); //Start fully transparent 
-			cDrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
-			cDrawBatch.Draw(cBackTexture, cGraphicsDevice.Viewport.Bounds, Color.White);
+				//Do drawing
+				cGraphicsDevice.Clear (new Color (255, 255, 255, 0)); //Start fully transparent 
+				cDrawBatch.Begin (SpriteSortMode.Deferred, BlendState.NonPremultiplied);
+				cDrawBatch.Draw (cBackTexture, cGraphicsDevice.Viewport.Bounds, Color.White);
 
-			DrawContents(CurrTime);
+				DrawContents (CurrTime);
 
-			cDrawBatch.End();
+				cDrawBatch.End ();
 
-			//Restore render targets
-			cGraphicsDevice.SetRenderTargets(RenderTargets);
+				//Restore render targets
+				cGraphicsDevice.SetRenderTargets (RenderTargets);
+			}
 		}
 
 		public virtual void DrawContents(GameTime CurrTime) { }
+		public virtual void UpdateContents(GameTime CurrTime) { }
 
 		public void Draw() {
 			if ((cIsVisible == false) && (cIsClosing == false)) { //Only draw if container is shown
@@ -150,6 +204,8 @@ namespace MDLN.MGTools {
 			cDrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
 			cDrawBatch.Draw(cRenderToBuffer, DrawRegion, cCurrDrawRegion, cAlphaOverlay);
 			cDrawBatch.End();
+
+			cHasChanges = false;
 		}
 
 		private void CalculateEffectSteps() {
@@ -180,6 +236,13 @@ namespace MDLN.MGTools {
 					break;
 				case DisplayEffect.Fade:
 					cAlphaOverlay.A = 0;
+					break;
+				case DisplayEffect.Zoom:
+					cCurrDrawRegion.X = (cFullDrawRegion.Width / 2) - 1;
+					cCurrDrawRegion.Width = (cFullDrawRegion.Width / 2) + 1;
+
+					cCurrDrawRegion.Y = (cFullDrawRegion.Height / 2) - 1;
+					cCurrDrawRegion.Height = (cFullDrawRegion.Height / 2) + 1;
 					break;
 				default:
 					break;
@@ -227,6 +290,17 @@ namespace MDLN.MGTools {
 						} else {
 							cAlphaOverlay.A -= cFadeStep;
 						}
+						break;
+					case DisplayEffect.Zoom:
+						cCurrDrawRegion.Height -= cSlideStepY;
+						cCurrDrawRegion.Y += cSlideStepY;
+						cCurrDrawRegion.X += cSlideStepX;
+						cCurrDrawRegion.Width -= cSlideStepX;
+
+						if (cCurrDrawRegion.Height <= cFullDrawRegion.Height / 2) {
+							cIsClosing = false;
+						}
+
 						break;
 					default :
 						cIsClosing = false;
@@ -282,6 +356,7 @@ namespace MDLN.MGTools {
 		SlideRight,
 		SlideUp,
 		SlideLeft,
+		Zoom,
 		Fade
 	}
 }

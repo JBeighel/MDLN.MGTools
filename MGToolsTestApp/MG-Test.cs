@@ -190,6 +190,9 @@ namespace MGTest
 			cFont.WriteText(spriteBatch, "Line 9", 195 + (cFont.CharacterHeight * 8), 20, Color.DarkBlue);
 			cFont.WriteText(spriteBatch, "Line 10", 195 + (cFont.CharacterHeight * 9), 20, Color.DarkBlue);
 
+			cFont.WriteText (spriteBatch, "Small Text", 5, 50, 300, Color.OrangeRed);
+			cFont.WriteText (spriteBatch, "Big Text", 40, 60, 300, Color.OrangeRed);
+
 			spriteBatch.End();
 
 			TestCont.Draw();

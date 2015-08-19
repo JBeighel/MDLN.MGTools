@@ -30,11 +30,20 @@ namespace MDLN.MGTools {
 		}
 
 		public void WriteText(SpriteBatch DrawBatch, string Text, int Top, int Left, Color FontColor) {
+			WriteText (DrawBatch, Text, cTextureRowHeight, Top, Left, FontColor);
+		}
+
+		public void WriteText(SpriteBatch DrawBatch, string Text, int FontHeight, int Top, int Left, Color FontColor) {
 			Rectangle LetterPos = new Rectangle(Left, Top, cTextureColWidth, cTextureRowHeight);
+
+			if (FontHeight != cTextureRowHeight) {
+				LetterPos.Height = FontHeight;
+				LetterPos.Width = (int)(((float)FontHeight / (float)cTextureRowHeight) * (float)cTextureRowHeight);
+			}
 
 			foreach(byte CurrChar in System.Text.Encoding.UTF8.GetBytes(Text)) {
 				DrawBatch.Draw(cFontTexture, LetterPos, GetCharacterTextureRegion(CurrChar), FontColor);
-				LetterPos.X += cTextureColWidth;
+				LetterPos.X += LetterPos.Width;
 			}
 		}
 

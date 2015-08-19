@@ -21,7 +21,7 @@
     <PlatformTarget>x86</PlatformTarget>
     <CustomCommands>
       <CustomCommands>
-        <Command type="BeforeExecute" command="%systemroot%\system32\xcopy.exe /y &quot;${ProjectDir}\Content\*.*&quot; &quot;${ProjectDir}\bin\Debug\Content&quot;" externalConsole="True" pauseExternalConsole="True" />
+        <Command type="BeforeExecute" command="%systemroot%\system32\xcopy.exe /y &quot;${ProjectDir}\Content\*.*&quot; &quot;${ProjectDir}\bin\Debug\Content&quot;" externalConsole="True" />
       </CustomCommands>
     </CustomCommands>
   </PropertyGroup>

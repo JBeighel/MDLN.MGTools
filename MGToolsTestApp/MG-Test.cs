@@ -192,9 +192,8 @@ namespace MGTest
 
 			spriteBatch.End();
 
-			DevConsole.Draw();
 			TestCont.Draw();
-
+			DevConsole.Draw();
 
 			base.Draw(gameTime);
 		}

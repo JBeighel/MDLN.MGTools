@@ -11,10 +11,11 @@ namespace MDLN.MGTools {
 		private Texture2D cBackTexture;
 		private int cSlideStepX, cSlideStepY;
 		private byte cFadeStep;
-		private bool cIsVisible, cIsClosing, cHasChanges;
+		private bool cIsVisible, cIsClosing, cHasChanges, cSendMouseEvents;
 		private DisplayEffect cCloseEffect, cOpenEffect;
 		private RenderTarget2D cRenderToBuffer;
 		private Vector2 cOrigin;
+		private MouseState cPriorMouse;
 
 		protected GraphicsDevice cGraphicsDevice;
 		protected SpriteBatch cDrawBatch;
@@ -37,6 +38,7 @@ namespace MDLN.MGTools {
 			cIsVisible = false;
 			cIsClosing = false;
 			cHasChanges = true;
+			cSendMouseEvents = false;
 
 			cOrigin.X = cFullDrawRegion.X;
 			cOrigin.Y = cFullDrawRegion.Y;
@@ -133,6 +135,22 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		public bool SendMouseEvents {
+			get {
+				return cSendMouseEvents;
+			}
+
+			set {
+				cSendMouseEvents = value;
+			}
+		}
+
+		public event ContainerMouseEnterEventHandler MouseEnter;
+
+		public event ContainerMouseLeaveEventHandler MouseLeave;
+
+		public event ContainerLeftMouseDownEventHandler LeftMouseDown;
+
 		protected Rectangle ClientRegion {
 			get {
 				Rectangle Region = new Rectangle();
@@ -175,6 +193,28 @@ namespace MDLN.MGTools {
 
 			UpdateEffect();
 			UpdateContents (CurrTime, CurrKeyboard, CurrMouse);
+
+			if (cSendMouseEvents == true) {
+				if ((cFullDrawRegion.Contains(CurrMouse.Position) == true) && ((cFullDrawRegion.Contains(cPriorMouse.Position) == false))) {
+					if (MouseEnter != null) {
+						MouseEnter(this, CurrMouse);
+					}
+				}
+
+				if ((cFullDrawRegion.Contains(CurrMouse.Position) == false) && ((cFullDrawRegion.Contains(cPriorMouse.Position) == true))) {
+					if (MouseLeave != null) {
+						MouseLeave(this, CurrMouse);
+					}
+				}
+
+				if ((CurrMouse.LeftButton == ButtonState.Pressed) && (cPriorMouse.LeftButton == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+					if (LeftMouseDown != null) {
+						LeftMouseDown(this, CurrMouse);
+					}
+				}
+
+				cPriorMouse = CurrMouse;
+			}
 
 			if (cHasChanges == true) { //Don't recreate the texture unless changes need drawn
 				//Render container to texture
@@ -363,6 +403,12 @@ namespace MDLN.MGTools {
 			}
 		}
 	}
+
+	public delegate void ContainerMouseEnterEventHandler(object Sender, MouseState CurrMouse);
+
+	public delegate void ContainerMouseLeaveEventHandler(object Sender, MouseState CurrMouse);
+
+	public delegate void ContainerLeftMouseDownEventHandler(object Sender, MouseState CurrMouse);
 
 	public enum DisplayEffect {
 		None,

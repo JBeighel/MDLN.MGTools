@@ -100,6 +100,8 @@ namespace MGTest
 			Lines.Add("");
 			Lines.Add("Women of Rohan");
 			TestCard.DescriptionLines = Lines;
+			TestCard.SendMouseEvents = true;
+			TestCard.LeftMouseDown += new ContainerLeftMouseDownEventHandler(MouseLeftDown);
 		}
 
 		/// <summary>
@@ -272,6 +274,10 @@ namespace MGTest
 			} else {
 				DevConsole.AddText("Unrecognized Command: " + Command + "\n ");
 			}
+		}
+
+		protected void MouseLeftDown(object Sender, MouseState CurrMouse) {
+			DevConsole.AddText("Left mouse button down on card");
 		}
 	}
 }

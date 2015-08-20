@@ -65,9 +65,9 @@ namespace MDLN.Cards {
 		public override void DrawContents(GameTime CurrTime) {
 			int LineTop;
 
-			cFont.WriteText(cDrawBatch, cCardTitle, 15, 10, 10, Color.Black);
+			cDrawBatch.Draw(cCardImage, new Rectangle(10, 10, ClientRegion.Width - 20, 145), Color.Wheat);
 
-			cDrawBatch.Draw(cCardImage, new Rectangle(10, 35, ClientRegion.Width - 20, 145), Color.Wheat);
+			cFont.WriteText(cDrawBatch, cCardTitle, 15, 165, 10, Color.Black);
 
 			LineTop = 190;
 			foreach (string Line in cCardDescLines) {

@@ -21,7 +21,7 @@
     <PlatformTarget>x86</PlatformTarget>
     <CustomCommands>
       <CustomCommands>
-        <Command type="BeforeExecute" command="%systemroot%\system32\xcopy.exe /y &quot;${ProjectDir}\Content\*.*&quot; &quot;${ProjectDir}\bin\Debug\Content&quot;" externalConsole="True" />
+        <Command type="BeforeExecute" command="%systemroot%\system32\xcopy.exe /y &quot;${SolutionDir}\Content\*.*&quot; &quot;${ProjectDir}\bin\Debug\Content&quot;" externalConsole="True" />
       </CustomCommands>
     </CustomCommands>
   </PropertyGroup>
@@ -42,13 +42,10 @@
     <Reference Include="OpenTK">
       <HintPath>..\packages\MonoGame.Framework.WindowsGL.3.4.0.459\lib\net40\OpenTK.dll</HintPath>
     </Reference>
+    <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="Content\CardBack.png" />
-    <None Include="Content\DiceTexture.png" />
-    <None Include="Content\Fighter.png" />
-    <None Include="Content\Font.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MDLN.MGTools\MDLN.MGTools.csproj">
@@ -58,8 +55,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MG-Test.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Content\" />
+    <Compile Include="MDLN.Cards.Card.cs" />
   </ItemGroup>
 </Project>

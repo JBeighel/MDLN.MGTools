@@ -188,7 +188,7 @@ namespace MDLN.MGTools {
 
 				//Do drawing
 				cGraphicsDevice.Clear (new Color (255, 255, 255, 0)); //Start fully transparent 
-				cDrawBatch.Begin (SpriteSortMode.Deferred, BlendState.NonPremultiplied);
+				cDrawBatch.Begin (SpriteSortMode.Deferred, BlendState.AlphaBlend);
 				cDrawBatch.Draw (cBackTexture, cGraphicsDevice.Viewport.Bounds, Color.White);
 
 				DrawContents (CurrTime);

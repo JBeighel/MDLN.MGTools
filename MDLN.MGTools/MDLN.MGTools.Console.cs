@@ -23,7 +23,7 @@ namespace MDLN.MGTools {
 			cFont = new TextureFont();
 
 			cFontColor = new Color(Color.LightBlue, 1.0f);
-			BackgroundColor = new Color(Color.DarkGray, 0.75f);
+			BackgroundColor = new Color(0.1f, 0.1f, 0.1f, 0.75f);
 
 			cFont.FontTexture = ContentMgr.Load<Texture2D>(FontFile);
 
@@ -145,7 +145,13 @@ namespace MDLN.MGTools {
 						}
 					} else if ((CurrKey >= Keys.NumPad0) && (CurrKey <= Keys.NumPad9)) {
 						NewKeys += ((int)(CurrKey - Keys.NumPad0)).ToString();
-					} else if (CurrKey == Keys.Space) {
+					} else if (CurrKey == Keys.OemPlus) {
+						if (ShiftDown == true) {
+							NewKeys += "+";
+						} else {
+							NewKeys += "=";
+						}
+					}else if (CurrKey == Keys.Space) {
 						NewKeys += " ";
 					} else if (CurrKey == Keys.Enter) {
 						NewKeys += "\n";

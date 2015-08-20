@@ -5,6 +5,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MDLN.MGTools", "MDLN.MGTool
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MGToolsTestApp", "MGToolsTestApp\MGToolsTestApp.csproj", "{4519B3DF-700D-4AA4-880C-710E6AEBEE4B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Content", "Content", "{12C398CF-78A3-452D-B046-F2B898BF9B7C}"
+	ProjectSection(SolutionItems) = preProject
+		Content\CardBack.png = Content\CardBack.png
+		Content\DiceTexture.png = Content\DiceTexture.png
+		Content\Fighter.png = Content\Fighter.png
+		Content\Font.png = Content\Font.png
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -19,5 +27,7 @@ Global
 		{61F383D9-872B-4B2B-92CE-21D18A74EC13}.Debug|x86.Build.0 = Debug|x86
 		{61F383D9-872B-4B2B-92CE-21D18A74EC13}.Release|x86.ActiveCfg = Release|x86
 		{61F383D9-872B-4B2B-92CE-21D18A74EC13}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
 EndGlobal

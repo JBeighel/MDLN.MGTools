@@ -3,9 +3,11 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 using MDLN.MGTools;
+using MDLN.Cards;
 
-
+using System.Collections.Generic;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 [assembly: AssemblyVersion("0.1.0.0")]
 [assembly: AssemblyFileVersion("0.1.0.0")]
@@ -38,6 +40,7 @@ namespace MGTest
 		private Container TestCont;
 		private TextureFont cFont;
 		private bool cMouseOverCard;
+		private Card TestCard;
 
 		private int FrameNum;
 
@@ -83,6 +86,20 @@ namespace MGTest
 			TestCont = new Container(GraphicsDevice, background, 20, 250, 100, 200);
 			TestCont.OpenEffect = DisplayEffect.SlideRight;
 			TestCont.CloseEffect = DisplayEffect.SlideLeft;
+
+			TestCard = new Card(GraphicsDevice, 350, 250, cFont);
+			TestCard.Top = 105;
+			TestCard.Left = 325;
+			TestCard.Background = Content.Load<Texture2D>("CardBase.png");
+			TestCard.CardImage = CardImage;
+			TestCard.Title = "Shield Maiden";
+
+			List<string> Lines = new List<string>();
+			Lines.Add("Health: 5");
+			Lines.Add("Attack: 3");
+			Lines.Add("");
+			Lines.Add("Women of Rohan");
+			TestCard.DescriptionLines = Lines;
 		}
 
 		/// <summary>
@@ -138,6 +155,8 @@ namespace MGTest
 				Transparency = 255 - ((gameTime.TotalGameTime.Milliseconds - 500) / 2);
 			}
 
+			TestCard.Update(gameTime);
+
 			//Use monogame update
 			base.Update(gameTime);
 		}
@@ -191,10 +210,11 @@ namespace MGTest
 			cFont.WriteText(spriteBatch, "Line 10", 195 + (cFont.CharacterHeight * 9), 20, Color.DarkBlue);
 
 			cFont.WriteText (spriteBatch, "Small Text", 5, 50, 300, Color.OrangeRed);
-			cFont.WriteText (spriteBatch, "Big Text", 40, 60, 300, Color.OrangeRed);
+			cFont.WriteText(spriteBatch, "Big Text", 40, 60, 300, Color.OrangeRed);
 
 			spriteBatch.End();
 
+			TestCard.Draw();
 			TestCont.Draw();
 			DevConsole.Draw();
 
@@ -202,12 +222,53 @@ namespace MGTest
 		}
 
 		protected void CommandSentEventHandler(object Sender, string Command) {
-			
+			Match rxResult;
+			string Name, Value;
 
 			if (Command.ToLower().CompareTo("exit") == 0) {
 				this.Exit();
 			} else if (Command.ToLower().CompareTo("clear") == 0) {
 				DevConsole.ClearText();
+			} else if (Command.Substring(0, 4).ToLower().CompareTo("card") == 0) { //Commands for the test card
+				rxResult = Regex.Match(Command, @"^card\s+([A-Z0-9]+) ?= ?([A-Z0-9]+)$", RegexOptions.IgnoreCase);
+
+				if (rxResult.Success == true) {
+					Name = rxResult.Groups[1].Value.ToLower();
+					Value = rxResult.Groups[2].Value.ToLower();
+
+					switch (Name) {
+						case "visible":
+							if (Regex.Match(Value, @"^[teoy1]", RegexOptions.IgnoreCase).Success == true) {
+								TestCard.Visible = true;
+							} else {
+								TestCard.Visible = false;
+							}
+							DevConsole.AddText("Card visibility update");
+							return;
+						case "effect":
+							if (Value.ToLower().CompareTo("zoom") == 0) {
+								TestCard.OpenEffect = DisplayEffect.Zoom;
+								TestCard.CloseEffect = DisplayEffect.Zoom;
+								DevConsole.AddText("Card effect set to zoom");
+								return;
+							} else if (Value.ToLower().CompareTo("fade") == 0) {
+								TestCard.OpenEffect = DisplayEffect.Fade;
+								TestCard.CloseEffect = DisplayEffect.Fade;
+								DevConsole.AddText("Card effect set to fade");
+								return;
+							} else if (Value.ToLower().CompareTo("none") == 0) {
+								TestCard.OpenEffect = DisplayEffect.None;
+								TestCard.CloseEffect = DisplayEffect.None;
+								DevConsole.AddText("Card effect set to none");
+								return;
+							}
+							break;
+					}
+
+					DevConsole.AddText("Invalid Card value name: " + Command);
+				} else {
+					DevConsole.AddText("Invalid Card command format: " + Command);
+				}
 			} else {
 				DevConsole.AddText("Unrecognized Command: " + Command + "\n ");
 			}

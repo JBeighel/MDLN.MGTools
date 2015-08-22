@@ -32,7 +32,7 @@ namespace MGTest
 	{
 		private GraphicsDeviceManager graphics;
 		private SpriteBatch spriteBatch;
-		private Texture2D background, ConsoleRect, CardImage, CardBack;
+		private Texture2D background, ConsoleRect, CardImage, CardBack, Assassin, Archer;
 		private int Transparency;
 		private KeyboardState PriorKeyState;
 		private MouseState PriorMouseState;
@@ -77,6 +77,8 @@ namespace MGTest
 			background = Content.Load<Texture2D>("DiceTexture.png");
 			CardImage = Content.Load<Texture2D>("Fighter.png");
 			CardBack = Content.Load<Texture2D>("CardBack.png");
+			Assassin = Content.Load<Texture2D>("Assassin.png");
+			Archer = Content.Load<Texture2D>("Archer.png");
 
 			ConsoleRect = new Texture2D(graphics.GraphicsDevice, 1, 1);
 			ConsoleRect.SetData(new[] { Color.DarkGray });
@@ -232,11 +234,11 @@ namespace MGTest
 			} else if (Command.ToLower().CompareTo("clear") == 0) {
 				DevConsole.ClearText();
 			} else if (Command.Substring(0, 4).ToLower().CompareTo("card") == 0) { //Commands for the test card
-				rxResult = Regex.Match(Command, @"^card\s+([A-Z0-9]+) ?= ?([A-Z0-9]+)$", RegexOptions.IgnoreCase);
+				rxResult = Regex.Match(Command, @"^card\s+([A-Z0-9]+) ?= ?([A-Z0-9 ]+)$", RegexOptions.IgnoreCase);
 
 				if (rxResult.Success == true) {
 					Name = rxResult.Groups[1].Value.ToLower();
-					Value = rxResult.Groups[2].Value.ToLower();
+					Value = rxResult.Groups[2].Value;
 
 					switch (Name) {
 						case "visible":
@@ -265,6 +267,25 @@ namespace MGTest
 								return;
 							}
 							break;
+						case "image":
+							if (Value.ToLower().CompareTo("assassin") == 0) {
+								TestCard.CardImage = Assassin;
+								DevConsole.AddText("Card image set");
+								return;
+							} else if (Value.ToLower().CompareTo("fighter") == 0) {
+								TestCard.CardImage = CardImage;
+								DevConsole.AddText("Card image set");
+								return;
+							} else if (Value.ToLower().CompareTo("archer") == 0) {
+								TestCard.CardImage = Archer;
+								DevConsole.AddText("Card image set");
+								return;
+							}
+							break;
+						case "title":
+							TestCard.Title = Value;
+							DevConsole.AddText("Card title set");
+							return;
 					}
 
 					DevConsole.AddText("Invalid Card value name: " + Command);

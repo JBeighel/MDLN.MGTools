@@ -2,8 +2,10 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MDLN.MGTools {
 	public class Console : Container {
@@ -12,8 +14,9 @@ namespace MDLN.MGTools {
 		private KeyboardState cPriorKeys;
 		private bool cCursorOn;
 		private string cCommand;
-		private int cMaxLines;
+		private int cMaxLines, cHistCtr;
 		private List<string> cLines;
+		private Queue<string> cCommandHist;
 
 		public Console(GraphicsDevice GraphicsDev, ContentManager ContentMgr, string FontFile, int Top, int Left, int Width, int Height) : this(GraphicsDev, ContentMgr, FontFile, new Rectangle(Left, Top, Width, Height)) { }
 
@@ -30,6 +33,9 @@ namespace MDLN.MGTools {
 			cMaxLines = (ClientRegion.Height / cFont.CharacterHeight) - 1; //Remove 1 line for the command input
 
 			cPriorKeys = new KeyboardState();
+
+			cCommandHist = new Queue<string>();
+			cHistCtr = 0;
 
 			cCommand = "> ";
 			cLines = new List<string>();
@@ -171,11 +177,46 @@ namespace MDLN.MGTools {
 				} else if (NewKeys.CompareTo("\n") == 0) {
 					if (CommandSent != null) {
 						CommandSent(this, cCommand.Substring(2)); //Start at two to chop off the > prompt
+
+						//Add command to history
+						cCommandHist.Enqueue(cCommand.Substring(2));
+
+						while (cCommandHist.Count > 10) {
+							cCommandHist.Dequeue();
+						}
+
+						cHistCtr = cCommandHist.Count;
 					}
 
 					cCommand = "> ";
 				} else {
 					cCommand += NewKeys;
+				}
+			}
+
+			if ((CurrKeys.IsKeyDown(Keys.Up) == true) && (cPriorKeys.IsKeyDown(Keys.Up) == false)) {
+				cHistCtr--;
+
+				if (cHistCtr < 0) { //0 is oldest command in the history
+					cHistCtr = 0;
+				}
+
+				if (cHistCtr < cCommandHist.Count) {
+					cCommand = "> " + cCommandHist.ElementAt(cHistCtr);
+					HasChanged = true;
+				}
+			}
+
+			if ((CurrKeys.IsKeyDown(Keys.Down) == true) && (cPriorKeys.IsKeyDown(Keys.Down) == false)) {
+				cHistCtr++;
+
+				if (cHistCtr > cCommandHist.Count) {
+					cHistCtr = cCommandHist.Count;
+				}
+
+				if (cHistCtr < cCommandHist.Count) {
+					cCommand = "> " + cCommandHist.ElementAt(cHistCtr);
+					HasChanged = true;
 				}
 			}
 

@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Input;
 using MDLN.MGTools;
 using MDLN.Cards;
 
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -33,14 +34,18 @@ namespace MGTest
 		private GraphicsDeviceManager graphics;
 		private SpriteBatch spriteBatch;
 		private Texture2D background, ConsoleRect, CardImage, CardBack, Assassin, Archer;
+		private Texture2D cShip;
+		private ShipDirection cShipDir;
+		private bool cShipUseKeys, cShipShow;
 		private int Transparency;
 		private KeyboardState PriorKeyState;
 		private MouseState PriorMouseState;
-		private Console DevConsole;
+		private MDLN.MGTools.Console DevConsole;
 		private Container TestCont;
 		private TextureFont cFont;
 		private bool cMouseOverCard;
 		private Card TestCard;
+		private double cMouseEnterTime;
 
 		private int FrameNum;
 
@@ -58,10 +63,12 @@ namespace MGTest
 
 			FrameNum = 1;
 
-			DevConsole = new Console(GraphicsDevice, Content, "Font.png", 0, 0, GraphicsDevice.Viewport.Bounds.Width, GraphicsDevice.Viewport.Bounds.Height / 2);
+			DevConsole = new MDLN.MGTools.Console(GraphicsDevice, Content, "Font.png", 0, 0, GraphicsDevice.Viewport.Bounds.Width, GraphicsDevice.Viewport.Bounds.Height / 2);
 			DevConsole.CommandSent += CommandSentEventHandler;
 			DevConsole.OpenEffect = DisplayEffect.SlideDown;
 			DevConsole.CloseEffect = DisplayEffect.SlideUp;
+
+			cMouseEnterTime = -1;
 
 			//Initializes monogame
 			base.Initialize();
@@ -79,6 +86,11 @@ namespace MGTest
 			CardBack = Content.Load<Texture2D>("CardBack.png");
 			Assassin = Content.Load<Texture2D>("Assassin.png");
 			Archer = Content.Load<Texture2D>("Archer.png");
+			cShip = Content.Load<Texture2D>("Ship.png");
+
+			cShipDir = ShipDirection.Straight;
+			cShipUseKeys = true;
+			cShipShow = false;
 
 			ConsoleRect = new Texture2D(graphics.GraphicsDevice, 1, 1);
 			ConsoleRect.SetData(new[] { Color.DarkGray });
@@ -88,6 +100,7 @@ namespace MGTest
 			TestCont = new Container(GraphicsDevice, background, 20, 250, 100, 200);
 			TestCont.OpenEffect = DisplayEffect.SlideRight;
 			TestCont.CloseEffect = DisplayEffect.SlideLeft;
+			TestCont.EffectDuration = 500;
 
 			TestCard = new Card(GraphicsDevice, 350, 250, cFont);
 			TestCard.Top = 105;
@@ -135,6 +148,7 @@ namespace MGTest
 			if (new Rectangle(10, 10, CardBack.Width, CardBack.Height).Contains(CurrMouse.X, CurrMouse.Y)) {
 				if (cMouseOverCard == false) {
 					DevConsole.AddText("Mouse entered card");
+					cMouseEnterTime = gameTime.TotalGameTime.TotalMilliseconds;
 					cMouseOverCard = true;
 					TestCont.Visible = true;
 				}
@@ -143,6 +157,13 @@ namespace MGTest
 					DevConsole.AddText("Mouse exited card");
 					cMouseOverCard = false;
 					TestCont.Visible = false;
+				}
+			}
+
+			if (cMouseEnterTime != -1) {
+				if (gameTime.TotalGameTime.TotalMilliseconds - cMouseEnterTime >= 500) {
+					DevConsole.AddText("Mouse over 500 ms elapsed");
+					cMouseEnterTime = -1;
 				}
 			}
 
@@ -157,6 +178,24 @@ namespace MGTest
 				Transparency = gameTime.TotalGameTime.Milliseconds / 2;
 			} else {
 				Transparency = 255 - ((gameTime.TotalGameTime.Milliseconds - 500) / 2);
+			}
+
+			if (cShipUseKeys == true) {
+				if (KeyState.IsKeyDown(Keys.Left) == true) {
+					cShipDir = ShipDirection.Left;
+				} else if (KeyState.IsKeyDown(Keys.Right) == true) {
+					cShipDir = ShipDirection.Right;
+				} else {
+					cShipDir = ShipDirection.Straight;
+				}
+			} else {
+				if (CurrMouse.Position.X < 300) {
+					cShipDir = ShipDirection.Left;
+				} else if (CurrMouse.Position.X > 500) {
+					cShipDir = ShipDirection.Right;
+				} else {
+					cShipDir = ShipDirection.Straight;
+				}
 			}
 
 			TestCard.Update(gameTime);
@@ -216,6 +255,16 @@ namespace MGTest
 			cFont.WriteText (spriteBatch, "Small Text", 5, 50, 300, Color.OrangeRed);
 			cFont.WriteText(spriteBatch, "Big Text", 40, 60, 300, Color.OrangeRed);
 
+			if (cShipShow == true) {
+				if (cShipDir == ShipDirection.Straight) {
+					spriteBatch.Draw(cShip, new Vector2(300f, 200f), new Rectangle(0, 0, 200, 200), Color.White);
+				} else if (cShipDir == ShipDirection.Left) {
+					spriteBatch.Draw(cShip, new Vector2(300f, 200f), null, new Rectangle(200, 0, 200, 200), null, 0, null, Color.White, SpriteEffects.FlipHorizontally, 0);
+				} else { //right
+					spriteBatch.Draw(cShip, new Vector2(300f, 200f), new Rectangle(200, 0, 200, 200), Color.White);
+				}
+			}
+
 			spriteBatch.End();
 
 			TestCard.Draw();
@@ -233,7 +282,7 @@ namespace MGTest
 				this.Exit();
 			} else if (Command.ToLower().CompareTo("clear") == 0) {
 				DevConsole.ClearText();
-			} else if (Command.Substring(0, 4).ToLower().CompareTo("card") == 0) { //Commands for the test card
+			} else if ((Command.Length >= 4) && (Command.Substring(0, 4).ToLower().CompareTo("card") == 0)) { //Commands for the test card
 				rxResult = Regex.Match(Command, @"^card\s+([A-Z0-9]+) ?= ?([A-Z0-9 ]+)$", RegexOptions.IgnoreCase);
 
 				if (rxResult.Success == true) {
@@ -286,11 +335,54 @@ namespace MGTest
 							TestCard.Title = Value;
 							DevConsole.AddText("Card title set");
 							return;
+						case "anim":
+							try {
+								TestCard.EffectDuration = int.Parse(Value);
+								DevConsole.AddText("Animation time set");
+							} catch (Exception) {
+								DevConsole.AddText("Invalid card animation time");
+							}
+							return;
 					}
 
 					DevConsole.AddText("Invalid Card value name: " + Command);
 				} else {
 					DevConsole.AddText("Invalid Card command format: " + Command);
+				}
+			} else if ((Command.Length >= 4) && (Command.Substring(0, 4).ToLower().CompareTo("ship") == 0)) { //Commands for the test ship
+				rxResult = Regex.Match(Command, @"^ship\s+([A-Z0-9]+) ?= ?([A-Z0-9 ]+)$", RegexOptions.IgnoreCase);
+
+				if (rxResult.Success == true) {
+					Name = rxResult.Groups[1].Value.ToLower();
+					Value = rxResult.Groups[2].Value;
+
+					switch (Name) {
+						case "visible":
+							if (Regex.Match(Value, @"^[teoy1]", RegexOptions.IgnoreCase).Success == true) {
+								cShipShow = true;
+							} else {
+								cShipShow = false;
+							}
+							DevConsole.AddText("Ship visibility update");
+							return;
+						case "control":
+							if (Value.ToLower().CompareTo("mouse") == 0) {
+								cShipUseKeys = false;
+								DevConsole.AddText("Ship control set to mosue");
+								return;
+							} else if (Value.ToLower().CompareTo("keys") == 0) {
+								cShipUseKeys = true;
+								DevConsole.AddText("Ship control set to keyboard");
+								return;
+							}
+
+							DevConsole.AddText("Invalid Ship control value name: " + Value);
+							return;
+					}
+
+					DevConsole.AddText("Invalid Ship value name: " + Command);
+				} else {
+					DevConsole.AddText("Invalid Shpi command format: " + Command);
 				}
 			} else {
 				DevConsole.AddText("Unrecognized Command: " + Command + "\n ");
@@ -300,5 +392,9 @@ namespace MGTest
 		protected void MouseLeftDown(object Sender, MouseState CurrMouse) {
 			DevConsole.AddText("Left mouse button down on card");
 		}
+	}
+
+	public enum ShipDirection {
+		Left, Straight, Right
 	}
 }

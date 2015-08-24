@@ -16,6 +16,7 @@ namespace MDLN.MGTools {
 		private RenderTarget2D cRenderToBuffer;
 		private Vector2 cOrigin;
 		private MouseState cPriorMouse;
+		private int cAnimationTime;
 
 		protected GraphicsDevice cGraphicsDevice;
 		protected SpriteBatch cDrawBatch;
@@ -43,7 +44,7 @@ namespace MDLN.MGTools {
 			cOrigin.X = cFullDrawRegion.X;
 			cOrigin.Y = cFullDrawRegion.Y;
 
-			CalculateEffectSteps();
+			cAnimationTime = 250;
 		}
 
 		public Texture2D Background {
@@ -97,6 +98,16 @@ namespace MDLN.MGTools {
 
 			set {
 				cCloseEffect = value;
+			}
+		}
+
+		public int EffectDuration {
+			get {
+				return cAnimationTime;
+			}
+
+			set {
+				cAnimationTime = value;
 			}
 		}
 
@@ -191,7 +202,7 @@ namespace MDLN.MGTools {
 				return;
 			}
 
-			UpdateEffect();
+			UpdateEffect(CurrTime.ElapsedGameTime.TotalMilliseconds);
 			UpdateContents (CurrTime, CurrKeyboard, CurrMouse);
 
 			if (cSendMouseEvents == true) {
@@ -243,6 +254,7 @@ namespace MDLN.MGTools {
 		}
 
 		public virtual void DrawContents(GameTime CurrTime) { }
+
 		public virtual void UpdateContents(GameTime CurrTime, KeyboardState CurrKeyboard, MouseState CurrMouse) { }
 
 		public void Draw() {
@@ -250,22 +262,28 @@ namespace MDLN.MGTools {
 				return;
 			}
 
-			Rectangle DrawRegion = new Rectangle();
+			Rectangle ScreenRegion = new Rectangle();
+			Rectangle TextureRegion = new Rectangle();
 
-			DrawRegion.X = cFullDrawRegion.X + (cFullDrawRegion.Width - cCurrDrawRegion.Width);
-			DrawRegion.Y = cFullDrawRegion.Y + (cFullDrawRegion.Height - cCurrDrawRegion.Height);
-			DrawRegion.Width = cCurrDrawRegion.Width - cCurrDrawRegion.X;
-			DrawRegion.Height = cCurrDrawRegion.Height - cCurrDrawRegion.Y;
+			ScreenRegion.X = cFullDrawRegion.X + cCurrDrawRegion.X;
+			ScreenRegion.Y = cFullDrawRegion.Y + cCurrDrawRegion.Y;
+			ScreenRegion.Width = cCurrDrawRegion.Width - cCurrDrawRegion.X;
+			ScreenRegion.Height = cCurrDrawRegion.Height - cCurrDrawRegion.Y;
 
+			TextureRegion.X = cCurrDrawRegion.X + (cFullDrawRegion.Width - cCurrDrawRegion.Width);
+			TextureRegion.Y = cCurrDrawRegion.Y + (cFullDrawRegion.Height - cCurrDrawRegion.Height);
+			TextureRegion.Width = cCurrDrawRegion.Width - cCurrDrawRegion.X;
+			TextureRegion.Height = cCurrDrawRegion.Height - cCurrDrawRegion.Y;
+			
 			cDrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
-			cDrawBatch.Draw(cRenderToBuffer, DrawRegion, cCurrDrawRegion, cAlphaOverlay);
+			cDrawBatch.Draw(cRenderToBuffer, ScreenRegion, TextureRegion, cAlphaOverlay);
 			cDrawBatch.End();
 		}
 
-		private void CalculateEffectSteps() {
-			cSlideStepY = cFullDrawRegion.Height / 10;
-			cSlideStepX = cFullDrawRegion.Width / 10;
-			cFadeStep = 255 / 10;
+		private void CalculateEffectStep(double ElapsedTime) {
+			cSlideStepY = (int)((float)(ElapsedTime / cAnimationTime) * (float)cFullDrawRegion.Height);
+			cSlideStepX = (int)((float)(ElapsedTime / cAnimationTime) * (float)cFullDrawRegion.Width);
+			cFadeStep = (byte)((float)(ElapsedTime / cAnimationTime) * 255f);
 		}
 
 		private void RestartOpenEffect() {
@@ -277,16 +295,16 @@ namespace MDLN.MGTools {
 
 			switch (cOpenEffect) {
 				case DisplayEffect.SlideUp:
-					cCurrDrawRegion.Height = 1;
-					break;
-				case DisplayEffect.SlideDown:
 					cCurrDrawRegion.Y = cFullDrawRegion.Height - 1;
 					break;
+				case DisplayEffect.SlideDown:
+					cCurrDrawRegion.Height = 1;
+					break;
 				case DisplayEffect.SlideLeft:
-					cCurrDrawRegion.Width = 1;
+					cCurrDrawRegion.X = cFullDrawRegion.Width - 1;
 					break;
 				case DisplayEffect.SlideRight:
-					cCurrDrawRegion.X = cFullDrawRegion.Width - 1;
+					cCurrDrawRegion.Width = 1;
 					break;
 				case DisplayEffect.Fade:
 					cAlphaOverlay.A = 0;
@@ -303,18 +321,12 @@ namespace MDLN.MGTools {
 			}
 		}
 
-		private void UpdateEffect() {
+		private void UpdateEffect(double ElapsedTime) {
+			CalculateEffectStep(ElapsedTime);
+
 			if (cIsClosing == true) { //Container is closing
 				switch (cCloseEffect) {
 					case DisplayEffect.SlideDown :
-						cCurrDrawRegion.Height -= cSlideStepY;
-
-						if (cCurrDrawRegion.Height <= 0) {
-							cIsClosing = false;
-						}
-
-						break;
-					case DisplayEffect.SlideUp :
 						cCurrDrawRegion.Y += cSlideStepY;
 
 						if (cCurrDrawRegion.Y >= cFullDrawRegion.Height) {
@@ -322,7 +334,15 @@ namespace MDLN.MGTools {
 						}
 
 						break;
-					case DisplayEffect.SlideLeft :
+					case DisplayEffect.SlideUp :
+						cCurrDrawRegion.Height -= cSlideStepY;
+
+						if (cCurrDrawRegion.Height <= 0) {
+							cIsClosing = false;
+						}
+
+						break;
+					case DisplayEffect.SlideRight :
 						cCurrDrawRegion.X += cSlideStepX;
 
 						if (cCurrDrawRegion.X >= cFullDrawRegion.Width) {
@@ -330,7 +350,7 @@ namespace MDLN.MGTools {
 						}
 
 						break;
-					case DisplayEffect.SlideRight :
+					case DisplayEffect.SlideLeft :
 						cCurrDrawRegion.Width -= cSlideStepX;
 
 						if (cCurrDrawRegion.Width <= 0) {

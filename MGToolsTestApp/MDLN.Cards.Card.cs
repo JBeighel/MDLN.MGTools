@@ -14,6 +14,7 @@ namespace MDLN.Cards {
 		private List<string> cCardDescLines;
 		private Texture2D cCardImage;
 		private TextureFont cFont;
+		private int cCurrHealth, cMaxHealth, cAttack;
 
 		public Card(GraphicsDevice GraphDev, int Height, int Width, TextureFont Font) : base(GraphDev, Height, Width) {
 			this.OpenEffect = DisplayEffect.Fade;
@@ -59,6 +60,37 @@ namespace MDLN.Cards {
 			set {
 				cCardImage = value;
 				this.HasChanged = true;
+			}
+		}
+
+		public int MaxHealth {
+			get {
+				return cMaxHealth;
+			}
+
+			set {
+				cMaxHealth = value;
+			}
+		}
+
+		public int CurrentHealth {
+			get {
+				return cCurrHealth;
+			}
+
+			set {
+				cCurrHealth = value;
+			}
+
+		}
+
+		public int Attack {
+			get {
+				return cAttack;
+			}
+
+			set {
+				cAttack = value;
 			}
 		}
 

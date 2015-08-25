@@ -11,6 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Content", "Content", "{12C3
 		Content\DiceTexture.png = Content\DiceTexture.png
 		Content\Fighter.png = Content\Fighter.png
 		Content\Font.png = Content\Font.png
+		Content\deck.xml = Content\deck.xml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MDLN.Tools", "MDLN.Tools\MDLN.Tools.csproj", "{4D524474-1FFF-448F-97BA-E58CCA87592D}"

@@ -5,6 +5,9 @@ using Microsoft.Xna.Framework.Input;
 using System;
 
 namespace MDLN.MGTools {
+	/// <summary>
+	/// Class that acts as a visual container for content drawn in Monogame
+	/// </summary>
 	public class Container {
 		private Rectangle cFullDrawRegion, cCurrDrawRegion;
 		private Color cAlphaOverlay;
@@ -18,15 +21,49 @@ namespace MDLN.MGTools {
 		private MouseState cPriorMouse;
 		private int cAnimationTime;
 
+		/// <summary>
+		/// Connection to the graphics rendering device
+		/// </summary>
 		protected GraphicsDevice cGraphicsDevice;
+		/// <summary>
+		/// Variable used to draw batches of 2D images
+		/// </summary>
 		protected SpriteBatch cDrawBatch;
 
+		/// <summary>
+		/// Constructor that sets minimum information for the <see cref="MDLN.MGTools.Container"/> class
+		/// </summary>
+		/// <param name="GraphDev">Connection to graphics device</param>
+		/// <param name="Height">Screen height of the container</param>
+		/// <param name="Width">Screen width of the container</param>
 		public Container(GraphicsDevice GraphDev, int Height, int Width) : this (GraphDev, null, new Rectangle(0, 0, Width, Height)) { }
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="MDLN.MGTools.Container"/> class.
+		/// </summary>
+		/// <param name="GraphDev">Connection to graphics device</param>
+		/// <param name="Background">Texture to use as the background of the container</param>
+		/// <param name="Height">Screen height of the container</param>
+		/// <param name="Width">Screen width of the container</param>
 		public Container(GraphicsDevice GraphDev, Texture2D Background, int Height, int Width) : this (GraphDev, Background, new Rectangle(0, 0, Width, Height)) { }
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="MDLN.MGTools.Container"/> class.
+		/// </summary>
+		/// <param name="GraphDev">Connection to graphics device</param>
+		/// <param name="Background">Texture to use as the background of the container</param>
+		/// <param name="Top">Top screen coordinate to draw the container</param>
+		/// <param name="Left">Left screen coordinate to draw the container</param>
+		/// <param name="Height">Screen height of the container</param>
+		/// <param name="Width">Screen width of the container</param>
 		public Container(GraphicsDevice GraphDev, Texture2D Background, int Top , int Left, int Height, int Width) : this (GraphDev, Background, new Rectangle(Left, Top, Width, Height)) { }
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="MDLN.MGTools.Container"/> class.
+		/// </summary>
+		/// <param name="GraphDev">Connection to graphics device</param>
+		/// <param name="Background">Texture to use as the background of the container</param>
+		/// <param name="DrawArea">Rectangular region on screen to draw the container</param>
 		public Container(GraphicsDevice GraphDev, Texture2D Background, Rectangle DrawArea) {
 			cGraphicsDevice = GraphDev;
 			cBackTexture = Background;
@@ -47,6 +84,10 @@ namespace MDLN.MGTools {
 			cAnimationTime = 250;
 		}
 
+		/// <summary>
+		/// Gets or sets the background texture for the container
+		/// </summary>
+		/// <value>The background texture</value>
 		public Texture2D Background {
 			get {
 				return cBackTexture;
@@ -57,6 +98,10 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Sets the color of the background, this flat color will be used in place of a texture
+		/// </summary>
+		/// <value>The color of the background.</value>
 		public Color BackgroundColor {
 			set {
 				cBackTexture = new Texture2D(cGraphicsDevice, 1, 1);
@@ -64,6 +109,10 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether this <see cref="MDLN.MGTools.Container"/> is visible.
+		/// </summary>
+		/// <value><c>true</c> if visible; otherwise, <c>false</c>.</value>
 		public bool Visible {
 			get {
 				return cIsVisible;
@@ -81,6 +130,10 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets the effect to use to animate the container when it is shown
+		/// </summary>
+		/// <value>The open effect.</value>
 		public DisplayEffect OpenEffect {
 			get {
 				return cOpenEffect;
@@ -91,6 +144,10 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets the effect to use to animate the container when it is closed
+		/// </summary>
+		/// <value>The close effect.</value>
 		public DisplayEffect CloseEffect {
 			get {
 				return cCloseEffect;
@@ -101,6 +158,10 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets the duration of the open and close effects in milliseconds
+		/// </summary>
+		/// <value>The duration of the effect.</value>
 		public int EffectDuration {
 			get {
 				return cAnimationTime;
@@ -111,6 +172,10 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets the top screen coordinate of the container.
+		/// </summary>
+		/// <value>The top.</value>
 		public int Top {
 			get {
 				return cFullDrawRegion.Y;
@@ -122,6 +187,10 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets the left coordinate of the container.
+		/// </summary>
+		/// <value>The left.</value>
 		public int Left {
 			get {
 				return cFullDrawRegion.X;
@@ -133,6 +202,10 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets the top left screen coordinates of the container.
+		/// </summary>
+		/// <value>The top left screen coordinates.</value>
 		public Vector2 TopLeft {
 			get {
 				return cOrigin;
@@ -146,6 +219,10 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether this <see cref="MDLN.MGTools.Container"/> should send mouse events.
+		/// </summary>
+		/// <value><c>true</c> if mouse events should be sent; otherwise, <c>false</c>.</value>
 		public bool SendMouseEvents {
 			get {
 				return cSendMouseEvents;
@@ -156,12 +233,25 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Occurs when the mouse enters the containers screen space
+		/// </summary>
 		public event ContainerMouseEnterEventHandler MouseEnter;
 
+		/// <summary>
+		/// Occurs when the mouse leave the containers screen space
+		/// </summary>
 		public event ContainerMouseLeaveEventHandler MouseLeave;
 
+		/// <summary>
+		/// Occurs when the left mouse buttone goes down over the container's screen space
+		/// </summary>
 		public event ContainerLeftMouseDownEventHandler LeftMouseDown;
 
+		/// <summary>
+		/// Gets the client region of the container.  Specifies where the content should be drawn within this container.
+		/// </summary>
+		/// <value>The client region.</value>
 		protected Rectangle ClientRegion {
 			get {
 				Rectangle Region = new Rectangle();
@@ -175,6 +265,11 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether visible content has changed.  This will trigger a redraw of the buffer used to display
+		/// the containers
+		/// </summary> 
+		/// <value><c>true</c> if the visible data has changed; otherwise, <c>false</c>.</value>
 		protected bool HasChanged {
 			get {
 				return cHasChanges;
@@ -185,6 +280,9 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Toggles the visible state of the container.  Hides it if it's shown, or shows it if its hidden
+		/// </summary>
 		public void ToggleVisible() {
 			if (cIsVisible == true) {
 				Visible = false;
@@ -193,10 +291,20 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Update function to be called during the game update routine.
+		/// </summary>
+		/// <param name="CurrTime">Current time information in the game</param>
 		public void Update(GameTime CurrTime) {
 			Update(CurrTime, Keyboard.GetState(), Mouse.GetState());
 		}
 
+		/// <summary>
+		/// Update function to be called during the game update routine.
+		/// </summary>
+		/// <param name="CurrTime">Current time information in the game</param>
+		/// <param name="CurrKeyboard">Current state of the keyboard.</param>
+		/// <param name="CurrMouse">Current state of the mouse.</param>
 		public void Update(GameTime CurrTime, KeyboardState CurrKeyboard, MouseState CurrMouse) {
 			if ((cIsVisible == false) && (cIsClosing == false)) { //Only draw if container is shown
 				return;
@@ -253,10 +361,26 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// This function should be overridden with code to render the contents of this container.
+		/// It will be called during the update routine.
+		/// </summary>
+		/// <param name="CurrTime">Current time information</param>
 		public virtual void DrawContents(GameTime CurrTime) { }
 
+		/// <summary>
+		/// This function is used to render the contents of the container.  It will render them to a buffer instead of direct to the screen.
+		/// It may be called during the update routine to avoid clearing a buffer when a frame is being drawn as the render object
+		/// will need to be changed.
+		/// </summary>
+		/// <param name="CurrTime">Currend time information</param>
+		/// <param name="CurrKeyboard">Current state of the keyboard.</param>
+		/// <param name="CurrMouse">Current state of the mouse.</param>
 		public virtual void UpdateContents(GameTime CurrTime, KeyboardState CurrKeyboard, MouseState CurrMouse) { }
 
+		/// <summary>
+		/// Draw function to be called when a frame is rendered for the game
+		/// </summary>
 		public void Draw() {
 			if ((cIsVisible == false) && (cIsClosing == false)) { //Only draw if container is shown
 				return;
@@ -424,19 +548,52 @@ namespace MDLN.MGTools {
 		}
 	}
 
+	/// <summary>
+	/// Container mouse enter event handler.
+	/// </summary>
 	public delegate void ContainerMouseEnterEventHandler(object Sender, MouseState CurrMouse);
 
+	/// <summary>
+	/// Container mouse leave event handler.
+	/// </summary>
 	public delegate void ContainerMouseLeaveEventHandler(object Sender, MouseState CurrMouse);
 
+	/// <summary>
+	/// Container left mouse down event handler.
+	/// </summary>
 	public delegate void ContainerLeftMouseDownEventHandler(object Sender, MouseState CurrMouse);
 
+	/// <summary>
+	/// List of effects that can be used to animate the container beign opened or closed
+	/// </summary>
 	public enum DisplayEffect {
+		/// <summary>
+		/// No effect, container will appear all at once
+		/// </summary>
 		None,
+		/// <summary>
+		/// Container will slide ito view from the top edge down
+		/// </summary>
 		SlideDown,
+		/// <summary>
+		/// Container will slide into view from the left edge right
+		/// </summary>
 		SlideRight,
+		/// <summary>
+		/// Container will slide into view from the bottom edge upwards
+		/// </summary>
 		SlideUp,
+		/// <summary>
+		/// COntainer will slide into view from the right edge left
+		/// </summary>
 		SlideLeft,
+		/// <summary>
+		/// Container will begin at the center and grow outwards
+		/// </summary>
 		Zoom,
+		/// <summary>
+		/// Container will change transpareny over time
+		/// </summary>
 		Fade
 	}
 }

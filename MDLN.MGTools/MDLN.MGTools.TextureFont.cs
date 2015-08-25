@@ -6,6 +6,10 @@ using System;
 using System.Collections.Generic;
 
 namespace MDLN.MGTools {
+	/// <summary>
+	/// A class that will render text on screeen using an alphabet stored in an image font.
+	/// The texture must contain 16 rows of 16 characters, this will encompass all 255 characters of the extended ASCII set
+	/// </summary>
 	public class TextureFont {
 		private Texture2D cFontTexture;
 		private int cTextureColWidth, cTextureRowHeight;
@@ -66,6 +70,11 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Determines the width of text in pixels
+		/// </summary>
+		/// <returns>The width of the text in pixels if it were displayed</returns>
+		/// <param name="Text">The text to measure</param>
 		public int DetermineRenderWidth(string Text) {
 			return DetermineRenderWidth(Text, cTextureColWidth);
 		}
@@ -74,6 +83,11 @@ namespace MDLN.MGTools {
 			return Text.Length * GetCharacterWidth(FontHeight);
 		}
 
+		/// <summary>
+		/// Determines the region in the font texture where the character exists
+		/// </summary>
+		/// <returns>The character texture region.</returns>
+		/// <param name="Ascii">ASCII character code</param>
 		protected Rectangle GetCharacterTextureRegion(byte Ascii) {
 			int TexRow, TexCol;
 

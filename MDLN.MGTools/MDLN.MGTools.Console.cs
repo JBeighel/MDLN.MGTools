@@ -8,6 +8,9 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace MDLN.MGTools {
+	/// <summary>
+	/// Class that acts as a text console drawn in Monogame
+	/// </summary>
 	public class Console : Container {
 		private Color cFontColor;
 		private TextureFont cFont;
@@ -18,10 +21,35 @@ namespace MDLN.MGTools {
 		private List<string> cLines;
 		private Queue<string> cCommandHist;
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="MDLN.MGTools.Console"/> class.
+		/// </summary>
+		/// <param name="GraphicsDev">Connection to the Graphics device</param>
+		/// <param name="ContentMgr">Connection to the content manager</param>
+		/// <param name="FontFile">Image file container the font texture</param>
+		/// <param name="Top">Top screen coordinate for the console</param>
+		/// <param name="Left">Left screen coordinate for the console</param>
+		/// <param name="Width">Width of the console on screen</param>
+		/// <param name="Height">Height of the console on screen</param>
 		public Console(GraphicsDevice GraphicsDev, ContentManager ContentMgr, string FontFile, int Top, int Left, int Width, int Height) : this(GraphicsDev, ContentMgr, FontFile, new Rectangle(Left, Top, Width, Height)) { }
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="MDLN.MGTools.Console"/> class.
+		/// </summary>
+		/// <param name="GraphicsDev">Connection to the Graphics device</param>
+		/// <param name="ContentMgr">Connection to the content manager</param>
+		/// <param name="FontFile">Image file container the font texture</param>
+		/// <param name="Width">Width of the console on screen</param>
+		/// <param name="Height">Height of the console on screen</param>
 		public Console(GraphicsDevice GraphicsDev, ContentManager ContentMgr, string FontFile, int Width, int Height) : this(GraphicsDev, ContentMgr, FontFile, new Rectangle(0, 0, Width, Height)) { }
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="MDLN.MGTools.Console"/> class.
+		/// </summary>
+		/// <param name="GraphicsDev">Connection to the Graphics device</param>
+		/// <param name="ContentMgr">Connection to the content manager</param>
+		/// <param name="FontFile">Image file container the font texture</param>
+		/// <param name="Region">Region on the screen to draw the console</param>
 		public Console(GraphicsDevice GraphicsDev, ContentManager ContentMgr, string FontFile, Rectangle Region) : base(GraphicsDev, null, Region) {
 			cFont = new TextureFont();
 
@@ -41,8 +69,15 @@ namespace MDLN.MGTools {
 			cLines = new List<string>();
 		}
 
+		/// <summary>
+		/// Occurs when a command is submitted to the console
+		/// </summary>
 		public event CommandSentEventHandler CommandSent;
 
+		/// <summary>
+		/// Gets or sets the color of the font.
+		/// </summary>
+		/// <value>The color of the font.</value>
 		public Color FontColor {
 			get {
 				return cFontColor;
@@ -53,6 +88,10 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Adds a new line of text to be displayed in the console.  A carraige return will be added to the end
+		/// </summary>
+		/// <param name="Text">Text to display</param>
 		public void AddText(string Text) {
 			Text = Text.Replace("\r\n", "\n");
 			Text = Text.Replace("\r", "\n");
@@ -69,10 +108,19 @@ namespace MDLN.MGTools {
 			HasChanged = true;
 		}
 
+		/// <summary>
+		/// Clears all text currently being shown in the console
+		/// </summary>
 		public void ClearText() {
 			cLines.Clear();
 		}
 
+		/// <summary>
+		/// Processes inputs to determine if any new content should be displayed in the console
+		/// </summary>
+		/// <param name="CurrKeys">Current state of the keyboard.</param>
+		/// <param name="CurrMouse">Current state of the mouse.</param>
+		/// <param name="TotalTime">Current time information</param>
 		public override void UpdateContents(GameTime TotalTime, KeyboardState CurrKeys, MouseState CurrMouse) {
 			Keys[] PressedList = CurrKeys.GetPressedKeys();
 			string NewKeys = "";
@@ -224,6 +272,10 @@ namespace MDLN.MGTools {
 			cPriorKeys = CurrKeys;
 		}
 
+		/// <summary>
+		/// This function renders the contents of the console
+		/// </summary>
+		/// <param name="CurrTime">Current time information</param>
 		public override void DrawContents(GameTime CurrTime) {
 			Rectangle LetterPos = new Rectangle(0, 0, cFont.CharacterHeight, cFont.CharacterWidth);
 
@@ -247,5 +299,8 @@ namespace MDLN.MGTools {
 		}
 	}
 
+	/// <summary>
+	/// Command sent event handler.
+	/// </summary>
 	public delegate void CommandSentEventHandler(object Sender, string EventCommand);
 }

@@ -1,11 +1,45 @@
 <deck>
-	<card>
+	<monster>
 		<title>Shield Maiden</title>
 		<image>Fighter.png</image>
+		<attack>4</attack>
+		<health>6</health>
 		<description>
 			Line 1
 			Line 2
 			Line 3
 		</description>
-	</card>
+	</monster>
+	<room>
+		<title>Empty Room</title>
+		<image>DiceTexture.png</image>
+		<description>
+			Line 1
+			Line 2
+			Line 3
+		</description>
+		<monsters>0</monsters>
+		<treasure>0</treasure>
+	</room>
+	<treasure>
+		<title>Empty Room</title>
+		<image>DiceTexture.png</image>
+		<description>
+			Line 1
+			Line 2
+			Line 3
+		</description>
+		<slot>Head</slot>
+		<affect></affect>
+	</treasure>
+	<action>
+		<title>Empty Room</title>
+		<image>DiceTexture.png</image>
+		<description>
+			Line 1
+			Line 2
+			Line 3
+		</description>
+		<affect></affect>
+	</action>
 </deck>

@@ -2,7 +2,9 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+
 using System;
+using System.Windows.Input;
 
 namespace MDLN.MGTools {
 	/// <summary>
@@ -246,7 +248,7 @@ namespace MDLN.MGTools {
 		/// <summary>
 		/// Occurs when the left mouse buttone goes down over the container's screen space
 		/// </summary>
-		public event ContainerLeftMouseDownEventHandler LeftMouseDown;
+		public event ContainerMouseDownEventHandler MouseDown;
 
 		/// <summary>
 		/// Gets the client region of the container.  Specifies where the content should be drawn within this container.
@@ -327,8 +329,14 @@ namespace MDLN.MGTools {
 				}
 
 				if ((CurrMouse.LeftButton == ButtonState.Pressed) && (cPriorMouse.LeftButton == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-					if (LeftMouseDown != null) {
-						LeftMouseDown(this, CurrMouse);
+					if (MouseDown != null) {
+						MouseDown(this, MouseButton.Left, CurrMouse);
+					}
+				}
+
+				if ((CurrMouse.RightButton == ButtonState.Pressed) && (cPriorMouse.RightButton == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+					if (MouseDown != null) {
+						MouseDown(this, MouseButton.Right, CurrMouse);
 					}
 				}
 
@@ -561,7 +569,7 @@ namespace MDLN.MGTools {
 	/// <summary>
 	/// Container left mouse down event handler.
 	/// </summary>
-	public delegate void ContainerLeftMouseDownEventHandler(object Sender, MouseState CurrMouse);
+	public delegate void ContainerMouseDownEventHandler(object Sender, MouseButton ButtonDown, MouseState CurrMouse);
 
 	/// <summary>
 	/// List of effects that can be used to animate the container beign opened or closed
@@ -595,5 +603,31 @@ namespace MDLN.MGTools {
 		/// Container will change transpareny over time
 		/// </summary>
 		Fade
+	}
+
+	/// <summary>
+	/// Enumeration of all mouse buttons
+	/// </summary>
+	public enum MouseButton {
+		/// <summary>
+		/// Left mouse button
+		/// </summary>
+		Left,
+		/// <summary>
+		/// Middle mouse button
+		/// </summary>
+		Middle,
+		/// <summary>
+		/// Rigth mouse button
+		/// </summary>
+		Right,
+		/// <summary>
+		/// First extended button
+		/// </summary>
+		XButton1,
+		/// <summary>
+		/// Second extended button
+		/// </summary>
+		XButton2
 	}
 }

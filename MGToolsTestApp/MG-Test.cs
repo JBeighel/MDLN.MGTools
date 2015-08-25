@@ -105,7 +105,7 @@ namespace MGTest
 			TestCard = new Card(GraphicsDevice, 350, 250, cFont);
 			TestCard.Top = 105;
 			TestCard.Left = 325;
-			TestCard.Background = Content.Load<Texture2D>("CardBase.png");
+			TestCard.CardBase = Content.Load<Texture2D>("CardBase.png");
 			TestCard.CardImage = CardImage;
 			TestCard.Title = "Shield Maiden";
 
@@ -116,7 +116,9 @@ namespace MGTest
 			Lines.Add("Women of Rohan");
 			TestCard.DescriptionLines = Lines;
 			TestCard.SendMouseEvents = true;
-			TestCard.LeftMouseDown += new ContainerLeftMouseDownEventHandler(MouseLeftDown);
+			TestCard.MouseDown += new ContainerMouseDownEventHandler(MouseLeftDown);
+
+			DevConsole.AddText("Viewport Bounds: X=" + GraphicsDevice.Viewport.Bounds.X + " Y=" + GraphicsDevice.Viewport.Bounds.Y + " Width=" + GraphicsDevice.Viewport.Bounds.Width + " Height=" + GraphicsDevice.Viewport.Bounds.Height);
 		}
 
 		/// <summary>
@@ -343,6 +345,14 @@ namespace MGTest
 								DevConsole.AddText("Invalid card animation time");
 							}
 							return;
+						case "full":
+							if (Regex.Match(Value, @"^[teoy1]", RegexOptions.IgnoreCase).Success == true) {
+								TestCard.ShowFullCard = true;
+							} else {
+								TestCard.ShowFullCard = false;
+							}
+							DevConsole.AddText("Card visibility update");
+							return;
 					}
 
 					DevConsole.AddText("Invalid Card value name: " + Command);
@@ -389,8 +399,14 @@ namespace MGTest
 			}
 		}
 
-		protected void MouseLeftDown(object Sender, MouseState CurrMouse) {
-			DevConsole.AddText("Left mouse button down on card");
+		protected void MouseLeftDown(object Sender, MouseButton CurrDown, MouseState CurrMouse) {
+			if (CurrDown == MouseButton.Left) {
+				DevConsole.AddText("Left mouse button down on card");
+			}
+
+			if (CurrDown == MouseButton.Right) {
+				DevConsole.AddText("Right mouse button down on card");
+			}
 		}
 	}
 

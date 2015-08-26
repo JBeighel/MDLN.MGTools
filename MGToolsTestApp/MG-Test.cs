@@ -41,10 +41,11 @@ namespace MGTest
 		private KeyboardState PriorKeyState;
 		private MouseState PriorMouseState;
 		private MDLN.MGTools.Console DevConsole;
-		private Container TestCont;
+		private Container TestCont, NestedCont;
 		private TextureFont cFont;
 		private bool cMouseOverCard;
-		private Card TestCard;
+		private CardDisplay TestCard;
+		private CardInfo cCard;
 		private double cMouseEnterTime;
 
 		private int FrameNum;
@@ -102,21 +103,30 @@ namespace MGTest
 			TestCont.CloseEffect = DisplayEffect.SlideLeft;
 			TestCont.EffectDuration = 500;
 
-			TestCard = new Card(GraphicsDevice, 350, 250, cFont);
+			TestCard = new CardDisplay(GraphicsDevice, 350, 250, cFont);
 			TestCard.Top = 105;
 			TestCard.Left = 325;
-			TestCard.CardBase = Content.Load<Texture2D>("CardBase.png");
-			TestCard.CardImage = CardImage;
-			TestCard.Title = "Shield Maiden";
+			TestCard.SendMouseEvents = true;
+			TestCard.MouseDown += new ContainerMouseDownEventHandler(MouseLeftDown);
+
+			cCard = new CardInfo(CardType.Monster);
+			cCard.Background = Content.Load<Texture2D>("CardBase.png");
+			cCard.Image = CardImage;
+			cCard.Title = "Shield Maiden";
 
 			List<string> Lines = new List<string>();
 			Lines.Add("Health: 5");
 			Lines.Add("Attack: 3");
 			Lines.Add("");
 			Lines.Add("Women of Rohan");
-			TestCard.DescriptionLines = Lines;
-			TestCard.SendMouseEvents = true;
-			TestCard.MouseDown += new ContainerMouseDownEventHandler(MouseLeftDown);
+			cCard.Description = Lines;
+			cCard.Changed = true;
+
+			TestCard.Card = cCard;
+
+			NestedCont = new Container(GraphicsDevice, null, 350, 600, 100, 100);
+			NestedCont.BackgroundColor = Color.BurlyWood;
+			NestedCont.Visible = true;
 
 			DevConsole.AddText("Viewport Bounds: X=" + GraphicsDevice.Viewport.Bounds.X + " Y=" + GraphicsDevice.Viewport.Bounds.Y + " Width=" + GraphicsDevice.Viewport.Bounds.Width + " Height=" + GraphicsDevice.Viewport.Bounds.Height);
 		}
@@ -202,6 +212,8 @@ namespace MGTest
 
 			TestCard.Update(gameTime);
 
+			NestedCont.Update(gameTime);
+
 			//Use monogame update
 			base.Update(gameTime);
 		}
@@ -271,6 +283,9 @@ namespace MGTest
 
 			TestCard.Draw();
 			TestCont.Draw();
+
+			NestedCont.Draw();
+
 			DevConsole.Draw();
 
 			base.Draw(gameTime);
@@ -320,21 +335,22 @@ namespace MGTest
 							break;
 						case "image":
 							if (Value.ToLower().CompareTo("assassin") == 0) {
-								TestCard.CardImage = Assassin;
+								cCard.Image = Assassin;
 								DevConsole.AddText("Card image set");
 								return;
 							} else if (Value.ToLower().CompareTo("fighter") == 0) {
-								TestCard.CardImage = CardImage;
+								cCard.Image = CardImage;
 								DevConsole.AddText("Card image set");
 								return;
 							} else if (Value.ToLower().CompareTo("archer") == 0) {
-								TestCard.CardImage = Archer;
+								cCard.Image = Archer;
 								DevConsole.AddText("Card image set");
 								return;
 							}
 							break;
 						case "title":
-							TestCard.Title = Value;
+							cCard.Title = Value;
+							cCard.Changed = true;
 							DevConsole.AddText("Card title set");
 							return;
 						case "anim":

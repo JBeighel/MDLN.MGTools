@@ -312,9 +312,16 @@ namespace MDLN.MGTools {
 				return;
 			}
 
-			UpdateEffect(CurrTime.ElapsedGameTime.TotalMilliseconds);
-			UpdateContents (CurrTime, CurrKeyboard, CurrMouse);
+			//Create a MouseState based on the top left of the container for inheriting classes to use
+			MouseState ContMouse = new MouseState(CurrMouse.X - Left, CurrMouse.Y - Top, CurrMouse.ScrollWheelValue, CurrMouse.LeftButton, CurrMouse.MiddleButton, CurrMouse.RightButton, CurrMouse.XButton1, CurrMouse.XButton2);
 
+			//Update the container
+			UpdateEffect(CurrTime.ElapsedGameTime.TotalMilliseconds);
+
+			//Update the contents
+			UpdateContents (CurrTime, CurrKeyboard, ContMouse);
+
+			//Trigger events
 			if (cSendMouseEvents == true) {
 				if ((cFullDrawRegion.Contains(CurrMouse.Position) == true) && ((cFullDrawRegion.Contains(cPriorMouse.Position) == false))) {
 					if (MouseEnter != null) {

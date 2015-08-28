@@ -204,6 +204,18 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		public int Height {
+			get {
+				return cFullDrawRegion.Height;
+			}
+		}
+
+		public int Width {
+			get {
+				return cFullDrawRegion.Width;
+			}
+		}
+
 		/// <summary>
 		/// Gets or sets the top left screen coordinates of the container.
 		/// </summary>

@@ -16,6 +16,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Content", "Content", "{12C3
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MDLN.Tools", "MDLN.Tools\MDLN.Tools.csproj", "{4D524474-1FFF-448F-97BA-E58CCA87592D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MDLN.Tools.UnitTests", "MDLN.Tools.UnitTests\MDLN.Tools.UnitTests.csproj", "{97BB734D-1897-4818-B5F0-DC85299DA724}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsteroidShooter", "AsteroidShooter\AsteroidShooter.csproj", "{4CBF630C-E105-4D03-93BE-343B8F779189}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -26,6 +30,10 @@ Global
 		{4519B3DF-700D-4AA4-880C-710E6AEBEE4B}.Debug|x86.Build.0 = Debug|x86
 		{4519B3DF-700D-4AA4-880C-710E6AEBEE4B}.Release|x86.ActiveCfg = Release|x86
 		{4519B3DF-700D-4AA4-880C-710E6AEBEE4B}.Release|x86.Build.0 = Release|x86
+		{4CBF630C-E105-4D03-93BE-343B8F779189}.Debug|x86.ActiveCfg = Debug|x86
+		{4CBF630C-E105-4D03-93BE-343B8F779189}.Debug|x86.Build.0 = Debug|x86
+		{4CBF630C-E105-4D03-93BE-343B8F779189}.Release|x86.ActiveCfg = Release|x86
+		{4CBF630C-E105-4D03-93BE-343B8F779189}.Release|x86.Build.0 = Release|x86
 		{4D524474-1FFF-448F-97BA-E58CCA87592D}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{4D524474-1FFF-448F-97BA-E58CCA87592D}.Debug|x86.Build.0 = Debug|Any CPU
 		{4D524474-1FFF-448F-97BA-E58CCA87592D}.Release|x86.ActiveCfg = Release|Any CPU
@@ -34,6 +42,10 @@ Global
 		{61F383D9-872B-4B2B-92CE-21D18A74EC13}.Debug|x86.Build.0 = Debug|x86
 		{61F383D9-872B-4B2B-92CE-21D18A74EC13}.Release|x86.ActiveCfg = Release|x86
 		{61F383D9-872B-4B2B-92CE-21D18A74EC13}.Release|x86.Build.0 = Release|x86
+		{97BB734D-1897-4818-B5F0-DC85299DA724}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{97BB734D-1897-4818-B5F0-DC85299DA724}.Debug|x86.Build.0 = Debug|Any CPU
+		{97BB734D-1897-4818-B5F0-DC85299DA724}.Release|x86.ActiveCfg = Release|Any CPU
+		{97BB734D-1897-4818-B5F0-DC85299DA724}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection

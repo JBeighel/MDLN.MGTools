@@ -78,14 +78,14 @@ namespace MDLN.AsteroidShooter
 
 
 			if (CurrKeys.IsKeyDown(Keys.Up) == true) {
-				SpeedAdjust = CalculateXYMagnitude(cRotation, 0.1f);
+				SpeedAdjust = MGMath.CalculateXYMagnitude(cRotation, 0.1f);
 
 				cSpeedX -= SpeedAdjust.X;
 				cSpeedY += SpeedAdjust.Y;
 			}
 
 			if (CurrKeys.IsKeyDown(Keys.Down) == true) {
-				SpeedAdjust = CalculateXYMagnitude(cRotation, 0.1f);
+				SpeedAdjust = MGMath.CalculateXYMagnitude(cRotation, 0.1f);
 
 				cSpeedX += SpeedAdjust.X;
 				cSpeedY -= SpeedAdjust.Y;
@@ -109,15 +109,6 @@ namespace MDLN.AsteroidShooter
 			if (Left > cGraphicsDevice.Viewport.Bounds.Width) {
 				Left = -1 * cDrawRegion.Width;
 			}
-		}
-
-		private Vector2 CalculateXYMagnitude(float Angle, float Magnitude) {
-			Vector2 Components;
-
-			Components.X = (float)(Math.Cos(Angle) * Magnitude);
-			Components.Y = (float)(Math.Sin(Angle) * Magnitude);
-
-			return Components;
 		}
 	}
 }

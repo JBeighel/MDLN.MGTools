@@ -53,7 +53,7 @@ namespace MDLN.AsteroidShooter
 		}
 
 		public override void UpdateContents(GameTime CurrTime, KeyboardState CurrKeys, MouseState CurrMouse) {
-			Vector2 SpeedAdjust;
+			Vector2 SpeedAdjust, NewPos;
 			//float RotatDegrees;
 
 			if (CurrKeys.IsKeyDown(Keys.Left) == true) {
@@ -91,8 +91,11 @@ namespace MDLN.AsteroidShooter
 				cSpeedY -= SpeedAdjust.Y;
 			}
 
-			Left -= (int)cSpeedX;
-			Top -= (int)cSpeedY;
+			NewPos = TopLeft;
+			NewPos.X -= cSpeedX;
+			NewPos.Y -= cSpeedY;
+
+			TopLeft = NewPos;
 
 			if (Top < -1 * (cDrawRegion.Height  + cDrawRegion.X)) {
 				Top = cGraphicsDevice.Viewport.Bounds.Height;

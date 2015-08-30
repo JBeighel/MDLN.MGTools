@@ -2,7 +2,9 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+
 using System;
+using System.Windows.Input;
 
 namespace MDLN.MGTools {
 	/// <summary>
@@ -203,6 +205,26 @@ namespace MDLN.MGTools {
 		}
 
 		/// <summary>
+		/// Gets the height of the container in pixels
+		/// </summary>
+		/// <value>The height in pixesls</value>
+		public int Height {
+			get {
+				return cFullDrawRegion.Height;
+			}
+		}
+
+		/// <summary>
+		/// Gets the width of the container in pixels
+		/// </summary>
+		/// <value>The width in pixels</value>
+		public int Width {
+			get {
+				return cFullDrawRegion.Width;
+			}
+		}
+
+		/// <summary>
 		/// Gets or sets the top left screen coordinates of the container.
 		/// </summary>
 		/// <value>The top left screen coordinates.</value>
@@ -246,7 +268,7 @@ namespace MDLN.MGTools {
 		/// <summary>
 		/// Occurs when the left mouse buttone goes down over the container's screen space
 		/// </summary>
-		public event ContainerLeftMouseDownEventHandler LeftMouseDown;
+		public event ContainerMouseDownEventHandler MouseDown;
 
 		/// <summary>
 		/// Gets the client region of the container.  Specifies where the content should be drawn within this container.
@@ -310,9 +332,16 @@ namespace MDLN.MGTools {
 				return;
 			}
 
-			UpdateEffect(CurrTime.ElapsedGameTime.TotalMilliseconds);
-			UpdateContents (CurrTime, CurrKeyboard, CurrMouse);
+			//Create a MouseState based on the top left of the container for inheriting classes to use
+			MouseState ContMouse = new MouseState(CurrMouse.X - Left, CurrMouse.Y - Top, CurrMouse.ScrollWheelValue, CurrMouse.LeftButton, CurrMouse.MiddleButton, CurrMouse.RightButton, CurrMouse.XButton1, CurrMouse.XButton2);
 
+			//Update the container
+			UpdateEffect(CurrTime.ElapsedGameTime.TotalMilliseconds);
+
+			//Update the contents
+			UpdateContents (CurrTime, CurrKeyboard, ContMouse);
+
+			//Trigger events
 			if (cSendMouseEvents == true) {
 				if ((cFullDrawRegion.Contains(CurrMouse.Position) == true) && ((cFullDrawRegion.Contains(cPriorMouse.Position) == false))) {
 					if (MouseEnter != null) {
@@ -327,8 +356,14 @@ namespace MDLN.MGTools {
 				}
 
 				if ((CurrMouse.LeftButton == ButtonState.Pressed) && (cPriorMouse.LeftButton == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-					if (LeftMouseDown != null) {
-						LeftMouseDown(this, CurrMouse);
+					if (MouseDown != null) {
+						MouseDown(this, MouseButton.Left, CurrMouse);
+					}
+				}
+
+				if ((CurrMouse.RightButton == ButtonState.Pressed) && (cPriorMouse.RightButton == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+					if (MouseDown != null) {
+						MouseDown(this, MouseButton.Right, CurrMouse);
 					}
 				}
 
@@ -561,7 +596,7 @@ namespace MDLN.MGTools {
 	/// <summary>
 	/// Container left mouse down event handler.
 	/// </summary>
-	public delegate void ContainerLeftMouseDownEventHandler(object Sender, MouseState CurrMouse);
+	public delegate void ContainerMouseDownEventHandler(object Sender, MouseButton ButtonDown, MouseState CurrMouse);
 
 	/// <summary>
 	/// List of effects that can be used to animate the container beign opened or closed
@@ -595,5 +630,31 @@ namespace MDLN.MGTools {
 		/// Container will change transpareny over time
 		/// </summary>
 		Fade
+	}
+
+	/// <summary>
+	/// Enumeration of all mouse buttons
+	/// </summary>
+	public enum MouseButton {
+		/// <summary>
+		/// Left mouse button
+		/// </summary>
+		Left,
+		/// <summary>
+		/// Middle mouse button
+		/// </summary>
+		Middle,
+		/// <summary>
+		/// Rigth mouse button
+		/// </summary>
+		Right,
+		/// <summary>
+		/// First extended button
+		/// </summary>
+		XButton1,
+		/// <summary>
+		/// Second extended button
+		/// </summary>
+		XButton2
 	}
 }

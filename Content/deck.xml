@@ -10,6 +10,28 @@
 			Line 3
 		</description>
 	</monster>
+	<monster>
+		<title>Assasson</title>
+		<image>Assassin.png</image>
+		<attack>4</attack>
+		<health>6</health>
+		<description>
+			Line 1
+			Line 2
+			Line 3
+		</description>
+	</monster>
+	<monster>
+		<title>Archer</title>
+		<image>Archer.png</image>
+		<attack>4</attack>
+		<health>6</health>
+		<description>
+			Line 1
+			Line 2
+			Line 3
+		</description>
+	</monster>
 	<room>
 		<title>Empty Room</title>
 		<image>DiceTexture.png</image>

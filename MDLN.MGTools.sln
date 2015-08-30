@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MDLN.Tools.UnitTests", "MDL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsteroidShooter", "AsteroidShooter\AsteroidShooter.csproj", "{4CBF630C-E105-4D03-93BE-343B8F779189}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardTable", "CardTable\CardTable.csproj", "{8777A8D0-DCF9-49A2-81A2-BB970302E8F8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -42,6 +44,10 @@ Global
 		{61F383D9-872B-4B2B-92CE-21D18A74EC13}.Debug|x86.Build.0 = Debug|x86
 		{61F383D9-872B-4B2B-92CE-21D18A74EC13}.Release|x86.ActiveCfg = Release|x86
 		{61F383D9-872B-4B2B-92CE-21D18A74EC13}.Release|x86.Build.0 = Release|x86
+		{8777A8D0-DCF9-49A2-81A2-BB970302E8F8}.Debug|x86.ActiveCfg = Debug|x86
+		{8777A8D0-DCF9-49A2-81A2-BB970302E8F8}.Debug|x86.Build.0 = Debug|x86
+		{8777A8D0-DCF9-49A2-81A2-BB970302E8F8}.Release|x86.ActiveCfg = Release|x86
+		{8777A8D0-DCF9-49A2-81A2-BB970302E8F8}.Release|x86.Build.0 = Release|x86
 		{97BB734D-1897-4818-B5F0-DC85299DA724}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{97BB734D-1897-4818-B5F0-DC85299DA724}.Debug|x86.Build.0 = Debug|Any CPU
 		{97BB734D-1897-4818-B5F0-DC85299DA724}.Release|x86.ActiveCfg = Release|Any CPU

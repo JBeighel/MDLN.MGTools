@@ -22,8 +22,8 @@ namespace MDLN.AsteroidShooter {
 	public class AsteroidShooter : Game {
 		private GraphicsDeviceManager cGraphDevMgr;
 		private Ship cPlayerShip;
-		private Particles cPlayerBullets;
-		private Particles cAsteroids;
+		private Particles2D cPlayerBullets;
+		private Particles2D cAsteroids;
 		private double cLastShot, cLastAsteroid;
 		private MDLN.MGTools.Console cDevConsole;
 		//private TextureFont cFont;
@@ -66,9 +66,9 @@ namespace MDLN.AsteroidShooter {
 			cPlayerShip.Top = cGraphDevMgr.GraphicsDevice.Viewport.Bounds.Height / 2;
 			cPlayerShip.Left = cGraphDevMgr.GraphicsDevice.Viewport.Bounds.Width / 2;
 
-			cPlayerBullets = new Particles(cGraphDevMgr.GraphicsDevice);
+			cPlayerBullets = new Particles2D(cGraphDevMgr.GraphicsDevice);
 
-			cAsteroids = new Particles(cGraphDevMgr.GraphicsDevice);
+			cAsteroids = new Particles2D(cGraphDevMgr.GraphicsDevice);
 			cAsteroids.WrapScreenEdges = true;
 		}
 

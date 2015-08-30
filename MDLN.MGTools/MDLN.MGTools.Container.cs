@@ -204,12 +204,20 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Gets the height of the container in pixels
+		/// </summary>
+		/// <value>The height in pixesls</value>
 		public int Height {
 			get {
 				return cFullDrawRegion.Height;
 			}
 		}
 
+		/// <summary>
+		/// Gets the width of the container in pixels
+		/// </summary>
+		/// <value>The width in pixels</value>
 		public int Width {
 			get {
 				return cFullDrawRegion.Width;

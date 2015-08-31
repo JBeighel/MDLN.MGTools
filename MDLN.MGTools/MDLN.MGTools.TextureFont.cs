@@ -91,8 +91,13 @@ namespace MDLN.MGTools {
 			LetterPos.Width = GetCharacterWidth(FontHeight);
 
 			foreach(byte CurrChar in System.Text.Encoding.UTF8.GetBytes(Text)) {
-				DrawBatch.Draw(cFontTexture, LetterPos, GetCharacterTextureRegion(CurrChar), FontColor);
-				LetterPos.X += LetterPos.Width;
+				if (CurrChar == '\n') {
+					LetterPos.X = Left;
+					LetterPos.Y = LetterPos.Y + FontHeight;
+				} else {
+					DrawBatch.Draw(cFontTexture, LetterPos, GetCharacterTextureRegion(CurrChar), FontColor);
+					LetterPos.X += LetterPos.Width;
+				}
 			}
 		}
 

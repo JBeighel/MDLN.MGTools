@@ -40,7 +40,7 @@ namespace MGTest
 		private int Transparency;
 		private KeyboardState PriorKeyState;
 		private MouseState PriorMouseState;
-		private MDLN.MGTools.Console DevConsole;
+		private MDLN.MGTools.GameConsole DevConsole;
 		private Container TestCont, NestedCont;
 		private TextureFont cFont;
 		private bool cMouseOverCard;
@@ -64,7 +64,7 @@ namespace MGTest
 
 			FrameNum = 1;
 
-			DevConsole = new MDLN.MGTools.Console(GraphicsDevice, Content, "Font.png", 0, 0, GraphicsDevice.Viewport.Bounds.Width, GraphicsDevice.Viewport.Bounds.Height / 2);
+			DevConsole = new MDLN.MGTools.GameConsole(GraphicsDevice, Content, "Font.png", 0, 0, GraphicsDevice.Viewport.Bounds.Width, GraphicsDevice.Viewport.Bounds.Height / 2);
 			DevConsole.CommandSent += CommandSentEventHandler;
 			DevConsole.OpenEffect = DisplayEffect.SlideDown;
 			DevConsole.CloseEffect = DisplayEffect.SlideUp;

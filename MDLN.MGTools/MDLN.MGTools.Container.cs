@@ -31,6 +31,10 @@ namespace MDLN.MGTools {
 		/// Variable used to draw batches of 2D images
 		/// </summary>
 		protected SpriteBatch cDrawBatch;
+		/// <summary>
+		/// State of the keyboard the last time this class was updated
+		/// </summary>
+		protected KeyboardState cPriorKeys;
 
 		/// <summary>
 		/// Constructor that sets minimum information for the <see cref="MDLN.MGTools.Container"/> class
@@ -303,6 +307,18 @@ namespace MDLN.MGTools {
 		}
 
 		/// <summary>
+		/// Get or Set a key to use to open or close the conainer if UseAccessKey is true.
+		/// </summary>
+		/// <value>The access key.</value>
+		public Keys AccessKey { get; set; }
+
+		/// <summary>
+		/// Gets or sets a value indicating whether this <see cref="MDLN.MGTools.Container"/> should use access key.
+		/// </summary>
+		/// <value><c>true</c> if use access key; otherwise, <c>false</c>.</value>
+		public bool UseAccessKey { get; set; }
+
+		/// <summary>
 		/// Toggles the visible state of the container.  Hides it if it's shown, or shows it if its hidden
 		/// </summary>
 		public void ToggleVisible() {
@@ -328,7 +344,12 @@ namespace MDLN.MGTools {
 		/// <param name="CurrKeyboard">Current state of the keyboard.</param>
 		/// <param name="CurrMouse">Current state of the mouse.</param>
 		public void Update(GameTime CurrTime, KeyboardState CurrKeyboard, MouseState CurrMouse) {
+			if ((UseAccessKey == true) && (CurrKeyboard.IsKeyDown(AccessKey) == true) && (cPriorKeys.IsKeyDown(AccessKey) == false)) {
+				ToggleVisible();
+			}
+
 			if ((cIsVisible == false) && (cIsClosing == false)) { //Only draw if container is shown
+				cPriorKeys = CurrKeyboard;
 				return;
 			}
 
@@ -394,6 +415,8 @@ namespace MDLN.MGTools {
 
 				cHasChanges = false;
 			}
+
+			cPriorKeys = CurrKeyboard;
 		}
 
 		/// <summary>

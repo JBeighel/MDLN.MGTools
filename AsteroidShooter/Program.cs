@@ -25,7 +25,7 @@ namespace MDLN.AsteroidShooter {
 		private Particles2D cPlayerBullets;
 		private Particles2D cAsteroids;
 		private double cLastShot, cLastAsteroid;
-		private MDLN.MGTools.Console cDevConsole;
+		private MDLN.MGTools.GameConsole cDevConsole;
 		//private TextureFont cFont;
 		private KeyboardState cPriorKeyState;
 		private Dictionary<Textures, Texture2D> cTextureDict;
@@ -54,7 +54,7 @@ namespace MDLN.AsteroidShooter {
 			cTextureDict.Add(Textures.Bullet, Content.Load<Texture2D>(Tools.Tools.GetEnumDescriptionAttribute(Textures.Bullet)));
 
 			//cFont = new TextureFont(cTextureDict[Textures.Font]);
-			cDevConsole = new MDLN.MGTools.Console(cGraphDevMgr.GraphicsDevice, Content, "Font.png", 0, 0, cGraphDevMgr.GraphicsDevice.Viewport.Bounds.Width, cGraphDevMgr.GraphicsDevice.Viewport.Bounds.Height / 2);
+			cDevConsole = new MDLN.MGTools.GameConsole(cGraphDevMgr.GraphicsDevice, Content, "Font.png", 0, 0, cGraphDevMgr.GraphicsDevice.Viewport.Bounds.Width, cGraphDevMgr.GraphicsDevice.Viewport.Bounds.Height / 2);
 			cDevConsole.CommandSent += CommandSentEventHandler;
 			cDevConsole.OpenEffect = DisplayEffect.SlideDown;
 			cDevConsole.CloseEffect = DisplayEffect.SlideUp;

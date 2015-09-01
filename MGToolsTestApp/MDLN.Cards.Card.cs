@@ -51,7 +51,7 @@ namespace MDLN.Cards {
 		protected override void DrawContents(GameTime CurrTime) {
 			int LineTop;
 
-			if (cIsFullCard == true) {
+			if (cIsFullCard == true) {//full height 350x250 (Image 145x230)
 				cDrawBatch.Draw(cCard.Background, ClientRegion, Color.White);
 				cDrawBatch.Draw(cCard.Image, new Rectangle(10, 10, ClientRegion.Width - 20, 145), Color.White);
 

@@ -107,7 +107,7 @@ namespace MGTest
 			TestCard.Top = 105;
 			TestCard.Left = 325;
 			TestCard.SendMouseEvents = true;
-			TestCard.MouseDown += new ContainerMouseDownEventHandler(MouseLeftDown);
+			TestCard.MouseDown += new ContainerMouseButtonEventHandler(MouseLeftDown);
 
 			cCard = new CardInfo(CardType.Monster);
 			cCard.Background = Content.Load<Texture2D>("CardBase.png");

@@ -123,7 +123,7 @@ namespace MDLN.MGTools {
 		/// <param name="CurrKeys">Current state of the keyboard.</param>
 		/// <param name="CurrMouse">Current state of the mouse.</param>
 		/// <param name="TotalTime">Current time information</param>
-		public override void UpdateContents(GameTime TotalTime, KeyboardState CurrKeys, MouseState CurrMouse) {
+		protected override void UpdateContents(GameTime TotalTime, KeyboardState CurrKeys, MouseState CurrMouse) {
 			Keys[] PressedList = CurrKeys.GetPressedKeys();
 			string NewKeys = "";
 			bool ShiftDown = false;
@@ -278,7 +278,7 @@ namespace MDLN.MGTools {
 		/// This function renders the contents of the console
 		/// </summary>
 		/// <param name="CurrTime">Current time information</param>
-		public override void DrawContents(GameTime CurrTime) {
+		protected override void DrawContents(GameTime CurrTime) {
 			Rectangle LetterPos = new Rectangle(0, 0, cFont.CharacterHeight, cFont.CharacterWidth);
 
 			//Draw the current command

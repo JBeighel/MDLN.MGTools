@@ -20,17 +20,20 @@ namespace MDNLN.CardTable {
 	}
 
 	public class CardTable : Game {
+		private const float BUTTONWIDTHPERCENT = 0.20f;
+		private const string INTERFACECONTENTDIR = "Content";
+
 		private GraphicsDeviceManager cGraphDevMgr;
 		private Dictionary<Textures, Texture2D> cTextureDict;
 		private TextureFont cFont;
 		private GameConsole cDevConsole;
-		private Button cOpenDoorButton, cSpawnMonsterButton;
+		private Dictionary<MenuButtons, Button> cMenuBtns;
 
 		public CardTable() {
 			cGraphDevMgr = new GraphicsDeviceManager(this);
-			Content.RootDirectory = "Content";
 			IsMouseVisible = true;
 			cTextureDict = new Dictionary<Textures, Texture2D>();
+			cMenuBtns = new Dictionary<MenuButtons, Button>();
 		}
 
 		protected override void Initialize() {
@@ -43,36 +46,48 @@ namespace MDNLN.CardTable {
 		}
 
 		protected override void LoadContent() {
+			Rectangle ButtonArea = new Rectangle();
+
+			Content.RootDirectory = INTERFACECONTENTDIR;
+
 			foreach (Textures CurrTexture in Enum.GetValues(typeof(Textures))) {
 				cTextureDict.Add(CurrTexture, Content.Load<Texture2D>(Tools.GetEnumDescriptionAttribute(CurrTexture)));
 			}
 
 			cFont = new TextureFont(cTextureDict[Textures.Font]);
 
+			ButtonArea.Width = (int)(cGraphDevMgr.GraphicsDevice.Viewport.Width * BUTTONWIDTHPERCENT);
+			ButtonArea.Height = (cGraphDevMgr.GraphicsDevice.Viewport.Height - Enum.GetValues(typeof(MenuButtons)).Length) / Enum.GetValues(typeof(MenuButtons)).Length;
+			ButtonArea.X = cGraphDevMgr.GraphicsDevice.Viewport.Width - ButtonArea.Width;
+			ButtonArea.Y = 0;
+			foreach (MenuButtons CurrBtn in Enum.GetValues(typeof(MenuButtons))) {
+				cMenuBtns.Add(CurrBtn, new Button(cGraphDevMgr.GraphicsDevice, null, ButtonArea.Y, ButtonArea.X, ButtonArea.Height, ButtonArea.Width));
+				cMenuBtns[CurrBtn].Text = Tools.GetEnumDescriptionAttribute(CurrBtn);
+				cMenuBtns[CurrBtn].Font = cFont;
+				cMenuBtns[CurrBtn].Visible = true;
+				cMenuBtns[CurrBtn].BackgroundColor = Color.Navy;
+				cMenuBtns[CurrBtn].FontColor = Color.AntiqueWhite;
+
+				ButtonArea.Y += ButtonArea.Height + 1;
+			}
+
+			cMenuBtns[MenuButtons.Menu].Click += new ButtonClickEvent(MenuClick);
+			cMenuBtns[MenuButtons.OpenDoor].Click += new ButtonClickEvent(OpenDoorClick);
+
 			cDevConsole = new GameConsole(cGraphDevMgr.GraphicsDevice, Content, "Font.png", cGraphDevMgr.GraphicsDevice.Viewport.Width, cGraphDevMgr.GraphicsDevice.Viewport.Height / 2);
 			cDevConsole.AccessKey = Keys.OemTilde;
 			cDevConsole.UseAccessKey = true;
 			cDevConsole.OpenEffect = DisplayEffect.SlideDown;
 			cDevConsole.CloseEffect = DisplayEffect.SlideUp;
+			cDevConsole.CommandSent += new CommandSentEventHandler(CommandEvent);
 
-			cOpenDoorButton = new Button(cGraphDevMgr.GraphicsDevice, null, 0, cGraphDevMgr.GraphicsDevice.Viewport.Width - 150, cGraphDevMgr.GraphicsDevice.Viewport.Height / 5, 150);
-			cOpenDoorButton.Text = "Open Door";
-			cOpenDoorButton.Font = cFont;
-			cOpenDoorButton.Visible = true;
-			cOpenDoorButton.BackgroundColor = Color.Navy;
-			cOpenDoorButton.FontColor = Color.AntiqueWhite;
-
-			cSpawnMonsterButton = new Button(cGraphDevMgr.GraphicsDevice, null, cOpenDoorButton.Height, cGraphDevMgr.GraphicsDevice.Viewport.Width - 150, cGraphDevMgr.GraphicsDevice.Viewport.Height / 5, 150);
-			cSpawnMonsterButton.Text = "Spawn\nMonster";
-			cSpawnMonsterButton.Font = cFont;
-			cSpawnMonsterButton.Visible = true;
-			cSpawnMonsterButton.BackgroundColor = Color.Blue;
-			cSpawnMonsterButton.FontColor = Color.AntiqueWhite;
+			cDevConsole.AddText(String.Format("Viewport Height={0} Width={1}", cGraphDevMgr.GraphicsDevice.Viewport.Height, cGraphDevMgr.GraphicsDevice.Viewport.Width));
 		}
 
 		protected override void Update(GameTime gameTime) {
-			cOpenDoorButton.Update(gameTime);
-			cSpawnMonsterButton.Update(gameTime);
+			foreach (KeyValuePair<MenuButtons, Button> KeyPair in cMenuBtns) {
+				KeyPair.Value.Update(gameTime);
+			}
 
 			cDevConsole.Update(gameTime);
 
@@ -83,8 +98,9 @@ namespace MDNLN.CardTable {
 		protected override void Draw(GameTime gameTime) {
 			cGraphDevMgr.GraphicsDevice.Clear(Color.Black);
 
-			cOpenDoorButton.Draw();
-			cSpawnMonsterButton.Draw();
+			foreach (KeyValuePair<MenuButtons, Button> KeyPair in cMenuBtns) {
+				KeyPair.Value.Draw();
+			}
 
 			cDevConsole.Draw();
 
@@ -92,9 +108,42 @@ namespace MDNLN.CardTable {
 			base.Draw(gameTime);
 		}
 
+		private void CommandEvent(object Sender, string CommandEvent) {
+			if (RegEx.LooseTest(CommandEvent, @"^\s*(quit|exit|close)\s*$") == true) {
+				Exit();
+			} else {
+				cDevConsole.AddText("Unrecognized command: " + CommandEvent);
+			}
+		}
+
+		private void MenuClick(object Sender, MouseButton Button) {
+			if (Button == MouseButton.Left) {
+				cDevConsole.AddText("Menu button clicked");
+			}
+		}
+
+		private void OpenDoorClick(object Sender, MouseButton Button) {
+			if (Button == MouseButton.Left) {
+				cDevConsole.AddText("Menu button clicked");
+			}
+		}
+
 		protected enum Textures {
 			[Description("Font.png")]
 			Font
+		}
+
+		protected enum MenuButtons {
+			[Description("Menu")]
+			Menu,
+			[Description("Open Door")]
+			OpenDoor,
+			[Description("Draw\nMonster")]
+			DrawMonster,
+			[Description("Treasure")]
+			Treasure,
+			[Description("Abilities")]
+			Abilities
 		}
 	}
 }

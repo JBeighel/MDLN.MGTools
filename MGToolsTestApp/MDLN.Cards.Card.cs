@@ -48,7 +48,7 @@ namespace MDLN.Cards {
 			}
 		}
 
-		public override void DrawContents(GameTime CurrTime) {
+		protected override void DrawContents(GameTime CurrTime) {
 			int LineTop;
 
 			if (cIsFullCard == true) {
@@ -80,7 +80,7 @@ namespace MDLN.Cards {
 			cCard.Changed = false;
 		}
 
-		public override void UpdateContents(GameTime CurrTime, KeyboardState CurrKeyboard, MouseState CurrMouse) {
+		protected override void UpdateContents(GameTime CurrTime, KeyboardState CurrKeyboard, MouseState CurrMouse) {
 			if (cCard.Changed == true) {
 				HasChanged = true;
 			}

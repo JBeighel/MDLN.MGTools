@@ -48,11 +48,11 @@ namespace MDLN.AsteroidShooter
 			}
 		}
 
-		public override void DrawContents(GameTime CurrTime) {
+		protected override void DrawContents(GameTime CurrTime) {
 			cDrawBatch.Draw(cShipTexture, cDrawRegion, cShipTexture.Bounds, Color.White, -1 * cRotation + 1.570796f, cOrigin, SpriteEffects.None, 0);
 		}
 
-		public override void UpdateContents(GameTime CurrTime, KeyboardState CurrKeys, MouseState CurrMouse) {
+		protected override void UpdateContents(GameTime CurrTime, KeyboardState CurrKeys, MouseState CurrMouse) {
 			Vector2 SpeedAdjust, NewPos;
 			//float RotatDegrees;
 

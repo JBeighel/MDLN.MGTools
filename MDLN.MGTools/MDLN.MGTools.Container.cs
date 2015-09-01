@@ -31,6 +31,10 @@ namespace MDLN.MGTools {
 		/// Variable used to draw batches of 2D images
 		/// </summary>
 		protected SpriteBatch cDrawBatch;
+		/// <summary>
+		/// State of the keyboard the last time this class was updated
+		/// </summary>
+		protected KeyboardState cPriorKeys;
 
 		/// <summary>
 		/// Constructor that sets minimum information for the <see cref="MDLN.MGTools.Container"/> class
@@ -268,7 +272,12 @@ namespace MDLN.MGTools {
 		/// <summary>
 		/// Occurs when the left mouse buttone goes down over the container's screen space
 		/// </summary>
-		public event ContainerMouseDownEventHandler MouseDown;
+		public event ContainerMouseButtonEventHandler MouseDown;
+
+		/// <summary>
+		/// Occurs when the left mouse button goes up over the container's screen space
+		/// </summary>
+		public event ContainerMouseButtonEventHandler MouseUp;
 
 		/// <summary>
 		/// Gets the client region of the container.  Specifies where the content should be drawn within this container.
@@ -303,6 +312,18 @@ namespace MDLN.MGTools {
 		}
 
 		/// <summary>
+		/// Get or Set a key to use to open or close the conainer if UseAccessKey is true.
+		/// </summary>
+		/// <value>The access key.</value>
+		public Keys AccessKey { get; set; }
+
+		/// <summary>
+		/// Gets or sets a value indicating whether this <see cref="MDLN.MGTools.Container"/> should use access key.
+		/// </summary>
+		/// <value><c>true</c> if use access key; otherwise, <c>false</c>.</value>
+		public bool UseAccessKey { get; set; }
+
+		/// <summary>
 		/// Toggles the visible state of the container.  Hides it if it's shown, or shows it if its hidden
 		/// </summary>
 		public void ToggleVisible() {
@@ -328,7 +349,12 @@ namespace MDLN.MGTools {
 		/// <param name="CurrKeyboard">Current state of the keyboard.</param>
 		/// <param name="CurrMouse">Current state of the mouse.</param>
 		public void Update(GameTime CurrTime, KeyboardState CurrKeyboard, MouseState CurrMouse) {
+			if ((UseAccessKey == true) && (CurrKeyboard.IsKeyDown(AccessKey) == true) && (cPriorKeys.IsKeyDown(AccessKey) == false)) {
+				ToggleVisible();
+			}
+
 			if ((cIsVisible == false) && (cIsClosing == false)) { //Only draw if container is shown
+				cPriorKeys = CurrKeyboard;
 				return;
 			}
 
@@ -342,33 +368,103 @@ namespace MDLN.MGTools {
 			UpdateContents (CurrTime, CurrKeyboard, ContMouse);
 
 			//Trigger events
-			if (cSendMouseEvents == true) {
-				if ((cFullDrawRegion.Contains(CurrMouse.Position) == true) && ((cFullDrawRegion.Contains(cPriorMouse.Position) == false))) {
-					if (MouseEnter != null) {
-						MouseEnter(this, CurrMouse);
-					}
+			if ((cFullDrawRegion.Contains(CurrMouse.Position) == true) && ((cFullDrawRegion.Contains(cPriorMouse.Position) == false))) {
+				if ((MouseEnter != null) && (cSendMouseEvents == true)) {
+					MouseEnter(this, CurrMouse);
 				}
 
-				if ((cFullDrawRegion.Contains(CurrMouse.Position) == false) && ((cFullDrawRegion.Contains(cPriorMouse.Position) == true))) {
-					if (MouseLeave != null) {
-						MouseLeave(this, CurrMouse);
-					}
-				}
-
-				if ((CurrMouse.LeftButton == ButtonState.Pressed) && (cPriorMouse.LeftButton == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-					if (MouseDown != null) {
-						MouseDown(this, MouseButton.Left, CurrMouse);
-					}
-				}
-
-				if ((CurrMouse.RightButton == ButtonState.Pressed) && (cPriorMouse.RightButton == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-					if (MouseDown != null) {
-						MouseDown(this, MouseButton.Right, CurrMouse);
-					}
-				}
-
-				cPriorMouse = CurrMouse;
+				MouseEventEnter(ContMouse);
 			}
+
+			if ((cFullDrawRegion.Contains(CurrMouse.Position) == false) && ((cFullDrawRegion.Contains(cPriorMouse.Position) == true))) {
+				if ((MouseLeave != null) && (cSendMouseEvents == true)) {
+					MouseLeave(this, CurrMouse);
+				}
+
+				MouseEventLeave(ContMouse);
+			}
+
+			if ((CurrMouse.LeftButton == ButtonState.Pressed) && (cPriorMouse.LeftButton == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+				if ((MouseDown != null) && (cSendMouseEvents == true)) {
+					MouseDown(this, MouseButton.Left, CurrMouse);
+				}
+
+				MouseEventButtonDown(ContMouse, MouseButton.Left);
+			}
+
+			if ((CurrMouse.RightButton == ButtonState.Pressed) && (cPriorMouse.RightButton == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+				if ((MouseDown != null) && (cSendMouseEvents == true)) {
+					MouseDown(this, MouseButton.Right, CurrMouse);
+				}
+
+				MouseEventButtonDown(ContMouse, MouseButton.Right);
+			}
+
+			if ((CurrMouse.MiddleButton == ButtonState.Pressed) && (cPriorMouse.MiddleButton == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+				if ((MouseDown != null) && (cSendMouseEvents == true)) {
+					MouseDown(this, MouseButton.Middle, CurrMouse);
+				}
+
+				MouseEventButtonDown(ContMouse, MouseButton.Middle);
+			}
+
+			if ((CurrMouse.XButton1 == ButtonState.Pressed) && (cPriorMouse.XButton1 == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+				if ((MouseDown != null) && (cSendMouseEvents == true)) {
+					MouseDown(this, MouseButton.XButton1, CurrMouse);
+				}
+
+				MouseEventButtonDown(ContMouse, MouseButton.XButton1);
+			}
+
+			if ((CurrMouse.XButton2 == ButtonState.Pressed) && (cPriorMouse.XButton2 == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+				if ((MouseDown != null) && (cSendMouseEvents == true)) {
+					MouseDown(this, MouseButton.XButton2, CurrMouse);
+				}
+
+				MouseEventButtonDown(ContMouse, MouseButton.XButton2);
+			}
+
+			if ((CurrMouse.LeftButton == ButtonState.Released) && (cPriorMouse.LeftButton == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+				if ((MouseDown != null) && (cSendMouseEvents == true)) {
+					MouseUp(this, MouseButton.Left, CurrMouse);
+				}
+
+				MouseEventButtonUp(ContMouse, MouseButton.Left);
+			}
+
+			if ((CurrMouse.RightButton == ButtonState.Released) && (cPriorMouse.RightButton == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+				if ((MouseDown != null) && (cSendMouseEvents == true)) {
+					MouseUp(this, MouseButton.Right, CurrMouse);
+				}
+
+				MouseEventButtonUp(ContMouse, MouseButton.Right);
+			}
+
+			if ((CurrMouse.MiddleButton == ButtonState.Released) && (cPriorMouse.MiddleButton == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+				if ((MouseDown != null) && (cSendMouseEvents == true)) {
+					MouseUp(this, MouseButton.Middle, CurrMouse);
+				}
+
+				MouseEventButtonUp(ContMouse, MouseButton.Middle);
+			}
+
+			if ((CurrMouse.XButton1 == ButtonState.Released) && (cPriorMouse.XButton1 == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+				if ((MouseDown != null) && (cSendMouseEvents == true)) {
+					MouseUp(this, MouseButton.XButton1, CurrMouse);
+				}
+
+				MouseEventButtonUp(ContMouse, MouseButton.XButton1);
+			}
+
+			if ((CurrMouse.XButton2 == ButtonState.Released) && (cPriorMouse.XButton2 == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+				if ((MouseDown != null) && (cSendMouseEvents == true)) {
+					MouseUp(this, MouseButton.XButton2, CurrMouse);
+				}
+
+				MouseEventButtonUp(ContMouse, MouseButton.XButton2);
+			}
+
+			cPriorMouse = CurrMouse;
 
 			if (cHasChanges == true) { //Don't recreate the texture unless changes need drawn
 				//Render container to texture
@@ -394,6 +490,8 @@ namespace MDLN.MGTools {
 
 				cHasChanges = false;
 			}
+
+			cPriorKeys = CurrKeyboard;
 		}
 
 		/// <summary>
@@ -401,7 +499,7 @@ namespace MDLN.MGTools {
 		/// It will be called during the update routine.
 		/// </summary>
 		/// <param name="CurrTime">Current time information</param>
-		public virtual void DrawContents(GameTime CurrTime) { }
+		protected virtual void DrawContents(GameTime CurrTime) { }
 
 		/// <summary>
 		/// This function is used to render the contents of the container.  It will render them to a buffer instead of direct to the screen.
@@ -411,7 +509,28 @@ namespace MDLN.MGTools {
 		/// <param name="CurrTime">Currend time information</param>
 		/// <param name="CurrKeyboard">Current state of the keyboard.</param>
 		/// <param name="CurrMouse">Current state of the mouse.</param>
-		public virtual void UpdateContents(GameTime CurrTime, KeyboardState CurrKeyboard, MouseState CurrMouse) { }
+		protected virtual void UpdateContents(GameTime CurrTime, KeyboardState CurrKeyboard, MouseState CurrMouse) { }
+
+		/// <summary>
+		/// This function is called whenever the mouse enters the screen space this container is displayed in
+		/// </summary>
+		/// <param name="CurrMouse">Curr mouse.</param>
+		protected virtual void MouseEventEnter(MouseState CurrMouse) { }
+
+		/// <summary>
+		/// This function is called whenever the mouse leaves the screen space this container is displayed in
+		/// </summary>
+		protected virtual void MouseEventLeave(MouseState CurrMouse) { }
+
+		/// <summary>
+		/// This function is called whenever a mouse button is pressed while the mouse is in the screen space this container is displayed in
+		/// </summary>
+		protected virtual void MouseEventButtonDown(MouseState CurrMouse, MouseButton Button) { }
+
+		/// <summary>
+		/// This function is called whenever a mouse button is released while the mouse is in the screen space this container is displayed in
+		/// </summary>
+		protected virtual void MouseEventButtonUp(MouseState CurrMouse, MouseButton Button) { }
 
 		/// <summary>
 		/// Draw function to be called when a frame is rendered for the game
@@ -596,7 +715,7 @@ namespace MDLN.MGTools {
 	/// <summary>
 	/// Container left mouse down event handler.
 	/// </summary>
-	public delegate void ContainerMouseDownEventHandler(object Sender, MouseButton ButtonDown, MouseState CurrMouse);
+	public delegate void ContainerMouseButtonEventHandler(object Sender, MouseButton ButtonDown, MouseState CurrMouse);
 
 	/// <summary>
 	/// List of effects that can be used to animate the container beign opened or closed

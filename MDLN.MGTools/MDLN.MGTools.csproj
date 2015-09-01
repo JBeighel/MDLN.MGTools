@@ -44,11 +44,12 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MDLN.MGTools.Console.cs" />
     <Compile Include="MDLN.MGTools.Container.cs" />
     <Compile Include="MDLN.MGTools.TextureFont.cs" />
     <Compile Include="MDLN.MGTools.AssemblyInfo.cs" />
     <Compile Include="MDLN.MGTools.Math.cs" />
     <Compile Include="MDLN.MGTools.Particles2D.cs" />
+    <Compile Include="MDLN.MGTools.GameConsole.cs" />
+    <Compile Include="MDLN.MGTools.Button.cs" />
   </ItemGroup>
 </Project>

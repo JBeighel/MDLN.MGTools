@@ -24,6 +24,7 @@ namespace MDLN.MGTools {
 		/// <param name="Width">Width of control</param>
 		public Button(GraphicsDevice GraphDev, Texture2D Background, int Top , int Left, int Height, int Width) : base(GraphDev, Background, Top, Left, Height, Width) {
 			Alignment = Justify.MiddleCenter;
+			Text = "";
 		}
 
 		/// <summary>

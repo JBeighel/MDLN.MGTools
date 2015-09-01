@@ -478,7 +478,7 @@ namespace MDLN.MGTools {
 
 				//Do drawing
 				cGraphicsDevice.Clear (new Color (255, 255, 255, 0)); //Start fully transparent 
-				cDrawBatch.Begin (SpriteSortMode.Deferred, BlendState.AlphaBlend);
+				cDrawBatch.Begin (SpriteSortMode.Deferred, BlendState.NonPremultiplied);
 				cDrawBatch.Draw (cBackTexture, cGraphicsDevice.Viewport.Bounds, Color.White);
 
 				DrawContents (CurrTime);
@@ -533,9 +533,19 @@ namespace MDLN.MGTools {
 		protected virtual void MouseEventButtonUp(MouseState CurrMouse, MouseButton Button) { }
 
 		/// <summary>
-		/// Draw function to be called when a frame is rendered for the game
+		/// Draw function to be called when a frame is rendered for the game.  The class will create it's own SpriteBatch to draw with.
 		/// </summary>
 		public void Draw() {
+			cDrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
+			Draw(cDrawBatch);
+			cDrawBatch.End();
+		}
+
+		/// <summary>
+		/// Draw function to be called when a frame is rendered for the game
+		/// </summary>
+		/// <param name="DrawBatch">Specify the sprite object to use for the drawing</param>
+		public void Draw(SpriteBatch DrawBatch) {
 			if ((cIsVisible == false) && (cIsClosing == false)) { //Only draw if container is shown
 				return;
 			}
@@ -548,14 +558,12 @@ namespace MDLN.MGTools {
 			ScreenRegion.Width = cCurrDrawRegion.Width - cCurrDrawRegion.X;
 			ScreenRegion.Height = cCurrDrawRegion.Height - cCurrDrawRegion.Y;
 
-			TextureRegion.X = cCurrDrawRegion.X + (cFullDrawRegion.Width - cCurrDrawRegion.Width);
+			TextureRegion.X = cFullDrawRegion.Width - cCurrDrawRegion.Width;
 			TextureRegion.Y = cCurrDrawRegion.Y + (cFullDrawRegion.Height - cCurrDrawRegion.Height);
 			TextureRegion.Width = cCurrDrawRegion.Width - cCurrDrawRegion.X;
 			TextureRegion.Height = cCurrDrawRegion.Height - cCurrDrawRegion.Y;
-			
-			cDrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
-			cDrawBatch.Draw(cRenderToBuffer, ScreenRegion, TextureRegion, cAlphaOverlay);
-			cDrawBatch.End();
+
+			DrawBatch.Draw(cRenderToBuffer, ScreenRegion, TextureRegion, cAlphaOverlay);
 		}
 
 		private void CalculateEffectStep(double ElapsedTime) {

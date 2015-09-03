@@ -182,7 +182,7 @@ namespace MDLN.MGTools {
 		/// Gets or sets the top screen coordinate of the container.
 		/// </summary>
 		/// <value>The top.</value>
-		public int Top {
+		public virtual int Top {
 			get {
 				return cFullDrawRegion.Y;
 			}
@@ -197,7 +197,7 @@ namespace MDLN.MGTools {
 		/// Gets or sets the left coordinate of the container.
 		/// </summary>
 		/// <value>The left.</value>
-		public int Left {
+		public virtual int Left {
 			get {
 				return cFullDrawRegion.X;
 			}
@@ -232,7 +232,7 @@ namespace MDLN.MGTools {
 		/// Gets or sets the top left screen coordinates of the container.
 		/// </summary>
 		/// <value>The top left screen coordinates.</value>
-		public Vector2 TopLeft {
+		public virtual Vector2 TopLeft {
 			get {
 				return cOrigin;
 			}

@@ -26,9 +26,10 @@ namespace MDLN.AsteroidShooter {
 		private Particles2D cAsteroids;
 		private double cLastShot, cLastAsteroid;
 		private MDLN.MGTools.GameConsole cDevConsole;
-		//private TextureFont cFont;
 		private KeyboardState cPriorKeyState;
 		private Dictionary<Textures, Texture2D> cTextureDict;
+		private Random cRandom;
+		private uint cAsteroidKills, cAliveSince;
 
 		public AsteroidShooter() {
 			cGraphDevMgr = new GraphicsDeviceManager(this);
@@ -36,6 +37,11 @@ namespace MDLN.AsteroidShooter {
 			IsMouseVisible = true;
 
 			cTextureDict = new Dictionary<Textures, Texture2D>();
+
+			cRandom = new Random(DateTime.Now.Millisecond);
+
+			cAsteroidKills = 0;
+			cAliveSince = 0;
 		}
 
 		protected override void Initialize() {
@@ -65,6 +71,7 @@ namespace MDLN.AsteroidShooter {
 			cPlayerShip.Visible = true;
 			cPlayerShip.Top = cGraphDevMgr.GraphicsDevice.Viewport.Bounds.Height / 2;
 			cPlayerShip.Left = cGraphDevMgr.GraphicsDevice.Viewport.Bounds.Width / 2;
+			cPlayerShip.ImageInitialAngle = 1.570796f; //Offset for image pointing up instead of right
 
 			cPlayerBullets = new Particles2D(cGraphDevMgr.GraphicsDevice);
 
@@ -75,12 +82,35 @@ namespace MDLN.AsteroidShooter {
 		protected override void Update(GameTime gameTime) {
 			KeyboardState CurrKeys = Keyboard.GetState();
 			MouseState CurrMouse = Mouse.GetState();
-			Vector2 BulletOrigin, BulletCenter, AsteroidCenter;
-			float ParticleDist, CollisionDist;
-			ParticleInfo BulletInfo, AstInfo;
+			Vector2 BulletOrigin, AstSpeed;
+			Particle2D BulletInfo, AstInfo;
 
-			if (cLastAsteroid < gameTime.TotalGameTime.TotalMilliseconds) {
-				cAsteroids.AddParticle(cTextureDict[Textures.Asteroid], -100, -100, 100, 100, cPlayerShip.cRotation - 0.628f, 2, Color.White);
+			if (cAliveSince == 0) {
+				cAliveSince = (uint)gameTime.TotalGameTime.TotalSeconds;
+			}
+
+			if (cLastAsteroid < gameTime.TotalGameTime.TotalMilliseconds) { //Create new asteroid
+				AstInfo = new Particle2D();
+
+				AstInfo.Width = 100;
+				AstInfo.Height = 100;
+
+				AstInfo.TopLeft.X = AstInfo.Width * cRandom.Next(-1, 1);
+				AstInfo.TopLeft.Y = AstInfo.Height * cRandom.Next(-1, 1);
+				if ((AstInfo.TopLeft.X == 0) && (AstInfo.TopLeft.Y == 0)) {
+					AstInfo.TopLeft.X = -1 * AstInfo.Width;
+				}
+
+				AstInfo.Image = cTextureDict[Textures.Asteroid];
+
+				AstSpeed = MGMath.CalculateXYMagnitude((float)cRandom.NextDouble() * 6.28318531f, 2);
+				AstInfo.SpeedX = AstSpeed.X;
+				AstInfo.SpeedY = AstSpeed.Y;
+				AstInfo.Tint = new Color(150 + cRandom.Next(0, 105), 150 + cRandom.Next(0, 105), 150 + cRandom.Next(0, 105), 255);
+
+				AstInfo.SpeedRotate = ((float)cRandom.NextDouble() * 0.2f) - 0.1f;
+
+				cAsteroids.AddParticle(AstInfo);
 
 				cLastAsteroid = gameTime.TotalGameTime.TotalMilliseconds + 1000;
 			}
@@ -107,25 +137,31 @@ namespace MDLN.AsteroidShooter {
 			cDevConsole.Update(gameTime, CurrKeys, CurrMouse);
 
 			//Collision detection
-			for (int Ctr = 0; Ctr < cPlayerBullets.cParticleList.Count; Ctr++) {
-				BulletInfo = cPlayerBullets.cParticleList[Ctr];
-				BulletCenter.X = BulletInfo.DrawRegion.X + (BulletInfo.DrawRegion.Width / 2);
-				BulletCenter.Y = BulletInfo.DrawRegion.Y + (BulletInfo.DrawRegion.Height / 2);
+			cPlayerShip.ImageTint = Color.White;
+			for (int Cnt = 0; Cnt < cAsteroids.ParticleList.Count; Cnt++) {
+				AstInfo = cAsteroids.ParticleList[Cnt];
 
-				for (int Cnt = 0; Cnt < cAsteroids.cParticleList.Count; Cnt++) {
-					AstInfo = cAsteroids.cParticleList[Cnt];
+				//Are bullts hitting the asteroid?
+				for (int Ctr = 0; Ctr < cPlayerBullets.ParticleList.Count; Ctr++) {
+					BulletInfo = cPlayerBullets.ParticleList[Ctr];
 
-					AsteroidCenter.X = AstInfo.DrawRegion.X + (AstInfo.DrawRegion.Width / 2);
-					AsteroidCenter.Y = AstInfo.DrawRegion.Y + (AstInfo.DrawRegion.Height / 2);
-
-					CollisionDist = (float)Math.Pow((AstInfo.DrawRegion.Width / 2) + (BulletInfo.DrawRegion.Width / 2), 2);
-					ParticleDist = (float)(Math.Pow(AsteroidCenter.X - BulletCenter.X, 2) + Math.Pow(AsteroidCenter.Y - BulletCenter.Y, 2));
-
-					if (ParticleDist < CollisionDist) {
-						cPlayerBullets.cParticleList.RemoveAt(Ctr);
-						cAsteroids.cParticleList.RemoveAt(Cnt);
+					if (BulletInfo.TestCollision(AstInfo.GetCollisionRegions()) == true) {
+						cPlayerBullets.ParticleList.RemoveAt(Ctr);
+						cAsteroids.ParticleList.RemoveAt(Cnt);
+						cAsteroidKills++;
 						break; //Exit inner loop so each bullet ony gets 1 asteroid
 					}
+				}
+
+				//Is the asteroid hitting the player?
+				if (AstInfo.TestCollision(cPlayerShip) == true) {
+					cPlayerShip.ImageTint = Color.Red;
+					if ((gameTime.TotalGameTime.TotalSeconds - cAliveSince >= 1) && (cAliveSince != 0)) {
+						cDevConsole.AddText(String.Format("Survived {0:0.0} seconds and shot {1} asteroids.", gameTime.TotalGameTime.TotalSeconds - cAliveSince, cAsteroidKills));
+					}
+
+					cAsteroidKills = 0;
+					cAliveSince = 0;
 				}
 			}
 
@@ -157,7 +193,7 @@ namespace MDLN.AsteroidShooter {
 			} else if (Tools.RegEx.QuickTest(Command, "^ship *center$") == true) {
 				cPlayerShip.Top = (cGraphDevMgr.GraphicsDevice.Viewport.Bounds.Height) / 2 - (cPlayerShip.Height / 2);
 				cPlayerShip.Left = (cGraphDevMgr.GraphicsDevice.Viewport.Bounds.Width) / 2 - (cPlayerShip.Width / 2);
-				cDevConsole.AddText("Ship position set to [X=" + cPlayerShip.Top + ", Y=" + cPlayerShip.Left + "]");
+				cDevConsole.AddText("Ship position set to [X=" + cPlayerShip.Left + ", Y=" + cPlayerShip.Width + "]");
 			} else if (Tools.RegEx.QuickTest(Command, "^ship *state$") == true) {
 				cDevConsole.AddText("Ship Position [X=" + cPlayerShip.Top + ", Y=" + cPlayerShip.Left + "]");
 				cDevConsole.AddText("     Speed X=" + cPlayerShip.cSpeedX + " Y=" + cPlayerShip.cSpeedY);

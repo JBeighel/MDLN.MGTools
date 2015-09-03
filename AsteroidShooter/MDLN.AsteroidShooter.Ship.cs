@@ -5,18 +5,21 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 using System;
+using System.Collections.Generic;
 
 namespace MDLN.AsteroidShooter
 {
-	public class Ship : Container {
+	public class Ship : Container, ICollidable {
 		private Texture2D cShipTexture;
 		public float cRotation, cSpeedX, cSpeedY;
 		private Vector2 cOrigin;
 		private Rectangle cDrawRegion;
-		//private KeyboardState cPriorKeys;
+		private List<CollisionRegion> cCollisionList;
+		private Color cTint;
 
 		public Ship(GraphicsDevice GraphDev, int HeightAndWidth) : base(GraphDev, HeightAndWidth, HeightAndWidth) {
 			int DrawSize;
+			CollisionRegion CollideRegion = new CollisionRegion();
 
 			//Diagonal of square = SqRt(2) * SideLength
 			//That is max with of ship rotated
@@ -30,6 +33,17 @@ namespace MDLN.AsteroidShooter
 
 			cSpeedX = 0;
 			cSpeedY = 0;
+
+			ImageInitialAngle = 0;
+
+			cCollisionList = new List<CollisionRegion>();
+			CollideRegion.Origin.X = Left + cDrawRegion.X + (DrawSize / 2);
+			CollideRegion.Origin.Y = Top + cDrawRegion.Y + (DrawSize / 2);;
+			CollideRegion.Radius = (DrawSize / 2) * 0.9f;
+
+			cCollisionList.Add(CollideRegion);
+
+			cTint = Color.White;
 		}
 
 		public Texture2D ShipTexture {
@@ -48,8 +62,84 @@ namespace MDLN.AsteroidShooter
 			}
 		}
 
+		public override int Left {
+			get {
+				return base.Left;
+			}
+
+			set {
+				base.Left = value;
+
+				CollisionRegion CollideRegion = cCollisionList[0];
+				CollideRegion.Origin.X = Left + value + Width / 2;
+				cCollisionList[0] = CollideRegion;
+			}
+		}
+
+		public override int Top {
+			get {
+				return base.Top;
+			}
+
+			set {
+				base.Top = value;
+
+				CollisionRegion CollideRegion = cCollisionList[0];
+				CollideRegion.Origin.Y = Top + value + Height / 2;
+				cCollisionList[0] = CollideRegion;
+			}
+		}
+
+		public override Vector2 TopLeft {
+			get {
+				return base.TopLeft;
+			}
+
+			set {
+				base.TopLeft = value;
+
+				CollisionRegion CollideRegion = cCollisionList[0];
+				CollideRegion.Origin.Y = value.Y + Height / 2;
+				CollideRegion.Origin.X = value.X + Width / 2;
+				cCollisionList[0] = CollideRegion;
+			}
+		}
+
+		public float ImageInitialAngle { get; set; }
+
+		public Color ImageTint { 
+			get {
+				return cTint;
+			}
+
+			set {
+				cTint = value;
+				HasChanged = true;
+			}
+		}
+
+		public IEnumerable<CollisionRegion> GetCollisionRegions() {
+			return cCollisionList;
+		}
+
+		public bool TestCollision(ICollidable TestObj) {
+			return TestCollision(TestObj.GetCollisionRegions());
+		}
+
+		public bool TestCollision(IEnumerable<CollisionRegion> TestRegions) {
+			foreach (CollisionRegion CurrRegion in TestRegions) {
+				foreach (CollisionRegion MyRegion in cCollisionList) {
+					if (MGMath.TestCircleCollision(CurrRegion.Origin, CurrRegion.Radius, MyRegion.Origin, MyRegion.Radius) == true) {
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
+
 		protected override void DrawContents(GameTime CurrTime) {
-			cDrawBatch.Draw(cShipTexture, cDrawRegion, cShipTexture.Bounds, Color.White, -1 * cRotation + 1.570796f, cOrigin, SpriteEffects.None, 0);
+			cDrawBatch.Draw(cShipTexture, cDrawRegion, cShipTexture.Bounds, cTint, -1 * cRotation + ImageInitialAngle, cOrigin, SpriteEffects.None, 0);
 		}
 
 		protected override void UpdateContents(GameTime CurrTime, KeyboardState CurrKeys, MouseState CurrMouse) {
@@ -115,4 +205,3 @@ namespace MDLN.AsteroidShooter
 		}
 	}
 }
-

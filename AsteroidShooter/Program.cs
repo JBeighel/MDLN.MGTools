@@ -65,7 +65,7 @@ namespace MDLN.AsteroidShooter {
 			cDevConsole.OpenEffect = DisplayEffect.SlideDown;
 			cDevConsole.CloseEffect = DisplayEffect.SlideUp;
 
-			cPlayerShip = new Ship(cGraphDevMgr.GraphicsDevice, 150);
+			cPlayerShip = new Ship(cGraphDevMgr.GraphicsDevice, 50);
 			cPlayerShip.BackgroundColor = new Color(100, 100, 100, 0); //Set background completely transparent
 			cPlayerShip.ShipTexture = cTextureDict[Textures.Ship];
 			cPlayerShip.Visible = true;
@@ -82,7 +82,7 @@ namespace MDLN.AsteroidShooter {
 		protected override void Update(GameTime gameTime) {
 			KeyboardState CurrKeys = Keyboard.GetState();
 			MouseState CurrMouse = Mouse.GetState();
-			Vector2 BulletOrigin, AstSpeed;
+			Vector2 BulletOrigin;
 			Particle2D BulletInfo, AstInfo;
 
 			if (cAliveSince == 0) {
@@ -90,29 +90,9 @@ namespace MDLN.AsteroidShooter {
 			}
 
 			if (cLastAsteroid < gameTime.TotalGameTime.TotalMilliseconds) { //Create new asteroid
-				AstInfo = new Particle2D();
+				CreateNewAsteroid(100, new Vector2(-1, -1));
 
-				AstInfo.Width = 100;
-				AstInfo.Height = 100;
-
-				AstInfo.TopLeft.X = AstInfo.Width * cRandom.Next(-1, 1);
-				AstInfo.TopLeft.Y = AstInfo.Height * cRandom.Next(-1, 1);
-				if ((AstInfo.TopLeft.X == 0) && (AstInfo.TopLeft.Y == 0)) {
-					AstInfo.TopLeft.X = -1 * AstInfo.Width;
-				}
-
-				AstInfo.Image = cTextureDict[Textures.Asteroid];
-
-				AstSpeed = MGMath.CalculateXYMagnitude((float)cRandom.NextDouble() * 6.28318531f, 2);
-				AstInfo.SpeedX = AstSpeed.X;
-				AstInfo.SpeedY = AstSpeed.Y;
-				AstInfo.Tint = new Color(150 + cRandom.Next(0, 105), 150 + cRandom.Next(0, 105), 150 + cRandom.Next(0, 105), 255);
-
-				AstInfo.SpeedRotate = ((float)cRandom.NextDouble() * 0.2f) - 0.1f;
-
-				cAsteroids.AddParticle(AstInfo);
-
-				cLastAsteroid = gameTime.TotalGameTime.TotalMilliseconds + 1000;
+				cLastAsteroid = gameTime.TotalGameTime.TotalMilliseconds + 3000;
 			}
 
 			if ((CurrKeys.IsKeyDown(Keys.Space) == true) && (cLastShot < gameTime.TotalGameTime.TotalMilliseconds - 250)) {
@@ -146,9 +126,22 @@ namespace MDLN.AsteroidShooter {
 					BulletInfo = cPlayerBullets.ParticleList[Ctr];
 
 					if (BulletInfo.TestCollision(AstInfo.GetCollisionRegions()) == true) {
+						//Spawn little asteroids
+						if (AstInfo.Height > 50) {
+							Vector2 TopLeft;
+
+							TopLeft.X = AstInfo.TopLeft.X + (AstInfo.Width / 2) - (AstInfo.Width * 0.35f);
+							TopLeft.Y = AstInfo.TopLeft.Y + (AstInfo.Height / 2) - (AstInfo.Height * 0.35f);
+								
+							CreateNewAsteroid((int)(AstInfo.Width * 0.7f), TopLeft);
+							CreateNewAsteroid((int)(AstInfo.Width * 0.7f), TopLeft);
+						}
+
+						//Destroy shot and large asteroid
 						cPlayerBullets.ParticleList.RemoveAt(Ctr);
 						cAsteroids.ParticleList.RemoveAt(Cnt);
 						cAsteroidKills++;
+
 						break; //Exit inner loop so each bullet ony gets 1 asteroid
 					}
 				}
@@ -223,9 +216,46 @@ namespace MDLN.AsteroidShooter {
 			} else if (Tools.RegEx.QuickTest(Command, "^new *asteroid$") == true) {
 				cDevConsole.AddText("Spawning Asteroid");
 				cAsteroids.AddParticle(cTextureDict[Textures.Asteroid], cPlayerShip.Top + (cPlayerShip.Height / 2) - 50, cPlayerShip.Left + (cPlayerShip.Height / 2) - 50, 100, 100, cPlayerShip.cRotation - 0.628f, 2, Color.White);
+			} else if (Tools.RegEx.QuickTest(Command, @"^\s*ast(eroid)?\s*count\s*?$") == true) {
+				cDevConsole.AddText("Current Asteroid Count: " + cAsteroids.ParticleList.Count);
+			} else if (Tools.RegEx.QuickTest(Command, @"^\s*ast(eroid)?\s*clear$") == true) {
+				cDevConsole.AddText("Destroying all asteroids");
+				cAsteroids.ParticleList.Clear();
 			} else {
 				cDevConsole.AddText("Unrecognized command: " + Command);
 			}
+		}
+
+		private void CreateNewAsteroid(int Size, Vector2 Position) {
+			Particle2D AstInfo;
+			Vector2 AstSpeed;
+
+			AstInfo = new Particle2D();
+
+			AstInfo.Width = Size;
+			AstInfo.Height = Size;
+
+			if ((Position.X == -1) && (Position.Y == -1)) {
+				AstInfo.TopLeft.X = AstInfo.Width * cRandom.Next(-1, 1);
+				AstInfo.TopLeft.Y = AstInfo.Height * cRandom.Next(-1, 1);
+				if ((AstInfo.TopLeft.X == 0) && (AstInfo.TopLeft.Y == 0)) {
+					AstInfo.TopLeft.X = -1 * AstInfo.Width;
+				}
+			} else {
+				AstInfo.TopLeft.X = Position.X;
+				AstInfo.TopLeft.Y = Position.Y;
+			}
+
+			AstInfo.Image = cTextureDict[Textures.Asteroid];
+
+			AstSpeed = MGMath.CalculateXYMagnitude((float)cRandom.NextDouble() * 6.28318531f, 2);
+			AstInfo.SpeedX = AstSpeed.X;
+			AstInfo.SpeedY = AstSpeed.Y;
+			AstInfo.Tint = new Color(150 + cRandom.Next(0, 105), 150 + cRandom.Next(0, 105), 150 + cRandom.Next(0, 105), 255);
+
+			AstInfo.SpeedRotate = ((float)cRandom.NextDouble() * 0.2f) - 0.1f;
+
+			cAsteroids.AddParticle(AstInfo);
 		}
 
 		protected enum Textures {

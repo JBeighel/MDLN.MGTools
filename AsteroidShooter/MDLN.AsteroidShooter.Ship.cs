@@ -10,8 +10,8 @@ using System.Collections.Generic;
 namespace MDLN.AsteroidShooter
 {
 	public class Ship : Container, ICollidable, IVisible {
-		private const float SPEEDSTEP = 0.03f;
-		private const float SPEEDMAX = 3.0f;
+		private const float SPEEDSTEP = 0.08f;
+		private const float SPEEDMAX = 5.0f;
 
 		private Texture2D cShipTexture;
 		public float cRotation, cSpeedX, cSpeedY;
@@ -186,22 +186,22 @@ namespace MDLN.AsteroidShooter
 				if (CurrKeys.IsKeyDown(Keys.Up) == true) {
 					SpeedAdjust = MGMath.CalculateXYMagnitude(cRotation, 0.1f);
 
-					cSpeedX -= SpeedAdjust.X;
-					cSpeedY += SpeedAdjust.Y;
+					cSpeedX += SpeedAdjust.X;
+					cSpeedY -= SpeedAdjust.Y;
 				}
 
 				if (CurrKeys.IsKeyDown(Keys.Down) == true) {
 					SpeedAdjust = MGMath.CalculateXYMagnitude(cRotation, 0.1f);
 
-					cSpeedX += SpeedAdjust.X;
-					cSpeedY -= SpeedAdjust.Y;
+					cSpeedX -= SpeedAdjust.X;
+					cSpeedY += SpeedAdjust.Y;
 				}
 
 			} else {
 				ShipCenter.Y = Height / 2;
 				ShipCenter.X = Width / 2;
 
-				cRotation = MGMath.GetAngleFromPoints(ShipCenter, CurrMouse.Position.ToVector2()) + ImageInitialAngle;
+				cRotation = MGMath.GetAngleFromPoints(ShipCenter, CurrMouse.Position.ToVector2(), true) + ImageInitialAngle;
 
 				if (CurrKeys.IsKeyDown(Keys.W) == true) {
 					cSpeedY -= SPEEDSTEP;

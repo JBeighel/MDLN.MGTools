@@ -50,16 +50,29 @@ namespace MDLN.MGTools {
 			}
 		}
 
-		public static float GetAngleFromPoints(Vector2 Point1, Vector2 Point2) {
+		public static float GetAngleFromPoints(Vector2 PointOrigin, Vector2 PointOffset) {
+			return GetAngleFromPoints(PointOrigin, PointOffset, false);
+		}
+
+		public static float GetAngleFromPoints(Vector2 PointOrigin, Vector2 PointOffset, bool InvertYAxis) {
 			float LenX, LenY;
 
-			LenX = Point1.X - Point2.X;
-			LenY = Point1.Y - Point2.Y;
+			LenX = PointOffset.X - PointOrigin.X;
 
-			if (LenY >= 0) {
-				return (float)Math.Atan(LenX / LenY) + 1.570796f;
+			if (InvertYAxis == true) {
+				LenY = PointOrigin.Y - PointOffset.Y;
 			} else {
-				return (float)Math.Atan(LenX / LenY) - 1.570796f;
+				LenY = PointOffset.Y - PointOrigin.Y;
+			}
+
+			if ((PointOffset.X >= PointOrigin.X) && (PointOffset.Y >= PointOrigin.Y)) { //Top right quadrant
+				return (float)Math.Atan(LenY / LenX);
+			} else if ((PointOffset.X < PointOrigin.X) && (PointOffset.Y >= PointOrigin.Y)) { //Top left quadrant
+				return (float)(Math.PI + Math.Atan(LenY / LenX));
+			} else if ((PointOffset.X < PointOrigin.X) && (PointOffset.Y < PointOrigin.Y)) { //Bottom left quadrant
+				return (float)(Math.Atan(LenY / LenX) + Math.PI);
+			} else { //Bottom right quadrant
+				return (float)((Math.PI) + Math.Atan(LenY / LenX) + Math.PI);
 			}
 		}
 	}

@@ -1,4 +1,7 @@
 ﻿using MDLN.Tools;
+using MDLN.MGTools;
+
+using Microsoft.Xna.Framework;
 
 using NUnit.Framework;
 
@@ -140,6 +143,83 @@ namespace MDLN.Tools.UnitTests {
 			TestName = "BytesToUshort() Offset=2 LSBFirst=false: ";
 			Result = Tools.BytesToUshort(StartVal, 2, false);
 			Assert.AreEqual(0xFF11, Result, TestName + "Verify conversion.");
+		}
+
+		[Test]
+		public void CalculateAngleFromPoints() {
+			Vector2 Point1, Point2;
+			float AngleRadians;
+			string TestName;
+
+			TestName = "Horizontal line, 0 degrees = 0 radians";
+			Point1.X = 1;
+			Point1.Y = 1;
+
+			Point2.X = 2;
+			Point2.Y = 1;
+
+			AngleRadians = MGMath.GetAngleFromPoints(Point1, Point2);
+			Assert.AreEqual(0.0f, AngleRadians, TestName);
+
+			TestName = "Horizontal line, 180 degrees = 3.14 radians";
+			Point1.X = 1;
+			Point1.Y = 1;
+
+			Point2.X = 2;
+			Point2.Y = 1;
+
+			AngleRadians = MGMath.GetAngleFromPoints(Point2, Point1);
+			Assert.AreEqual((float)Math.PI, AngleRadians, TestName);
+
+			TestName = "Diagonal line, 45 degrees = 0.785 radians";
+			Point1.X = 1;
+			Point1.Y = 1;
+
+			Point2.X = 2;
+			Point2.Y = 2;
+
+			AngleRadians = MGMath.GetAngleFromPoints(Point1, Point2);
+			Assert.AreEqual((float)(Math.PI / 4), AngleRadians, TestName);
+
+			TestName = "Diagonal line, 135 degrees = 2.356 radians";
+			Point1.X = -2;
+			Point1.Y = -2;
+
+			Point2.X = -3;
+			Point2.Y = -1;
+
+			AngleRadians = MGMath.GetAngleFromPoints(Point1, Point2);
+			Assert.AreEqual((float)(Math.PI * 3 / 4), AngleRadians, TestName);
+
+			TestName = "Diagonal line, 225 degrees = 3.93 radians";
+			Point1.X = 1;
+			Point1.Y = 1;
+
+			Point2.X = 2;
+			Point2.Y = 2;
+
+			AngleRadians = MGMath.GetAngleFromPoints(Point2, Point1);
+			Assert.AreEqual((float)(Math.PI + (Math.PI / 4)), AngleRadians, TestName);
+
+			TestName = "Diagonal line, 225 degrees = 3.93 radians";
+			Point1.X = 0;
+			Point1.Y = 0;
+
+			Point2.X = -1;
+			Point2.Y = -1;
+
+			AngleRadians = MGMath.GetAngleFromPoints(Point1, Point2);
+			Assert.AreEqual((float)(Math.PI + (Math.PI / 4)), AngleRadians, TestName);
+
+			TestName = "Diagonal line, 315 degrees = 5.498 radians";
+			Point1.X = 0;
+			Point1.Y = 0;
+
+			Point2.X = 1;
+			Point2.Y = -1;
+
+			AngleRadians = MGMath.GetAngleFromPoints(Point1, Point2);
+			Assert.AreEqual((float)(Math.PI + (Math.PI * 3 / 4)), AngleRadians, TestName);
 		}
 	}
 }

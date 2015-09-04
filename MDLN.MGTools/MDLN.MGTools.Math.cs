@@ -49,6 +49,19 @@ namespace MDLN.MGTools {
 				return false;
 			}
 		}
+
+		public static float GetAngleFromPoints(Vector2 Point1, Vector2 Point2) {
+			float LenX, LenY;
+
+			LenX = Point1.X - Point2.X;
+			LenY = Point1.Y - Point2.Y;
+
+			if (LenY >= 0) {
+				return (float)Math.Atan(LenX / LenY) + 1.570796f;
+			} else {
+				return (float)Math.Atan(LenX / LenY) - 1.570796f;
+			}
+		}
 	}
 }
 

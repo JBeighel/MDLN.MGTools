@@ -22,11 +22,12 @@ namespace MDLN.AsteroidShooter {
 	public class AsteroidShooter : Game {
 		private GraphicsDeviceManager cGraphDevMgr;
 		private Ship cPlayerShip;
-		private Particles2D cPlayerBullets;
-		private Particles2D cAsteroids;
+		private ParticleEngine2D cPlayerBullets;
+		private ParticleEngine2D cAsteroids;
 		private double cLastShot, cLastAsteroid;
 		private MDLN.MGTools.GameConsole cDevConsole;
 		private KeyboardState cPriorKeyState;
+		private MouseState cPriorMouseState;
 		private Dictionary<Textures, Texture2D> cTextureDict;
 		private Random cRandom;
 		private uint cAsteroidKills, cAliveSince;
@@ -54,10 +55,9 @@ namespace MDLN.AsteroidShooter {
 		}
 
 		protected override void LoadContent() {
-			cTextureDict.Add(Textures.Asteroid, Content.Load<Texture2D>(Tools.Tools.GetEnumDescriptionAttribute(Textures.Asteroid)));
-			cTextureDict.Add(Textures.Ship, Content.Load<Texture2D>(Tools.Tools.GetEnumDescriptionAttribute(Textures.Ship)));
-			cTextureDict.Add(Textures.Font, Content.Load<Texture2D>(Tools.Tools.GetEnumDescriptionAttribute(Textures.Font)));
-			cTextureDict.Add(Textures.Bullet, Content.Load<Texture2D>(Tools.Tools.GetEnumDescriptionAttribute(Textures.Bullet)));
+			foreach (Textures CurrTexture in Enum.GetValues(typeof(Textures))) {
+				cTextureDict.Add(CurrTexture, Content.Load<Texture2D>(Tools.Tools.GetEnumDescriptionAttribute(CurrTexture)));
+			}
 
 			//cFont = new TextureFont(cTextureDict[Textures.Font]);
 			cDevConsole = new MDLN.MGTools.GameConsole(cGraphDevMgr.GraphicsDevice, Content, "Font.png", 0, 0, cGraphDevMgr.GraphicsDevice.Viewport.Bounds.Width, cGraphDevMgr.GraphicsDevice.Viewport.Bounds.Height / 2);
@@ -71,11 +71,12 @@ namespace MDLN.AsteroidShooter {
 			cPlayerShip.Visible = true;
 			cPlayerShip.Top = cGraphDevMgr.GraphicsDevice.Viewport.Bounds.Height / 2;
 			cPlayerShip.Left = cGraphDevMgr.GraphicsDevice.Viewport.Bounds.Width / 2;
-			cPlayerShip.ImageInitialAngle = 1.570796f; //Offset for image pointing up instead of right
+			//cPlayerShip.ImageInitialAngle = 1.570796f; //Offset for image pointing up instead of right
+			cPlayerShip.MouseRotate = true;
 
-			cPlayerBullets = new Particles2D(cGraphDevMgr.GraphicsDevice);
+			cPlayerBullets = new ParticleEngine2D(cGraphDevMgr.GraphicsDevice);
 
-			cAsteroids = new Particles2D(cGraphDevMgr.GraphicsDevice);
+			cAsteroids = new ParticleEngine2D(cGraphDevMgr.GraphicsDevice);
 			cAsteroids.WrapScreenEdges = true;
 		}
 
@@ -90,12 +91,17 @@ namespace MDLN.AsteroidShooter {
 			}
 
 			if (cLastAsteroid < gameTime.TotalGameTime.TotalMilliseconds) { //Create new asteroid
-				CreateNewAsteroid(100, new Vector2(-1, -1));
+				if (cLastAsteroid % 3 == 0) {
+					CreateNewAsteroid(100, new Vector2(-1, -1));	
+				} else {
+					CreateNewHunter(60, new Vector2(-1, -1));
+				}
 
 				cLastAsteroid = gameTime.TotalGameTime.TotalMilliseconds + 3000;
 			}
 
-			if ((CurrKeys.IsKeyDown(Keys.Space) == true) && (cLastShot < gameTime.TotalGameTime.TotalMilliseconds - 250)) {
+			//Check for player input
+			if (((CurrKeys.IsKeyDown(Keys.Space) == true) || (CurrMouse.LeftButton == ButtonState.Pressed)) && (cLastShot < gameTime.TotalGameTime.TotalMilliseconds - 250)) {
 				//Calculate coordinates of ship tip relative to its center
 				BulletOrigin = MDLN.MGTools.MGMath.CalculateXYMagnitude(-1 * cPlayerShip.cRotation, cPlayerShip.Width / 4);
 
@@ -133,8 +139,10 @@ namespace MDLN.AsteroidShooter {
 							TopLeft.X = AstInfo.TopLeft.X + (AstInfo.Width / 2) - (AstInfo.Width * 0.35f);
 							TopLeft.Y = AstInfo.TopLeft.Y + (AstInfo.Height / 2) - (AstInfo.Height * 0.35f);
 								
-							CreateNewAsteroid((int)(AstInfo.Width * 0.7f), TopLeft);
-							CreateNewAsteroid((int)(AstInfo.Width * 0.7f), TopLeft);
+							if (AstInfo.SplitOnDeath == true) { //Only split asteroids, not UFOs
+								CreateNewAsteroid((int)(AstInfo.Width * 0.7f), TopLeft);
+								CreateNewAsteroid((int)(AstInfo.Width * 0.7f), TopLeft);
+							}
 						}
 
 						//Destroy shot and large asteroid
@@ -158,6 +166,7 @@ namespace MDLN.AsteroidShooter {
 				}
 			}
 
+			cPriorMouseState = CurrMouse;
 			cPriorKeyState = CurrKeys;
 
 			//Use monogame update
@@ -221,7 +230,17 @@ namespace MDLN.AsteroidShooter {
 			} else if (Tools.RegEx.QuickTest(Command, @"^\s*ast(eroid)?\s*clear$") == true) {
 				cDevConsole.AddText("Destroying all asteroids");
 				cAsteroids.ParticleList.Clear();
-			} else {
+			} else if (Tools.RegEx.QuickTest(Command, @"^\s*mouse\s*turn\s*=\s*(on|true|enable|1)\s*$") == true) {
+				cDevConsole.AddText("Using mouse position to rotate ship");
+				cPlayerShip.MouseRotate = true;
+			} else if (Tools.RegEx.QuickTest(Command, @"^\s*mouse\s*turn\s*=\s*(off|false|disable|0)\s*$") == true) {
+				cDevConsole.AddText("Using arrow keys to rotate ship");
+				cPlayerShip.MouseRotate = false;
+			} else if (Tools.RegEx.QuickTest(Command, @"^\s*(spawn|new)\s*hunter\s*$") == true) {
+				cDevConsole.AddText("Spawning new hunter UFO");
+				Vector2 StartPos = new Vector2(-50, -50);
+				CreateNewHunter(100, StartPos);
+			}else {
 				cDevConsole.AddText("Unrecognized command: " + Command);
 			}
 		}
@@ -255,18 +274,48 @@ namespace MDLN.AsteroidShooter {
 
 			AstInfo.SpeedRotate = ((float)cRandom.NextDouble() * 0.2f) - 0.1f;
 
+			AstInfo.SplitOnDeath = true;
+
 			cAsteroids.AddParticle(AstInfo);
 		}
 
+		private void CreateNewHunter(int Size, Vector2 Position) {
+			HunterShip NewShip = new HunterShip();
+
+			if ((Position.X == -1) && (Position.Y == -1)) {
+				NewShip.TopLeft.X = NewShip.Width * cRandom.Next(-1, 1);
+				NewShip.TopLeft.Y = NewShip.Height * cRandom.Next(-1, 1);
+				if ((NewShip.TopLeft.X == 0) && (NewShip.TopLeft.Y == 0)) {
+					NewShip.TopLeft.X = -1 * NewShip.Width;
+				}
+			} else {
+				NewShip.TopLeft.X = Position.X;
+				NewShip.TopLeft.Y = Position.Y;
+			}
+				
+			NewShip.TargetObject = cPlayerShip;
+			NewShip.MaxDistanceFromTarget = 150 + (75 * cRandom.Next(1, 5));
+			NewShip.MinDistanceFromTarget = (NewShip.MaxDistanceFromTarget / 2) + 25;
+			NewShip.Image = cTextureDict[Textures.Hunter];
+			NewShip.Height = Size;
+			NewShip.Width = Size;
+			NewShip.Tint = Color.White;
+			NewShip.SplitOnDeath = false;
+
+			cAsteroids.AddParticle(NewShip);
+		}
+
 		protected enum Textures {
-			[Description("Ship.png")]
+			[Description("UFO.png")]
 			Ship,
 			[Description("Asteroid.png")]
 			Asteroid,
 			[Description("Font.png")]
 			Font,
 			[Description("Bullet-Blue.png")]
-			Bullet
+			Bullet,
+			[Description("UFO-Red.png")]
+			Hunter
 		}
 	}
 }

@@ -10,7 +10,7 @@ namespace MDLN.MGTools {
 	/// <summary>
 	/// Class to track, update, and draw particles in 2D graphics.
 	/// </summary>
-	public class Particles2D {
+	public class ParticleEngine2D {
 		private GraphicsDevice cGraphDev;
 		private SpriteBatch cDrawBatch;
 		/// <summary>
@@ -37,7 +37,7 @@ namespace MDLN.MGTools {
 		/// Initializes a new instance of the <see cref="MDLN.MGTools.Particles2D"/> class.
 		/// </summary>
 		/// <param name="GraphDev">Graph device.</param>
-		public Particles2D(GraphicsDevice GraphDev) {
+		public ParticleEngine2D(GraphicsDevice GraphDev) {
 			cGraphDev = GraphDev;
 
 			cDrawBatch = new SpriteBatch(cGraphDev);
@@ -198,6 +198,10 @@ namespace MDLN.MGTools {
 		/// Speed at which the particle is rotating
 		/// </summary>
 		public float SpeedRotate;
+		/// <summary>
+		/// Split the particle into more when it does, assuming all other conditions are met
+		/// </summary>
+		public bool SplitOnDeath;
 
 		/// <summary>
 		/// Retrieves a list of collision circles that represent where this object exists on screen
@@ -257,7 +261,7 @@ namespace MDLN.MGTools {
 		/// Function to use to update this particle
 		/// </summary>
 		/// <param name="CurrTime">Curr time.</param>
-		public void Update(GameTime CurrTime) {
+		public virtual void Update(GameTime CurrTime) {
 			TopLeft.X += SpeedX;
 			TopLeft.Y -= SpeedY;
 
@@ -277,7 +281,7 @@ namespace MDLN.MGTools {
 		/// Function to draw this particle to the screen
 		/// </summary>
 		/// <param name="DrawBatch">Draw batch.</param>
-		public void Draw(SpriteBatch DrawBatch) {
+		public virtual void Draw(SpriteBatch DrawBatch) {
 			Vector2 Origin;
 			Rectangle DrawRegion;
 
@@ -331,5 +335,9 @@ namespace MDLN.MGTools {
 		/// <returns><c>true</c>, if collision is happening, <c>false</c> otherwise.</returns>
 		/// <param name="TestObj">Test object.</param>
 		bool TestCollision(ICollidable TestObj);
+	}
+
+	public interface IVisible {
+		Vector2 GetCenterCoordinates();
 	}
 }

@@ -48,8 +48,8 @@
     <Compile Include="MDLN.MGTools.TextureFont.cs" />
     <Compile Include="MDLN.MGTools.AssemblyInfo.cs" />
     <Compile Include="MDLN.MGTools.Math.cs" />
-    <Compile Include="MDLN.MGTools.Particles2D.cs" />
     <Compile Include="MDLN.MGTools.GameConsole.cs" />
     <Compile Include="MDLN.MGTools.Button.cs" />
+    <Compile Include="MDLN.MGTools.ParticleEngine2D.cs" />
   </ItemGroup>
 </Project>

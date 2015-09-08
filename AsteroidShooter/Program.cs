@@ -8,6 +8,8 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
+using System.Reflection;
 
 namespace MDLN.AsteroidShooter {
 	class MainClass {
@@ -24,6 +26,7 @@ namespace MDLN.AsteroidShooter {
 		private Ship cPlayerShip;
 		private ParticleEngine2D cPlayerBullets, cEnemyBullets;
 		private ParticleEngine2D cAsteroids, cUFOs;
+		private ParticleEngine2D cSparkles;
 		private double cLastShot, cLastAsteroid;
 		private MDLN.MGTools.GameConsole cDevConsole;
 		private KeyboardState cPriorKeyState;
@@ -31,9 +34,16 @@ namespace MDLN.AsteroidShooter {
 		private Dictionary<Textures, Texture2D> cTextureDict;
 		private Random cRandom;
 		private uint cEnemyKills, cAliveSince, cSpawnNum;
+		private SpriteBatch cDrawBatch;
+		private Texture2D cSolidTexture;
+		private TextureFont cFont;
+		private bool cHeadlightMode, cShowStats;
+		private Effect cShader;
 
 		public AsteroidShooter() {
 			cGraphDevMgr = new GraphicsDeviceManager(this);
+			cGraphDevMgr.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
+
 			Content.RootDirectory = "Content";
 			IsMouseVisible = true;
 
@@ -44,6 +54,8 @@ namespace MDLN.AsteroidShooter {
 			cEnemyKills = 0;
 			cAliveSince = 0;
 			cSpawnNum = 0;
+
+			cHeadlightMode = false;
 		}
 
 		protected override void Initialize() {
@@ -56,11 +68,20 @@ namespace MDLN.AsteroidShooter {
 		}
 
 		protected override void LoadContent() {
+			cShader = Content.Load<Effect>("ShaderEffect");
+
+			cDrawBatch = new SpriteBatch(cGraphDevMgr.GraphicsDevice);
+
+			cSolidTexture = new Texture2D(cGraphDevMgr.GraphicsDevice, 1, 1);
+			//cSolidTexture.SetData (new[] { new Color(255, 255, 255, 100) });
+			//cSolidTexture.SetData (new[] { new Color(0, 0, 0, 100) });
+			cSolidTexture.SetData (new[] { Color.White });
+
 			foreach (Textures CurrTexture in Enum.GetValues(typeof(Textures))) {
 				cTextureDict.Add(CurrTexture, Content.Load<Texture2D>(Tools.Tools.GetEnumDescriptionAttribute(CurrTexture)));
 			}
 
-			//cFont = new TextureFont(cTextureDict[Textures.Font]);
+			cFont = new TextureFont(cTextureDict[Textures.Font]);
 			cDevConsole = new MDLN.MGTools.GameConsole(cGraphDevMgr.GraphicsDevice, Content, "Font.png", 0, 0, cGraphDevMgr.GraphicsDevice.Viewport.Bounds.Width, cGraphDevMgr.GraphicsDevice.Viewport.Bounds.Height / 2);
 			cDevConsole.CommandSent += CommandSentEventHandler;
 			cDevConsole.OpenEffect = DisplayEffect.SlideDown;
@@ -76,13 +97,20 @@ namespace MDLN.AsteroidShooter {
 			cPlayerShip.MouseRotate = true;
 
 			cPlayerBullets = new ParticleEngine2D(cGraphDevMgr.GraphicsDevice);
+			cPlayerBullets.DrawBlendingMode = BlendState.Additive;
+			cPlayerBullets.ShaderEffect = cShader;
+
 			cEnemyBullets = new ParticleEngine2D(cGraphDevMgr.GraphicsDevice);
+			cEnemyBullets.DrawBlendingMode = BlendState.Additive;
 
 			cAsteroids = new ParticleEngine2D(cGraphDevMgr.GraphicsDevice);
 			cAsteroids.WrapScreenEdges = true;
 
 			cUFOs = new ParticleEngine2D(cGraphDevMgr.GraphicsDevice);
 			cUFOs.WrapScreenEdges = true;
+
+			cSparkles = new ParticleEngine2D(cGraphDevMgr.GraphicsDevice);
+			cSparkles.DrawBlendingMode = BlendState.Additive;
 		}
 
 		protected override void Update(GameTime gameTime) {
@@ -124,7 +152,7 @@ namespace MDLN.AsteroidShooter {
 				BulletOrigin.Y += cPlayerShip.Top + (cPlayerShip.Height / 2);
 				BulletOrigin.X += cPlayerShip.Left + (cPlayerShip.Height / 2);
 
-				cPlayerBullets.AddParticle(cTextureDict[Textures.Bullet], BulletOrigin.Y - 10, BulletOrigin.X - 10, 20, 20, cPlayerShip.cRotation, 15, Color.White);
+				cPlayerBullets.AddParticle(cTextureDict[Textures.Bullet], BulletOrigin.Y - 10, BulletOrigin.X - 10, 20, 20, cPlayerShip.cRotation, 15, new Color(75, 75, 255, 255));
 				cLastShot = gameTime.TotalGameTime.TotalMilliseconds;
 			}
 
@@ -137,6 +165,7 @@ namespace MDLN.AsteroidShooter {
 			cEnemyBullets.Update(gameTime);
 			cPlayerBullets.Update(gameTime);
 			cPlayerShip.Update(gameTime, CurrKeys, CurrMouse);
+			cSparkles.Update(gameTime);
 			cDevConsole.Update(gameTime, CurrKeys, CurrMouse);
 
 			//Collision detection
@@ -149,6 +178,8 @@ namespace MDLN.AsteroidShooter {
 					BulletInfo = cPlayerBullets.ParticleList[Ctr];
 
 					if (BulletInfo.TestCollision(EnemyInfo.GetCollisionRegions()) == true) {
+						CreateParticleBurst(new Vector2(EnemyInfo.TopLeft.X + (EnemyInfo.Width / 2), EnemyInfo.TopLeft.Y + (EnemyInfo.Height / 2)), 25 * EnemyInfo.Height / 6, EnemyInfo.Height / 3, Color.SaddleBrown, cTextureDict[Textures.Dust]);
+
 						//Spawn little asteroids
 						if (EnemyInfo.Height > 50) {
 							Vector2 TopLeft;
@@ -172,6 +203,9 @@ namespace MDLN.AsteroidShooter {
 				//Is the asteroid hitting the player?
 				if (EnemyInfo.TestCollision(cPlayerShip) == true) {
 					cPlayerShip.ImageTint = Color.Red;
+
+					CreateParticleBurst(new Vector2(cPlayerShip.Left + (cPlayerShip.Width / 2), cPlayerShip.Top + (cPlayerShip.Height / 2)), 15);
+
 					if ((gameTime.TotalGameTime.TotalSeconds - cAliveSince >= 1) && (cAliveSince != 0)) {
 						cDevConsole.AddText(String.Format("Survived {0:0.0} seconds and shot {1} enemies.", gameTime.TotalGameTime.TotalSeconds - cAliveSince, cEnemyKills));
 					}
@@ -194,6 +228,8 @@ namespace MDLN.AsteroidShooter {
 						cUFOs.ParticleList.RemoveAt(Cnt);
 						cEnemyKills++;
 
+						CreateParticleBurst(new Vector2(EnemyInfo.TopLeft.X + (EnemyInfo.Width / 2), EnemyInfo.TopLeft.Y + (EnemyInfo.Height / 2)), 200, Color.OrangeRed);
+
 						break; //Exit inner loop so each bullet ony gets 1 enemy
 					}
 				}
@@ -201,6 +237,9 @@ namespace MDLN.AsteroidShooter {
 				//Is the UFO hitting the player?
 				if (EnemyInfo.TestCollision(cPlayerShip) == true) {
 					cPlayerShip.ImageTint = Color.Red;
+
+					CreateParticleBurst(new Vector2(cPlayerShip.Left + (cPlayerShip.Width / 2), cPlayerShip.Top + (cPlayerShip.Height / 2)), 15);
+
 					if ((gameTime.TotalGameTime.TotalSeconds - cAliveSince >= 1) && (cAliveSince != 0)) {
 						cDevConsole.AddText(String.Format("Survived {0:0.0} seconds and shot {1} enemies.", gameTime.TotalGameTime.TotalSeconds - cAliveSince, cEnemyKills));
 					}
@@ -216,6 +255,7 @@ namespace MDLN.AsteroidShooter {
 				//Is the bullet hitting the player?
 				if (BulletInfo.TestCollision(cPlayerShip) == true) {
 					cEnemyBullets.ParticleList.RemoveAt(Cnt);
+					CreateParticleBurst(new Vector2(cPlayerShip.Left + (cPlayerShip.Width / 2), cPlayerShip.Top + (cPlayerShip.Height / 2)), 50);
 
 					cPlayerShip.ImageTint = Color.Red;
 					if ((gameTime.TotalGameTime.TotalSeconds - cAliveSince >= 1) && (cAliveSince != 0)) {
@@ -235,15 +275,80 @@ namespace MDLN.AsteroidShooter {
 		}
 
 		protected override void Draw(GameTime gameTime) {
+			Rectangle OverlayRect;
+			Vector2 OverlayOrigin;
+
 			cGraphDevMgr.GraphicsDevice.Clear(Color.Black);
 
 			cUFOs.Draw();
 			cAsteroids.Draw();
 			cEnemyBullets.Draw();
+
+			cDevConsole.AddText("Playerbullets: " + cPlayerBullets.ParticleList.Count);
 			cPlayerBullets.Draw();
+
+			if (cHeadlightMode == true) {//Dimming overlay for the flashlight
+				cDrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
+
+				OverlayRect.X = cPlayerShip.Left + (cPlayerShip.Width / 2);
+				OverlayRect.Y = cPlayerShip.Top + (cPlayerShip.Height / 2);
+				OverlayRect.Width = cTextureDict[Textures.LightFilter].Width * 4 + cGraphDevMgr.GraphicsDevice.Viewport.Width;
+				OverlayRect.Height = cTextureDict[Textures.LightFilter].Height * 4 + cGraphDevMgr.GraphicsDevice.Viewport.Height;
+
+				OverlayOrigin.X = cTextureDict[Textures.LightFilter].Width / 2;
+				OverlayOrigin.Y = cTextureDict[Textures.LightFilter].Height;
+
+				//cDrawBatch.Draw(cSolidTexture, cGraphDevMgr.GraphicsDevice.Viewport.Bounds, cSolidTexture.Bounds, new Color(255, 0, 0, 255));
+				cDrawBatch.Draw(cTextureDict[Textures.LightFilter], OverlayRect, cTextureDict[Textures.LightFilter].Bounds, new Color(255, 200, 255, 250), (float)((Math.PI * 2) - (cPlayerShip.cRotation)), OverlayOrigin, SpriteEffects.None, 0);
+				cDrawBatch.Draw(cTextureDict[Textures.LightFilter], OverlayRect, cTextureDict[Textures.LightFilter].Bounds, new Color(255, 200, 255, 250), (float)((Math.PI * 2) - (cPlayerShip.cRotation + Math.PI)), OverlayOrigin, SpriteEffects.FlipHorizontally, 0);
+
+				cDrawBatch.End();
+			}
+
 			cPlayerShip.Draw();
+			cSparkles.Draw();
+
 			cDevConsole.Draw();
 
+			if (cShowStats == true) {
+				cDrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
+				cFont.WriteText(cDrawBatch, string.Format("Asteroids={0} UFOs={1} Bullets={2} Sparkles={3} Kills={4} Alive={5:0.00}s", cAsteroids.ParticleList.Count, cUFOs.ParticleList.Count, cPlayerBullets.ParticleList.Count + cEnemyBullets.ParticleList.Count, cSparkles.ParticleList.Count, cEnemyKills, gameTime.TotalGameTime.TotalSeconds - cAliveSince), 10, cGraphDevMgr.GraphicsDevice.Viewport.Height - cFont.CharacterHeight, 10, Color.Azure);
+				cDrawBatch.End();
+			}
+
+			/*
+			Vector2 ShadowOrigin = MGTools.MGMath.CalculateXYMagnitude(cPlayerShip.cRotation, cPlayerShip.Height);
+			Matrix StencilMatrix = Matrix.CreateOrthographicOffCenter(0, cGraphDevMgr.GraphicsDevice.PresentationParameters.BackBufferWidth, cGraphDevMgr.GraphicsDevice.PresentationParameters.BackBufferHeight, 0, 0, 1);
+
+			var StencilAlphaTest = new AlphaTestEffect(cGraphDevMgr.GraphicsDevice);
+			StencilAlphaTest.Projection = StencilMatrix;
+
+			DepthStencilState DepthStencilMask = new DepthStencilState();
+			DepthStencilMask.StencilEnable = true;
+			DepthStencilMask.StencilFunction = CompareFunction.Always;
+			DepthStencilMask.StencilPass = StencilOperation.Replace;
+			DepthStencilMask.ReferenceStencil = 1;
+			DepthStencilMask.DepthBufferEnable = false;
+
+			DepthStencilState DepthStencilDraw = new DepthStencilState {
+				StencilEnable = true,
+				StencilFunction = CompareFunction.LessEqual,
+				StencilPass = StencilOperation.Keep,
+				ReferenceStencil = 1,
+				DepthBufferEnable = false,
+			};
+
+			cDrawBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, DepthStencilMask, null, StencilAlphaTest);
+			cDrawBatch.Draw(cSolidTexture, new Rectangle((int)(cPlayerShip.Left + (cPlayerShip.Width / 2) - ShadowOrigin.X), (int)(cPlayerShip.Top + (cPlayerShip.Height / 2) + ShadowOrigin.Y), cGraphDevMgr.GraphicsDevice.Viewport.Width * 2, cGraphDevMgr.GraphicsDevice.Viewport.Height * 2), cSolidTexture.Bounds, new Color(0,0,0,0), (float)(2 * Math.PI - cPlayerShip.cRotation + 1.0472), Vector2.Zero, SpriteEffects.None, 0);
+			cDrawBatch.Draw(cSolidTexture, new Rectangle((int)(cPlayerShip.Left + (cPlayerShip.Width / 2) - ShadowOrigin.X), (int)(cPlayerShip.Top + (cPlayerShip.Height / 2) + ShadowOrigin.Y), cGraphDevMgr.GraphicsDevice.Viewport.Width * 2, cGraphDevMgr.GraphicsDevice.Viewport.Height * 2), cSolidTexture.Bounds, new Color(0,0,0,0), (float)(2 * Math.PI - cPlayerShip.cRotation - 2.618), Vector2.Zero, SpriteEffects.None, 0);
+			cDrawBatch.Draw(cSolidTexture, new Rectangle((int)(cPlayerShip.Left + (cPlayerShip.Width / 2) - ShadowOrigin.X), (int)(cPlayerShip.Top + (cPlayerShip.Height / 2) + ShadowOrigin.Y), cGraphDevMgr.GraphicsDevice.Viewport.Width * 2, cGraphDevMgr.GraphicsDevice.Viewport.Height * 2), cSolidTexture.Bounds, new Color(0,0,0,0), (float)(2 * Math.PI - cPlayerShip.cRotation + (Math.PI / 2)), Vector2.Zero, SpriteEffects.None, 0);
+			cDrawBatch.Draw(cSolidTexture, new Rectangle((int)(cPlayerShip.Left + (cPlayerShip.Width / 2) - ShadowOrigin.X), (int)(cPlayerShip.Top + (cPlayerShip.Height / 2) + ShadowOrigin.Y), cGraphDevMgr.GraphicsDevice.Viewport.Width * 2, cGraphDevMgr.GraphicsDevice.Viewport.Height * 2), cSolidTexture.Bounds, new Color(0,0,0,0), (float)(2 * Math.PI - cPlayerShip.cRotation + Math.PI), Vector2.Zero, SpriteEffects.None, 0);
+			cDrawBatch.End();
+
+			cDrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, null, DepthStencilDraw, null, StencilAlphaTest); //Draw stuff to be masked
+			cDrawBatch.Draw(cTextureDict[Textures.Asteroid], cGraphDevMgr.GraphicsDevice.Viewport.Bounds, new Color(0, 0, 0, 100)); //Uses 
+			cDrawBatch.End();
+			*/
 			//Use monogame draw
 			base.Draw(gameTime);
 		}
@@ -303,7 +408,45 @@ namespace MDLN.AsteroidShooter {
 				cDevConsole.AddText("Spawning new hunter UFO");
 				Vector2 StartPos = new Vector2(-50, -50);
 				CreateNewHunter(100, StartPos);
-			}else {
+			} else if (Tools.RegEx.QuickTest(Command, @"^\s*(sparkles|particles)\s*$") == true) {
+				Particle2D NewSparkle;
+				Vector2 Speed;
+
+				cDevConsole.AddText("Particle burst on player ship");
+
+				for (int Ctr = 0; Ctr < 25; Ctr++) {
+					NewSparkle = new Particle2D();
+
+					NewSparkle.AlphaFade = true;
+					NewSparkle.TimeToLive = 100 + (cRandom.NextDouble() * 1000);
+					NewSparkle.Height = 10;
+					NewSparkle.Width = 10;
+					NewSparkle.TopLeft.X = cPlayerShip.Left + (cPlayerShip.Width / 2);
+					NewSparkle.TopLeft.Y = cPlayerShip.Top + (cPlayerShip.Height / 2);
+					NewSparkle.Image = cTextureDict[Textures.Bullet];
+
+					NewSparkle.Rotation = (float)(cRandom.NextDouble() * 6.2f);
+					Speed = MGMath.CalculateXYMagnitude(NewSparkle.Rotation, (float)(cRandom.NextDouble() * 5));
+					NewSparkle.SpeedX = Speed.X;
+					NewSparkle.SpeedY = Speed.Y;
+
+					NewSparkle.Tint = Color.White;
+
+					cSparkles.AddParticle(NewSparkle);
+				}
+			} else if (Tools.RegEx.QuickTest(Command, @"^\s*(headlight|flashlight|dark)\s*=\s*(1|true|enable)\s*$") == true) {
+				cDevConsole.AddText("Headlight mode enabled.");
+				cHeadlightMode = true;
+			} else if (Tools.RegEx.QuickTest(Command, @"^\s*(headlight|flashlight|dark)\s*=\s*(0|false|disable)\s*$") == true) {
+				cDevConsole.AddText("Headlight mode disabled.");
+				cHeadlightMode = false;
+			} else if (Tools.RegEx.QuickTest(Command, @"^\s*stats\s*=\s*(1|true|enable|on)\s*$") == true) {
+				cDevConsole.AddText("Stats enabled.");
+				cShowStats = true;
+			} else if (Tools.RegEx.QuickTest(Command, @"^\s*stats\s*=\s*(0|false|disable|off)\s*$") == true) {
+				cDevConsole.AddText("Stats disabled.");
+				cShowStats = false;
+			}  else {
 				cDevConsole.AddText("Unrecognized command: " + Command);
 			}
 		}
@@ -334,8 +477,6 @@ namespace MDLN.AsteroidShooter {
 
 			AstInfo.SpeedRotate = ((float)cRandom.NextDouble() * 0.2f) - 0.1f;
 
-			AstInfo.SplitOnDeath = true;
-
 			cAsteroids.AddParticle(AstInfo);
 		}
 
@@ -358,11 +499,45 @@ namespace MDLN.AsteroidShooter {
 			NewShip.MinDistanceFromTarget = (NewShip.MaxDistanceFromTarget / 2) + 25;
 			NewShip.Image = cTextureDict[Textures.Hunter];
 			NewShip.Tint = Color.White;
-			NewShip.SplitOnDeath = false;
+
 			NewShip.BulletManager = cEnemyBullets;
 			NewShip.BulletTexture = cTextureDict[Textures.Bullet];
 
 			cUFOs.AddParticle(NewShip);
+		}
+
+		private void CreateParticleBurst(Vector2 Position, int Count) {
+			CreateParticleBurst(Position, Count, Color.White);
+		}
+
+		private void CreateParticleBurst(Vector2 Position, int Count, Color Tint) {
+			CreateParticleBurst(Position, Count, 10, Tint, cTextureDict[Textures.Bullet]);
+		}
+
+		private void CreateParticleBurst(Vector2 Position, int Count, int Size, Color Tint, Texture2D Image) {
+			Particle2D NewSparkle;
+			Vector2 Speed;
+
+			for (int Ctr = 0; Ctr < Count; Ctr++) {
+				NewSparkle = new Particle2D();
+
+				NewSparkle.AlphaFade = true;
+				NewSparkle.TimeToLive = 100 + (cRandom.NextDouble() * 1000);
+				NewSparkle.Height = Size;
+				NewSparkle.Width = Size;
+				NewSparkle.TopLeft = Position;
+				NewSparkle.Image = Image;
+
+				NewSparkle.Rotation = (float)(cRandom.NextDouble() * 6.2f);
+				Speed = MGMath.CalculateXYMagnitude(NewSparkle.Rotation, (float)(cRandom.NextDouble() * (70 / Size)));
+				NewSparkle.SpeedX = Speed.X;
+				NewSparkle.SpeedY = Speed.Y;
+				NewSparkle.SpeedRotate = (float)cRandom.NextDouble() * 0.25f;
+
+				NewSparkle.Tint = Tint;
+
+				cSparkles.AddParticle(NewSparkle);
+			}
 		}
 
 		protected enum Textures {
@@ -372,10 +547,14 @@ namespace MDLN.AsteroidShooter {
 			Asteroid,
 			[Description("Font.png")]
 			Font,
-			[Description("Bullet-Blue.png")]
+			[Description("Bullet-Gray.png")]
 			Bullet,
 			[Description("UFO-Red.png")]
-			Hunter
+			Hunter,
+			[Description("Flashlight.png")]
+			LightFilter,
+			[Description("Dust.png")]
+			Dust
 		}
 	}
 }

@@ -23,7 +23,7 @@ namespace MDLN.AsteroidShooter {
 		public ParticleEngine2D BulletManager { get; set; }
 		public Texture2D BulletTexture { get; set; }
 
-		public override void Update(GameTime CurrTime) {
+		public override bool Update(GameTime CurrTime) {
 			Vector2 MyCenter, TargetCenter, Speed;
 			float Distance;
 
@@ -68,7 +68,7 @@ namespace MDLN.AsteroidShooter {
 			TopLeft.Y -= SpeedY;
 
 			if (cLastShot == 0) {
-				cLastShot = CurrTime.TotalGameTime.TotalMilliseconds + 2000;
+				cLastShot = CurrTime.TotalGameTime.TotalMilliseconds + 1500 + cRand.Next(1000);
 			}
 
 			if (cLastShot < CurrTime.TotalGameTime.TotalMilliseconds) {
@@ -77,10 +77,12 @@ namespace MDLN.AsteroidShooter {
 				BulletOrigin.Y = TopLeft.Y + (Height / 2);
 				BulletOrigin.X = TopLeft.X + (Height / 2);
 
-				BulletManager.AddParticle(BulletTexture, BulletOrigin.Y - 10, BulletOrigin.X - 10, 20, 20, Rotation, 8, new Color(255, 200, 150));
+				BulletManager.AddParticle(BulletTexture, BulletOrigin.Y - 10, BulletOrigin.X - 10, 20, 20, Rotation, 8, new Color(255, 75, 75, 255));
 
-				cLastShot = CurrTime.TotalGameTime.TotalMilliseconds + 2000;
+				cLastShot = CurrTime.TotalGameTime.TotalMilliseconds + 1500 + cRand.Next(1000);
 			}
+
+			return true;
 		}
 	}
 }

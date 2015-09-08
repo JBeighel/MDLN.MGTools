@@ -33,6 +33,10 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		public BlendState DrawBlendingMode { get; set; }
+
+		public Effect ShaderEffect { get; set; }
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="MDLN.MGTools.Particles2D"/> class.
 		/// </summary>
@@ -43,6 +47,10 @@ namespace MDLN.MGTools {
 			cDrawBatch = new SpriteBatch(cGraphDev);
 
 			cParticleList = new List<Particle2D>();
+
+			DrawBlendingMode = BlendState.NonPremultiplied;
+
+			ShaderEffect = null;
 		}
 
 		/// <summary>
@@ -108,7 +116,10 @@ namespace MDLN.MGTools {
 			for (Ctr = 0; Ctr < cParticleList.Count; Ctr++) {
 				CurrBullet = cParticleList[Ctr];
 
-				CurrBullet.Update(CurrTime);
+				if (CurrBullet.Update(CurrTime) == false) { //Particle update says this particle no longer exists
+					cParticleList.RemoveAt(Ctr);
+					continue;
+				}
 
 				if ((CurrBullet.SpeedX <= 0) && (CurrBullet.TopLeft.X < -1 * cParticleList[Ctr].Width)) {  //Bullet moved off screen left
 					if (WrapScreenEdges == false) {
@@ -148,9 +159,13 @@ namespace MDLN.MGTools {
 		/// Draw all of the particles to current render device
 		/// </summary>
 		public void Draw() {
-			cDrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
+			cDrawBatch.Begin(SpriteSortMode.Immediate, DrawBlendingMode);
 
 			foreach (Particle2D CurrParticle in cParticleList) {
+				if (ShaderEffect != null) {
+					//ShaderEffect.Parameters["TintColor"].SetValue(CurrParticle.Tint.ToVector4());
+					ShaderEffect.Techniques[0].Passes[0].Apply();
+				}
 				CurrParticle.Draw(cDrawBatch);
 			}
 
@@ -198,10 +213,15 @@ namespace MDLN.MGTools {
 		/// Speed at which the particle is rotating
 		/// </summary>
 		public float SpeedRotate;
-		/// <summary>
-		/// Split the particle into more when it does, assuming all other conditions are met
-		/// </summary>
-		public bool SplitOnDeath;
+		public double TimeToLive;
+		public bool AlphaFade;
+
+		private double cCreationTime;
+
+		public Particle2D() {
+			TimeToLive = 0;
+			AlphaFade = false;
+		}
 
 		/// <summary>
 		/// Retrieves a list of collision circles that represent where this object exists on screen
@@ -261,9 +281,17 @@ namespace MDLN.MGTools {
 		/// Function to use to update this particle
 		/// </summary>
 		/// <param name="CurrTime">Curr time.</param>
-		public virtual void Update(GameTime CurrTime) {
+		public virtual bool Update(GameTime CurrTime) {
 			TopLeft.X += SpeedX;
 			TopLeft.Y -= SpeedY;
+
+			if (cCreationTime == 0) {
+				cCreationTime = CurrTime.TotalGameTime.TotalMilliseconds;
+			}
+
+			if ((TimeToLive > 0) && (CurrTime.TotalGameTime.TotalMilliseconds - cCreationTime >= TimeToLive)) {
+				return false;
+			}
 
 			Rotation += SpeedRotate;
 
@@ -275,6 +303,12 @@ namespace MDLN.MGTools {
 			if (Rotation > 6.28318531f) {
 				Rotation = 0;
 			}
+
+			if (AlphaFade == true) {
+				Tint.A = (byte)(255 - (((CurrTime.TotalGameTime.TotalMilliseconds - cCreationTime) / TimeToLive) * 255));
+			}
+
+			return true;
 		}
 
 		/// <summary>

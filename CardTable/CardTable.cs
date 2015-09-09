@@ -30,9 +30,11 @@ namespace MDLN.CardTable {
 		private SpriteBatch cDrawBatch;
 		private Dictionary<Textures, Texture2D> cTextureDict;
 		private TextureFont cFont;
+		private FullCardPanel cFullCardFrame;
 		private GameConsole cDevConsole;
 		private Dictionary<MenuButtons, Button> cMenuBtns;
 		private List<CardInfo> cMonsterDeck;
+		private List<CardMini> cCardsInPlay;
 
 		public CardTable() {
 			cGraphDevMgr = new GraphicsDeviceManager(this);
@@ -40,6 +42,7 @@ namespace MDLN.CardTable {
 			cTextureDict = new Dictionary<Textures, Texture2D>();
 			cMenuBtns = new Dictionary<MenuButtons, Button>();
 			cMonsterDeck = new List<CardInfo>();
+			cCardsInPlay = new List<CardMini>();
 		}
 
 		protected override void Initialize() {
@@ -55,6 +58,7 @@ namespace MDLN.CardTable {
 
 		protected override void LoadContent() {
 			Rectangle ButtonArea = new Rectangle();
+			int MiniCardHeight, MiniCardWidth;
 
 			Content.RootDirectory = INTERFACECONTENTDIR;
 
@@ -79,11 +83,15 @@ namespace MDLN.CardTable {
 				ButtonArea.Y += ButtonArea.Height + 1;
 			}
 
-			cMenuBtns[MenuButtons.Menu].Click += new ButtonClickEvent(MenuClick);
-			cMenuBtns[MenuButtons.OpenDoor].Click += new ButtonClickEvent(OpenDoorClick);
-			cMenuBtns[MenuButtons.DrawMonster].Click += new ButtonClickEvent(SpawnMonsterClick);
-			cMenuBtns[MenuButtons.Abilities].Click += new ButtonClickEvent(AbilitiesClick);
-			cMenuBtns[MenuButtons.Treasure].Click += new ButtonClickEvent(TreasureClick);
+			cMenuBtns[MenuButtons.Menu].Click += new ClickEvent(MenuClick);
+			cMenuBtns[MenuButtons.OpenDoor].Click += new ClickEvent(OpenDoorClick);
+			cMenuBtns[MenuButtons.DrawMonster].Click += new ClickEvent(SpawnMonsterClick);
+			cMenuBtns[MenuButtons.Abilities].Click += new ClickEvent(AbilitiesClick);
+			cMenuBtns[MenuButtons.Treasure].Click += new ClickEvent(TreasureClick);
+
+			cFullCardFrame = new FullCardPanel(cGraphDevMgr.GraphicsDevice, cGraphDevMgr.GraphicsDevice.Viewport.Height, (int)(cGraphDevMgr.GraphicsDevice.Viewport.Width / 3));
+			cFullCardFrame.BackgroundColor = Color.DarkViolet;
+			cFullCardFrame.Font = cFont;
 
 			cDevConsole = new GameConsole(cGraphDevMgr.GraphicsDevice, Content, "Font.png", cGraphDevMgr.GraphicsDevice.Viewport.Width, cGraphDevMgr.GraphicsDevice.Viewport.Height / 2);
 			cDevConsole.AccessKey = Keys.OemTilde;
@@ -94,6 +102,20 @@ namespace MDLN.CardTable {
 
 			cDevConsole.AddText(String.Format("Viewport Height={0} Width={1}", cGraphDevMgr.GraphicsDevice.Viewport.Height, cGraphDevMgr.GraphicsDevice.Viewport.Width));
 
+			MiniCardHeight = (int)(((cGraphDevMgr.GraphicsDevice.Viewport.Height - 10) / 3) - 10);
+			MiniCardWidth = (int)(200f * ((float)MiniCardHeight / 175f));
+
+			for (int Ctr = 0; Ctr < 3; Ctr++) {
+				cCardsInPlay.Add(new CardMini(cGraphDevMgr.GraphicsDevice, MiniCardHeight, MiniCardWidth));
+				cCardsInPlay[Ctr].Font = cFont;
+				cCardsInPlay[Ctr].FontColor = Color.DarkSlateGray;
+				cCardsInPlay[Ctr].Visible = true;
+				cCardsInPlay[Ctr].BackgroundColor = new Color(0, 0, 0, 0);
+				cCardsInPlay[Ctr].Top = 3;
+				cCardsInPlay[Ctr].Left = 3 + (Ctr * (MiniCardWidth + 3));
+				cCardsInPlay[Ctr].Click += new ClickEvent(CardInPlayClick);
+			}
+
 			LoadMonsterDeck(DECKXMLFILE);
 		}
 
@@ -102,6 +124,15 @@ namespace MDLN.CardTable {
 				KeyPair.Value.Update(gameTime);
 			}
 
+			cCardsInPlay[0].Card = cMonsterDeck[0];
+			cCardsInPlay[1].Card = cMonsterDeck[1];
+			cCardsInPlay[2].Card = cMonsterDeck[2];
+
+			foreach (CardMini CurrCard in cCardsInPlay) {
+				CurrCard.Update(gameTime);
+			}
+
+			cFullCardFrame.Update(gameTime);
 			cDevConsole.Update(gameTime);
 
 			//Use monogame update
@@ -117,27 +148,13 @@ namespace MDLN.CardTable {
 
 			cDrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
 
-			Rectangle FullCardRegion, MiniCardRegion;
-			FullCardRegion.X = 10;
-			FullCardRegion.Y = 10;
-			FullCardRegion.Width = 250;
-			FullCardRegion.Height = 350;
-			cMonsterDeck[0].RenderFullCard(FullCardRegion, Color.White, Color.DarkSlateGray, cDrawBatch, cFont);
-
-			MiniCardRegion.X = 270;
-			MiniCardRegion.Y = 10;
-			MiniCardRegion.Height = (int)(((cGraphDevMgr.GraphicsDevice.Viewport.Height - 10) / 3) - 10);
-			MiniCardRegion.Width = (int)(200f * ((float)MiniCardRegion.Height / 175f));
-			cMonsterDeck[0].RenderMiniCard(MiniCardRegion, Color.White, Color.DarkSlateGray, cDrawBatch, cFont);
-
-			MiniCardRegion.Y += MiniCardRegion.Height + 10;
-			cMonsterDeck[1].RenderMiniCard(MiniCardRegion, Color.White, Color.DarkSlateGray, cDrawBatch, cFont);
-
-			MiniCardRegion.Y += MiniCardRegion.Height + 10;
-			cMonsterDeck[2].RenderMiniCard(MiniCardRegion, Color.White, Color.DarkSlateGray, cDrawBatch, cFont);
-
 			cDrawBatch.End();
 
+			foreach (CardMini CurrCard in cCardsInPlay) {
+				CurrCard.Draw();
+			}
+
+			cFullCardFrame.Draw();
 			cDevConsole.Draw();
 
 			//Use monogame draw
@@ -147,6 +164,33 @@ namespace MDLN.CardTable {
 		private void CommandEvent(object Sender, string CommandEvent) {
 			if (RegEx.LooseTest(CommandEvent, @"^\s*(quit|exit|close)\s*$") == true) {
 				Exit();
+			} else if (RegEx.LooseTest(CommandEvent, @"^\s*card\s*left\s*$") == true) {
+				if (cFullCardFrame.Visible == false) {
+					cDevConsole.AddText("Opening Full Card panel from left");
+					cFullCardFrame.Card = cMonsterDeck[0];
+					cFullCardFrame.Left = 0;
+					cFullCardFrame.OpenEffect = DisplayEffect.SlideRight;
+					cFullCardFrame.CloseEffect = DisplayEffect.SlideLeft;
+					cFullCardFrame.Visible = true;
+				} else {
+					cDevConsole.AddText("Closing Full Card panel");
+					cFullCardFrame.Visible = false;
+				}
+			} else if (RegEx.LooseTest(CommandEvent, @"^\s*card\s*right\s*$") == true) {
+				if (cFullCardFrame.Visible == false) {
+					cDevConsole.AddText("Opening Full Card panel from right");
+					cFullCardFrame.Card = cMonsterDeck[1];
+					cFullCardFrame.Left = cGraphDevMgr.GraphicsDevice.Viewport.Width - cFullCardFrame.Width - cMenuBtns[MenuButtons.Menu].Width;
+					cFullCardFrame.OpenEffect = DisplayEffect.SlideLeft;
+					cFullCardFrame.CloseEffect = DisplayEffect.SlideRight;
+					cFullCardFrame.Visible = true;
+				} else {
+					cDevConsole.AddText("Closing Full Card panel");
+					cFullCardFrame.Visible = false;
+				}
+			} else if (RegEx.LooseTest(CommandEvent, @"^\s*card\s*close\s*$") == true) {
+				cDevConsole.AddText("Closing Full Card panel");
+				cFullCardFrame.Visible = false;
 			} else {
 				cDevConsole.AddText("Unrecognized command: " + CommandEvent);
 			}
@@ -231,6 +275,28 @@ namespace MDLN.CardTable {
 			}
 
 			cDevConsole.AddText("Loaded " + cMonsterDeck.Count + " cards.");
+		}
+
+		private void CardInPlayClick(object Sender, MouseButton Button) {
+			CardMini CurrCard = (CardMini)Sender;
+			int MidPoint;
+
+			if (Button == MouseButton.Left) {
+				cFullCardFrame.Card = CurrCard.Card;
+				MidPoint = (cGraphDevMgr.GraphicsDevice.Viewport.Width - cMenuBtns[MenuButtons.Menu].Width) / 2;
+
+				if (CurrCard.Left > MidPoint) { //Card is on left half
+					cFullCardFrame.Left = 0;
+					cFullCardFrame.OpenEffect = DisplayEffect.SlideRight;
+					cFullCardFrame.CloseEffect = DisplayEffect.SlideLeft;
+				} else {
+					cFullCardFrame.Left = cGraphDevMgr.GraphicsDevice.Viewport.Width - cFullCardFrame.Width - cMenuBtns[MenuButtons.Menu].Width;
+					cFullCardFrame.OpenEffect = DisplayEffect.SlideLeft;
+					cFullCardFrame.CloseEffect = DisplayEffect.SlideRight;
+				}
+
+				cFullCardFrame.Visible = true;
+			}
 		}
 
 		protected enum Textures {

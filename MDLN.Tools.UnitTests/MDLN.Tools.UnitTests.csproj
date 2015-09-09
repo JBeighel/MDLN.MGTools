@@ -32,6 +32,12 @@
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="MonoGame.Framework">
+      <HintPath>..\packages\MonoGame.Framework.WindowsGL.3.4.0.459\lib\net40\MonoGame.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenTK">
+      <HintPath>..\packages\MonoGame.Framework.WindowsGL.3.4.0.459\lib\net40\OpenTK.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -45,6 +51,10 @@
     <ProjectReference Include="..\MDLN.Tools\MDLN.Tools.csproj">
       <Project>{4D524474-1FFF-448F-97BA-E58CCA87592D}</Project>
       <Name>MDLN.Tools</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MDLN.MGTools\MDLN.MGTools.csproj">
+      <Project>{61F383D9-872B-4B2B-92CE-21D18A74EC13}</Project>
+      <Name>MDLN.MGTools</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

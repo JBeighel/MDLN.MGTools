@@ -78,7 +78,7 @@ namespace MDLN.Tools {
 					Value = Value >> 8;
 				}
 			} else {
-				for (Ctr = 3; Ctr <= 0; Ctr--) {
+				for (Ctr = 3; Ctr >= 0; Ctr--) {
 					Bytes[Ctr] = (byte)(0x000000FF & Value);
 					Value = Value >> 8;
 				}
@@ -103,7 +103,7 @@ namespace MDLN.Tools {
 					Value = Value >> 8;
 				}
 			} else {
-				for (Ctr = 5; Ctr <= 0; Ctr--) {
+				for (Ctr = 5; Ctr >= 0; Ctr--) {
 					Bytes[Ctr] = (byte)(0x000000FF & Value);
 					Value = Value >> 8;
 				}

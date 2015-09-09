@@ -9,7 +9,7 @@ namespace MDLN.MGTools {
 	/// <summary>
 	/// Class to act as a button or label control in monogame projects
 	/// </summary>
-	public class Button : Container {
+	public class Button : Container, IControl {
 		private bool cMouseDown;
 		private MouseButton cMouseButtonDown;
 
@@ -24,6 +24,7 @@ namespace MDLN.MGTools {
 		/// <param name="Width">Width of control</param>
 		public Button(GraphicsDevice GraphDev, Texture2D Background, int Top , int Left, int Height, int Width) : base(GraphDev, Background, Top, Left, Height, Width) {
 			Alignment = Justify.MiddleCenter;
+			Text = "";
 		}
 
 		/// <summary>
@@ -53,7 +54,7 @@ namespace MDLN.MGTools {
 		/// <summary>
 		/// Occurs when the mouse clicks this control.
 		/// </summary>
-		public event ButtonClickEvent Click;
+		public event ClickEvent Click;
 
 		/// <summary>
 		/// This function is called whenever a mouse button is pressed while the mouse is in the screen space this container
@@ -150,9 +151,35 @@ namespace MDLN.MGTools {
 	}
 
 	/// <summary>
+	/// Interface defining common attributes of user interface controls
+	/// </summary>
+	public interface IControl {
+		/// <summary>
+		/// Gets or sets the text displayed on the control
+		/// </summary>
+		/// <value>The text.</value>
+		string Text { get; set; }
+
+		/// <summary>
+		/// Occurs when the mouse clicks the control
+		/// </summary>
+		event ClickEvent Click;
+
+		/// <summary>
+		/// Updates the control based on current information
+		/// </summary>
+		/// <param name="CurrTime">Current game time.</param>
+		void Update(GameTime CurrTime);
+		/// <summary>
+		/// Draws the control to the screen
+		/// </summary>
+		void Draw();
+	}
+
+	/// <summary>
 	/// Event handler for button clicks
 	/// </summary>
-	public delegate void ButtonClickEvent(object Sender, MouseButton Button);
+	public delegate void ClickEvent(object Sender, MouseButton Button);
 
 	/// <summary>
 	/// Used to specify the alignment of the text within a control

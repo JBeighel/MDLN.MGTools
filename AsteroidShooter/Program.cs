@@ -283,8 +283,6 @@ namespace MDLN.AsteroidShooter {
 			cUFOs.Draw();
 			cAsteroids.Draw();
 			cEnemyBullets.Draw();
-
-			cDevConsole.AddText("Playerbullets: " + cPlayerBullets.ParticleList.Count);
 			cPlayerBullets.Draw();
 
 			if (cHeadlightMode == true) {//Dimming overlay for the flashlight

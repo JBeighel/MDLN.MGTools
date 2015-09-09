@@ -50,10 +50,23 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Calculates the angle from the X Axis going clockwise of a line segment defined by two points.
+		/// </summary>
+		/// <returns>The angle from points.</returns>
+		/// <param name="PointOrigin">Origin point, defines the vertex of the angle a horizontal line is projected as one of the sides.</param>
+		/// <param name="PointOffset">Offset point, defines the line composing the other side of the angle.</param>
 		public static float GetAngleFromPoints(Vector2 PointOrigin, Vector2 PointOffset) {
 			return GetAngleFromPoints(PointOrigin, PointOffset, false);
 		}
 
+		/// <summary>
+		/// Calculates the angle from the X Axis going clockwise of a line segment defined by two points.
+		/// </summary>
+		/// <returns>The angle from points.</returns>
+		/// <param name="PointOrigin">Origin point, defines the vertex of the angle a horizontal line is projected as one of the sides.</param>
+		/// <param name="PointOffset">Offset point, defines the line composing the other side of the angle.</param>
+		/// <param name="InvertYAxis">If set to <c>true</c> to invert Y axis, matches the results with screen coordinates.</param>
 		public static float GetAngleFromPoints(Vector2 PointOrigin, Vector2 PointOffset, bool InvertYAxis) {
 			float LenX, LenY;
 

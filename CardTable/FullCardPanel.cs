@@ -22,7 +22,7 @@ namespace MDLN.CardTable {
 			cCloseBtn.BackgroundColor = Color.Navy;
 			cCloseBtn.FontColor = Color.AntiqueWhite;
 			cCloseBtn.Visible = true;
-			cCloseBtn.Click += new ButtonClickEvent(CloseBtnCLick);
+			cCloseBtn.Click += new ClickEvent(CloseBtnCLick);
 		}
 
 		public CardInfo Card { 

@@ -83,11 +83,11 @@ namespace MDLN.CardTable {
 				ButtonArea.Y += ButtonArea.Height + 1;
 			}
 
-			cMenuBtns[MenuButtons.Menu].Click += new ButtonClickEvent(MenuClick);
-			cMenuBtns[MenuButtons.OpenDoor].Click += new ButtonClickEvent(OpenDoorClick);
-			cMenuBtns[MenuButtons.DrawMonster].Click += new ButtonClickEvent(SpawnMonsterClick);
-			cMenuBtns[MenuButtons.Abilities].Click += new ButtonClickEvent(AbilitiesClick);
-			cMenuBtns[MenuButtons.Treasure].Click += new ButtonClickEvent(TreasureClick);
+			cMenuBtns[MenuButtons.Menu].Click += new ClickEvent(MenuClick);
+			cMenuBtns[MenuButtons.OpenDoor].Click += new ClickEvent(OpenDoorClick);
+			cMenuBtns[MenuButtons.DrawMonster].Click += new ClickEvent(SpawnMonsterClick);
+			cMenuBtns[MenuButtons.Abilities].Click += new ClickEvent(AbilitiesClick);
+			cMenuBtns[MenuButtons.Treasure].Click += new ClickEvent(TreasureClick);
 
 			cFullCardFrame = new FullCardPanel(cGraphDevMgr.GraphicsDevice, cGraphDevMgr.GraphicsDevice.Viewport.Height, (int)(cGraphDevMgr.GraphicsDevice.Viewport.Width / 3));
 			cFullCardFrame.BackgroundColor = Color.DarkViolet;
@@ -113,7 +113,7 @@ namespace MDLN.CardTable {
 				cCardsInPlay[Ctr].BackgroundColor = new Color(0, 0, 0, 0);
 				cCardsInPlay[Ctr].Top = 3;
 				cCardsInPlay[Ctr].Left = 3 + (Ctr * (MiniCardWidth + 3));
-				cCardsInPlay[Ctr].Click += new ButtonClickEvent(CardInPlayClick);
+				cCardsInPlay[Ctr].Click += new ClickEvent(CardInPlayClick);
 			}
 
 			LoadMonsterDeck(DECKXMLFILE);

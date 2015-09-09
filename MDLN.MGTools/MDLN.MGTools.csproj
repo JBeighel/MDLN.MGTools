@@ -13,6 +13,7 @@
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug</OutputPath>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\MDLN.MGTools.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>false</Optimize>

@@ -33,12 +33,20 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets the draw blending mode.
+		/// </summary>
+		/// <value>The draw blending mode.</value>
 		public BlendState DrawBlendingMode { get; set; }
 
+		/// <summary>
+		/// Gets or sets the shader effect to use when rendering the particles.
+		/// </summary>
+		/// <value>The shader effect.</value>
 		public Effect ShaderEffect { get; set; }
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="MDLN.MGTools.Particles2D"/> class.
+		/// Initializes a new instance of the <see cref="MDLN.MGTools.ParticleEngine2D"/> class.
 		/// </summary>
 		/// <param name="GraphDev">Graph device.</param>
 		public ParticleEngine2D(GraphicsDevice GraphDev) {
@@ -213,11 +221,20 @@ namespace MDLN.MGTools {
 		/// Speed at which the particle is rotating
 		/// </summary>
 		public float SpeedRotate;
+		/// <summary>
+		/// The amount of time in milliseconds the particle should exist
+		/// </summary>
 		public double TimeToLive;
+		/// <summary>
+		/// True to have the particle fade over time, false to not fade
+		/// </summary>
 		public bool AlphaFade;
 
 		private double cCreationTime;
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="MDLN.MGTools.Particle2D"/> class.
+		/// </summary>
 		public Particle2D() {
 			TimeToLive = 0;
 			AlphaFade = false;
@@ -371,7 +388,14 @@ namespace MDLN.MGTools {
 		bool TestCollision(ICollidable TestObj);
 	}
 
+	/// <summary>
+	/// Interface that offers common controls for any object that might be visible on the screen
+	/// </summary>
 	public interface IVisible {
+		/// <summary>
+		/// Retrieves teh coordinates of the center of the control
+		/// </summary>
+		/// <returns>The center coordinates.</returns>
 		Vector2 GetCenterCoordinates();
 	}
 }

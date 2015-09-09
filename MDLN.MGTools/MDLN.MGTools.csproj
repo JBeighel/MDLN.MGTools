@@ -41,5 +41,6 @@
     <Compile Include="MDLN.MGTools.GameConsole.cs" />
     <Compile Include="MDLN.MGTools.Button.cs" />
     <Compile Include="MDLN.MGTools.ParticleEngine2D.cs" />
+    <Compile Include="MDLN.MGTools.TextBox.cs" />
   </ItemGroup>
 </Project>

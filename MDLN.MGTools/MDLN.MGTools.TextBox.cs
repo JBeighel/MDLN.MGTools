@@ -1,9 +1,13 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 using System;
 
 namespace MDLN.MGTools {
+	/// <summary>
+	/// A control to allow the user to enter text input
+	/// </summary>
 	public class TextBox : Button, IControl, IVisible {
 		/// <summary>
 		/// Initializes a new instance of the <see cref="MDLN.MGTools.TextBox"/> class.
@@ -23,6 +27,32 @@ namespace MDLN.MGTools {
 		/// </summary>
 		/// <value><c>true</c> if this instance has focus; otherwise, <c>false</c>.</value>
 		public bool HasFocus { get; set; }
+
+		/// <summary>
+		/// This function is used to update the contents of the text box. 
+		/// </summary>
+		/// <param name="CurrTime">Currend time information</param>
+		/// <param name="CurrKeyboard">Current state of the keyboard.</param>
+		/// <param name="CurrMouse">Current state of the mouse.</param>
+		protected override void UpdateContents(GameTime CurrTime, Microsoft.Xna.Framework.Input.KeyboardState CurrKeyboard, Microsoft.Xna.Framework.Input.MouseState CurrMouse) {
+			if ((CurrMouse.LeftButton == ButtonState.Pressed) || (CurrMouse.LeftButton == ButtonState.Pressed)) { //Mouse button is pressed
+				if (ClientRegion.Contains(CurrMouse.Position) == false) {//Mouse is outside of the control, it has lost focus
+					HasFocus = false;
+				}
+			}
+
+			if (HasFocus == false) { //Only update if the control has focus
+
+			}
+		}
+
+		/// <summary>
+		/// Retrieves teh coordinates of the center of the control
+		/// </summary>
+		/// <returns>The center coordinates.</returns>
+		public Vector2 GetCenterCoordinates() {
+			return new Vector2(Left + (Height / 2), Top + (Width / 2));
+		}
 
 		private void ControlClicked(object Sender, MouseButton Button) {
 			HasFocus = true;

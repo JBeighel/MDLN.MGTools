@@ -124,15 +124,7 @@ namespace MDLN.MGTools {
 		/// <param name="CurrMouse">Current state of the mouse.</param>
 		/// <param name="TotalTime">Current time information</param>
 		protected override void UpdateContents(GameTime TotalTime, KeyboardState CurrKeys, MouseState CurrMouse) {
-			Keys[] PressedList = CurrKeys.GetPressedKeys();
-			string NewKeys = "";
-			bool ShiftDown = false;
-
-			if ((CurrKeys.IsKeyDown(Keys.LeftShift) == true) || (CurrKeys.IsKeyDown(Keys.RightShift) == true)) {
-				ShiftDown = true;
-			} else {
-				ShiftDown = false;
-			}
+			string NewKeys = MGInput.GetTypedChars(CurrKeys, cPriorKeys);
 
 			if (TotalTime.TotalGameTime.Milliseconds <= 500) {
 				if (cCursorOn == false) {
@@ -146,75 +138,6 @@ namespace MDLN.MGTools {
 				}
 
 				cCursorOn = false;
-			}
-
-			foreach (Keys CurrKey in PressedList) {
-				if (cPriorKeys.IsKeyDown(CurrKey) == false) {
-					if ((CurrKey >= Keys.A) && (CurrKey <= Keys.Z)) {
-						if (ShiftDown == true) {
-							NewKeys += CurrKey.ToString();
-						} else {
-							NewKeys += CurrKey.ToString().ToLower();
-						}
-					} else if ((CurrKey >= Keys.D0) && (CurrKey <= Keys.D9)) {
-						string Num = ((int)(CurrKey - Keys.D0)).ToString();
-
-						if (ShiftDown == true) {
-							switch (Num)
-							{
-								case "1":
-									NewKeys += "!";
-									break;
-								case "2":
-									NewKeys += "@";
-									break;
-								case "3":
-									NewKeys += "#";
-									break;
-								case "4":
-									NewKeys += "$";
-									break;
-								case "5":
-									NewKeys += "%";
-									break;
-								case "6":
-									NewKeys += "^";
-									break;
-								case "7":
-									NewKeys += "&";
-									break;
-								case "8":
-									NewKeys += "*";
-									break;
-								case "9":
-									NewKeys += "(";
-									break;
-								case "0":
-									NewKeys += ")";
-									break;
-								default:
-									//wtf?
-									break;
-							}
-						} else {
-							NewKeys += ((int)(CurrKey - Keys.D0)).ToString();
-						}
-					} else if ((CurrKey >= Keys.NumPad0) && (CurrKey <= Keys.NumPad9)) {
-						NewKeys += ((int)(CurrKey - Keys.NumPad0)).ToString();
-					} else if (CurrKey == Keys.OemPlus) {
-						if (ShiftDown == true) {
-							NewKeys += "+";
-						} else {
-							NewKeys += "=";
-						}
-					}else if (CurrKey == Keys.Space) {
-						NewKeys += " ";
-					} else if (CurrKey == Keys.Enter) {
-						NewKeys += "\n";
-					} else if (CurrKey == Keys.Back) {
-						NewKeys += "\b";
-					}
-				}
 			}
 
 			if (NewKeys.CompareTo("") != 0) {

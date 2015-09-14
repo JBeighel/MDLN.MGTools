@@ -41,8 +41,16 @@ namespace MDLN.MGTools {
 				}
 			}
 
-			if (HasFocus == false) { //Only update if the control has focus
+			if (HasFocus != false) { //Only update if the control has focus
+				string Input = MGInput.GetTypedChars(CurrKeyboard, cPriorKeys);
 
+				if (Input.CompareTo("\b") == 0) {
+					if (Text.Length > 2) {
+						Text = Text.Substring(0, Text.Length - 1);
+					}
+				} else {
+					Text += Input;
+				}
 			}
 		}
 

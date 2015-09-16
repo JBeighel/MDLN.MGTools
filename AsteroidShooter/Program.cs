@@ -38,7 +38,7 @@ namespace MDLN.AsteroidShooter {
 		private Texture2D cSolidTexture;
 		private TextureFont cFont;
 		private bool cHeadlightMode, cShowStats;
-		private Effect cShader;
+		private Effect cShader, cShipShader;
 
 		public AsteroidShooter() {
 			cGraphDevMgr = new GraphicsDeviceManager(this);
@@ -68,8 +68,6 @@ namespace MDLN.AsteroidShooter {
 		}
 
 		protected override void LoadContent() {
-			cShader = Content.Load<Effect>("ShaderEffect");
-
 			cDrawBatch = new SpriteBatch(cGraphDevMgr.GraphicsDevice);
 
 			cSolidTexture = new Texture2D(cGraphDevMgr.GraphicsDevice, 1, 1);
@@ -80,6 +78,10 @@ namespace MDLN.AsteroidShooter {
 			foreach (Textures CurrTexture in Enum.GetValues(typeof(Textures))) {
 				cTextureDict.Add(CurrTexture, Content.Load<Texture2D>(Tools.Tools.GetEnumDescriptionAttribute(CurrTexture)));
 			}
+
+			cShader = Content.Load<Effect>("ShaderEffect");
+			cShipShader = Content.Load<Effect>("BumpMap");
+			cShipShader.Parameters["NormalMap"].SetValue(cTextureDict[Textures.ShipNormal]);
 
 			cFont = new TextureFont(cTextureDict[Textures.Font]);
 			cDevConsole = new MDLN.MGTools.GameConsole(cGraphDevMgr.GraphicsDevice, Content, "Font.png", 0, 0, cGraphDevMgr.GraphicsDevice.Viewport.Bounds.Width, cGraphDevMgr.GraphicsDevice.Viewport.Bounds.Height / 2);
@@ -107,6 +109,7 @@ namespace MDLN.AsteroidShooter {
 			cAsteroids.WrapScreenEdges = true;
 
 			cUFOs = new ParticleEngine2D(cGraphDevMgr.GraphicsDevice);
+			cUFOs.ShaderEffect = cShipShader;
 			cUFOs.WrapScreenEdges = true;
 
 			cSparkles = new ParticleEngine2D(cGraphDevMgr.GraphicsDevice);
@@ -539,6 +542,8 @@ namespace MDLN.AsteroidShooter {
 		}
 
 		protected enum Textures {
+			[Description("UFO-NormalMap.png")]
+			ShipNormal,
 			[Description("UFO.png")]
 			Ship,
 			[Description("Asteroid.png")]

@@ -69,6 +69,8 @@ namespace MDLN.AsteroidShooter
 			}
 		}
 
+		public Texture2D ShipNormalMap { get; set; }
+
 		public override int Left {
 			get {
 				return base.Left;
@@ -125,6 +127,8 @@ namespace MDLN.AsteroidShooter
 			}
 		}
 
+		public Effect ShaderEffect { get; set; }
+
 		public IEnumerable<CollisionRegion> GetCollisionRegions() {
 			return cCollisionList;
 		}
@@ -155,6 +159,10 @@ namespace MDLN.AsteroidShooter
 		}
 
 		protected override void DrawContents(GameTime CurrTime) {
+			if (ShaderEffect != null) {
+				ShaderEffect.Techniques[0].Passes[0].Apply();
+			}
+
 			cDrawBatch.Draw(cShipTexture, cDrawRegion, cShipTexture.Bounds, cTint, -1 * cRotation + ImageInitialAngle, cOrigin, SpriteEffects.None, 0);
 		}
 

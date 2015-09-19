@@ -1,7 +1,7 @@
 ﻿sampler s0;
 sampler NormalMap;
 float2 ObjectPos;
-float2 LightPos;
+
 
 float PI = 3.141593;
 
@@ -20,17 +20,40 @@ float CalculateAngleFromPoints(float2 PointOrigin, float2 PointOffset) {
 	}
 }
 
+float2 CalculateXYMagnitude(float Angle, float Magnitude) {
+	float2 Components;
+
+	Components.x = cos(Angle) * Magnitude;
+	Components.y = sin(Angle) * Magnitude;
+
+	return Components;
+}
+
 //Tint is the color set in SpriteBatch.Draw() and coords is screen coordinates
 float4 PixelShaderFunction(float4 TintColor : COLOR0, float2 TexCoord: TEXCOORD0) : COLOR0
 {
+float2 LightPos;
+	LightPos.x = 0;
+	LightPos.y = 0;
+
 	float LightAngle = CalculateAngleFromPoints(ObjectPos, LightPos);
 	float4 NormalColor = tex2D(NormalMap, TexCoord);
+
+	float2 LightMagn = CalculateXYMagnitude(LightAngle, 1);
 
 	float4 DrawColor = tex2D(s0, TexCoord);
 
 	DrawColor *= TintColor;
 
-	DrawColor += NormalColor;
+	if (NormalColor.g - 0.5 > 0) {
+		DrawColor.r += NormalColor.g * LightMagn.x;
+		DrawColor.g += NormalColor.g * LightMagn.x;
+		DrawColor.b += NormalColor.g * LightMagn.x;
+	} else {
+		//DrawColor.r -= NormalColor.g * LightMagn.x;
+		//DrawColor.g -= NormalColor.g * LightMagn.x;
+		//DrawColor.b -= NormalColor.g * LightMagn.x;
+	}
 	
 	return DrawColor;
 }

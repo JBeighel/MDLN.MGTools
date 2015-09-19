@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsteroidShooter", "Asteroid
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardTable", "CardTable\CardTable.csproj", "{8777A8D0-DCF9-49A2-81A2-BB970302E8F8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarchingSquares", "MarchingSquares\MarchingSquares.csproj", "{7116E45B-7C7E-4B58-BC1B-BE72AD06B76F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,10 @@ Global
 		{61F383D9-872B-4B2B-92CE-21D18A74EC13}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{61F383D9-872B-4B2B-92CE-21D18A74EC13}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{61F383D9-872B-4B2B-92CE-21D18A74EC13}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7116E45B-7C7E-4B58-BC1B-BE72AD06B76F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7116E45B-7C7E-4B58-BC1B-BE72AD06B76F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7116E45B-7C7E-4B58-BC1B-BE72AD06B76F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7116E45B-7C7E-4B58-BC1B-BE72AD06B76F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8777A8D0-DCF9-49A2-81A2-BB970302E8F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8777A8D0-DCF9-49A2-81A2-BB970302E8F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8777A8D0-DCF9-49A2-81A2-BB970302E8F8}.Release|Any CPU.ActiveCfg = Release|Any CPU

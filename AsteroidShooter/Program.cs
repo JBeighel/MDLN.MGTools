@@ -109,7 +109,7 @@ namespace MDLN.AsteroidShooter {
 			cAsteroids.WrapScreenEdges = true;
 
 			cUFOs = new ParticleEngine2D(cGraphDevMgr.GraphicsDevice);
-			cUFOs.ShaderEffect = cShipShader;
+			//cUFOs.ShaderEffect = cShipShader;
 			cUFOs.WrapScreenEdges = true;
 
 			cSparkles = new ParticleEngine2D(cGraphDevMgr.GraphicsDevice);

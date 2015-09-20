@@ -425,7 +425,7 @@ namespace MDLN.MGTools {
 			}
 
 			if ((CurrMouse.LeftButton == ButtonState.Released) && (cPriorMouse.LeftButton == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-				if ((MouseDown != null) && (cSendMouseEvents == true)) {
+				if ((MouseUp != null) && (cSendMouseEvents == true)) {
 					MouseUp(this, MouseButton.Left, CurrMouse);
 				}
 
@@ -433,7 +433,7 @@ namespace MDLN.MGTools {
 			}
 
 			if ((CurrMouse.RightButton == ButtonState.Released) && (cPriorMouse.RightButton == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-				if ((MouseDown != null) && (cSendMouseEvents == true)) {
+				if ((MouseUp != null) && (cSendMouseEvents == true)) {
 					MouseUp(this, MouseButton.Right, CurrMouse);
 				}
 
@@ -441,7 +441,7 @@ namespace MDLN.MGTools {
 			}
 
 			if ((CurrMouse.MiddleButton == ButtonState.Released) && (cPriorMouse.MiddleButton == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-				if ((MouseDown != null) && (cSendMouseEvents == true)) {
+				if ((MouseUp != null) && (cSendMouseEvents == true)) {
 					MouseUp(this, MouseButton.Middle, CurrMouse);
 				}
 
@@ -449,7 +449,7 @@ namespace MDLN.MGTools {
 			}
 
 			if ((CurrMouse.XButton1 == ButtonState.Released) && (cPriorMouse.XButton1 == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-				if ((MouseDown != null) && (cSendMouseEvents == true)) {
+				if ((MouseUp != null) && (cSendMouseEvents == true)) {
 					MouseUp(this, MouseButton.XButton1, CurrMouse);
 				}
 
@@ -457,7 +457,7 @@ namespace MDLN.MGTools {
 			}
 
 			if ((CurrMouse.XButton2 == ButtonState.Released) && (cPriorMouse.XButton2 == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-				if ((MouseDown != null) && (cSendMouseEvents == true)) {
+				if ((MouseUp != null) && (cSendMouseEvents == true)) {
 					MouseUp(this, MouseButton.XButton2, CurrMouse);
 				}
 
@@ -477,7 +477,7 @@ namespace MDLN.MGTools {
 				cGraphicsDevice.SetRenderTarget (cRenderToBuffer);
 
 				//Do drawing
-				cGraphicsDevice.Clear (new Color (255, 255, 255, 0)); //Start fully transparent 
+				cGraphicsDevice.Clear (new Color (255, 255, 255, 255)); //Start fully transparent 
 				cDrawBatch.Begin (SpriteSortMode.Deferred, BlendState.NonPremultiplied);
 				cDrawBatch.Draw (cBackTexture, cGraphicsDevice.Viewport.Bounds, Color.White);
 

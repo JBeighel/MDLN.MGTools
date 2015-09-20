@@ -23,6 +23,7 @@ namespace MDLN.MarchingSquares {
 		private GraphicsDeviceManager cGraphDevMgr;
 		private GameConsole cDevConsole;
 		private Dictionary<Textures, Texture2D> cTextureDict;
+		private MarchingSquares2D cSquares;
 
 		public MarchingSquares() {
 			cGraphDevMgr = new GraphicsDeviceManager(this);
@@ -49,6 +50,17 @@ namespace MDLN.MarchingSquares {
 			cDevConsole.AccessKey = Keys.OemTilde;
 			cDevConsole.UseAccessKey = true;
 
+			cSquares = new MarchingSquares2D(cGraphDevMgr.GraphicsDevice, cGraphDevMgr.GraphicsDevice.Viewport.Height, cGraphDevMgr.GraphicsDevice.Viewport.Height + (cGraphDevMgr.GraphicsDevice.Viewport.Height / 10));
+			cSquares.CornerTexture = cTextureDict[Textures.Circle];
+			cSquares.WallTexture = cTextureDict[Textures.Squares];
+			cSquares.Top = 0;
+			cSquares.Left = 0;
+			cSquares.Visible = true;
+			cSquares.ColumnCount = 11;
+			cSquares.RowCount = 10;
+			cSquares.SendMouseEvents = true;
+			cSquares.MouseUp += new ContainerMouseButtonEventHandler(SquaresClick);
+
 			//Call monogame base
 			base.LoadContent();
 		}
@@ -56,6 +68,7 @@ namespace MDLN.MarchingSquares {
 		protected override void Update(GameTime gameTime) {
 			
 			//Update visual objects
+			cSquares.Update(gameTime);
 			cDevConsole.Update(gameTime);
 
 			//Call monogame base
@@ -66,6 +79,7 @@ namespace MDLN.MarchingSquares {
 			cGraphDevMgr.GraphicsDevice.Clear(Color.Black);
 
 			//Draw visual objects
+			cSquares.Draw();
 			cDevConsole.Draw();
 
 			//Call monogame base
@@ -82,9 +96,34 @@ namespace MDLN.MarchingSquares {
 
 		}
 
+		private void SquaresClick(object Sender, MouseButton MBtn, MouseState CurrMouse) {
+			Rectangle CornerRegion = new Rectangle();
+			int RowCtr, ColCtr;
+
+			for (RowCtr = 0; RowCtr <= cSquares.RowCount; RowCtr++) {
+				for (ColCtr = 0; ColCtr <= cSquares.ColumnCount; ColCtr++) {
+					CornerRegion.X = (int)((ColCtr * cSquares.Width / cSquares.ColumnCount) - 5);
+					CornerRegion.Y = (int)((RowCtr * cSquares.Height / cSquares.RowCount) - 5);
+					CornerRegion.Height = 10;
+					CornerRegion.Width = 10;
+
+					if (CornerRegion.Contains(CurrMouse.Position) == true) {
+						if (cSquares.GetCellCornerState(RowCtr, ColCtr) == CellCornerState.Empty) {
+							cSquares.SetCellCornerState(RowCtr, ColCtr, CellCornerState.Solid);
+						} else {
+							cSquares.SetCellCornerState(RowCtr, ColCtr, CellCornerState.Empty);
+						}
+						return;
+					}
+				}
+			}
+		}
+
 		protected enum Textures {
 			[Description("MarchingSquares.png")]
 			Squares,
+			[Description("Circle.png")]
+			Circle,
 			[Description("Font.png")]
 			Font
 		}

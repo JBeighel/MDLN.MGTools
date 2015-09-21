@@ -13,9 +13,10 @@ namespace MDLN.MarchingSquares {
 		private float cCellHeight, cCellWidth;
 		private uint cRowCount, cColCount;
 		/// <summary>
-		/// States of every cell vertex/corner.  cCellVertexes[X/Row][Y/Column]
+		/// States of every cell vertex/corner.  cCellVertexes[Y/Row][X/Column]
 		/// </summary>
 		private List<List<CellCornerState>> cCellVertexes;
+		private Random cRandom;
 
 		public MarchingSquares2D(GraphicsDevice GraphDev, int Height, int Width) : base(GraphDev, Height, Width) {
 			BackgroundColor = new Color(0, 0, 0, 255);
@@ -25,11 +26,35 @@ namespace MDLN.MarchingSquares {
 			cColCount = 0;
 
 			CornerTexture = null;
+
+			cRandom = new Random(DateTime.Now.Millisecond);
 		}
 
 		public Texture2D WallTexture { get; set; }
 
 		public Texture2D CornerTexture { get; set; }
+
+		public uint RowCount { 
+			get {
+				return  cRowCount;
+			}
+
+			set {
+				cRowCount = value;
+				ResizeVertexArrays();
+			}
+		}
+
+		public uint ColumnCount { 
+			get {
+				return cColCount;
+			}
+
+			set {
+				cColCount = value;
+				ResizeVertexArrays();
+			}
+		}
 
 		public void SetCellCornerState(int CornerRow, int CornerColumn, CellCornerState State) {
 			cCellVertexes[CornerRow][CornerColumn] = State;
@@ -38,6 +63,54 @@ namespace MDLN.MarchingSquares {
 
 		public CellCornerState GetCellCornerState(int CornerRow, int CornerColumn) {
 			return cCellVertexes[CornerRow][CornerColumn];
+		}
+
+		public void RandomizeAllCornerStates(float SolidChance) {
+			int RowCtr;
+
+			foreach (List<CellCornerState> Column in cCellVertexes) {
+				for (RowCtr = 0; RowCtr < Column.Count; RowCtr++) {
+					if (cRandom.NextDouble() < SolidChance) {
+						Column[RowCtr] = CellCornerState.Solid;
+					} else {
+						Column[RowCtr] = CellCornerState.Empty;
+					}
+				}
+			}
+
+			HasChanged = true;
+		}
+
+		public void CellularAutomatonPass(CellCornerState GridEdge, int BirthLimit, int NeighborMinLmit, int NeighborMaxLimit) {
+			int ColCtr, RowCtr, NeighborCount;
+			List<List<CellCornerState>> NewVertexList = new List<List<CellCornerState>>();
+			List<CellCornerState> NewRow;
+
+			for (RowCtr = 0; RowCtr < cCellVertexes.Count; RowCtr++) {
+				NewRow = new List<CellCornerState>();
+				NewVertexList.Add(NewRow);
+
+				for (ColCtr = 0; ColCtr < cCellVertexes[RowCtr].Count; ColCtr++) {
+					NeighborCount = GetCellNeighborCount(RowCtr, ColCtr, GridEdge);
+
+					if (cCellVertexes[RowCtr][ColCtr] == CellCornerState.Solid) {
+						if ((NeighborCount < NeighborMinLmit) || (NeighborCount > NeighborMaxLimit)) {
+							NewRow.Add(CellCornerState.Empty);
+						} else {
+							NewRow.Add(CellCornerState.Solid);
+						}
+					} else {
+						if (NeighborCount > BirthLimit) {
+							NewRow.Add(CellCornerState.Solid);
+						} else {
+							NewRow.Add(CellCornerState.Empty);
+						}
+					}
+				}
+			}
+
+			cCellVertexes = NewVertexList;
+			HasChanged = true;
 		}
 
 		protected override void DrawContents(GameTime CurrTime) {
@@ -75,28 +148,6 @@ namespace MDLN.MarchingSquares {
 						}
 					}
 				}
-			}
-		}
-
-		public uint RowCount { 
-			get {
-				return  cRowCount;
-			}
-
-			set {
-				cRowCount = value;
-				ResizeVertexArrays();
-			}
-		}
-
-		public uint ColumnCount { 
-			get {
-				return cColCount;
-			}
-
-			set {
-				cColCount = value;
-				ResizeVertexArrays();
 			}
 		}
 
@@ -179,6 +230,37 @@ namespace MDLN.MarchingSquares {
 			TextRegion.Y = TextRegion.Height * TextCol;
 
 			return TextRegion;
+		}
+
+		private int GetCellNeighborCount(int Row, int Col, CellCornerState GridEdge) {
+			List<CellCornerState> Neighbors = new List<CellCornerState>();
+			int ColCtr, RowCtr;
+
+			//Generate a list of neighbors
+			for (ColCtr = -1; ColCtr < 2; ColCtr++) {
+				for (RowCtr = -1; RowCtr < 2; RowCtr++) {
+					if ((ColCtr == 0) && (RowCtr == 0)) {
+						continue; //Skip the center, we only want neighbors
+					}
+
+					if ((Row + RowCtr < 0) || (Row + RowCtr > RowCount) || (Col + ColCtr < 0) || (Col + ColCtr > ColumnCount)) {
+						//Neighbor is outside the grid
+						Neighbors.Add(GridEdge);
+					} else {
+						Neighbors.Add(cCellVertexes[Row + RowCtr][Col + ColCtr]);
+					}
+				}
+			}
+
+			//Count the solid neighbors
+			ColCtr = 0;
+			foreach (CellCornerState CurrVal in Neighbors) {
+				if (CurrVal == CellCornerState.Solid) {
+					ColCtr++;
+				}
+			}
+
+			return ColCtr;
 		}
 	}
 

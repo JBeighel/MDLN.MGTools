@@ -56,8 +56,8 @@ namespace MDLN.MarchingSquares {
 			cSquares.Top = 0;
 			cSquares.Left = 0;
 			cSquares.Visible = true;
-			cSquares.ColumnCount = 11;
-			cSquares.RowCount = 10;
+			cSquares.ColumnCount = 11 * 3;
+			cSquares.RowCount = 10 * 3;
 			cSquares.SendMouseEvents = true;
 			cSquares.MouseUp += new ContainerMouseButtonEventHandler(SquaresClick);
 
@@ -93,7 +93,18 @@ namespace MDLN.MarchingSquares {
 		}
 
 		private void CommandSentEventHandler(object Sender, string Command) {
-
+			if (RegEx.QuickTest(Command, @"^(quit|exit)$") == true) {
+				Exit();
+			} else if (RegEx.QuickTest(Command, @"^Randomize\s*[=:]\s*[0-9]{1,2}$") == true) {
+				int Chance = Int32.Parse(RegEx.GetRegExGroup(Command, @"^Randomize\s*[=:]\s*([0-9]{1,2})$", 1));
+				cSquares.RandomizeAllCornerStates((float)Chance / 100);
+				cDevConsole.AddText("Randomizing with " + (float)Chance / 100 + " chance of solids.");
+			} else if (RegEx.QuickTest(Command, @"^cell\s*step$") == true) {
+				cSquares.CellularAutomatonPass(CellCornerState.Empty, 4, 2, 4);
+				cDevConsole.AddText("Cellular Automaton step.");
+			}else {
+				cDevConsole.AddText("Unrecognized command: " + Command);
+			}
 		}
 
 		private void SquaresClick(object Sender, MouseButton MBtn, MouseState CurrMouse) {

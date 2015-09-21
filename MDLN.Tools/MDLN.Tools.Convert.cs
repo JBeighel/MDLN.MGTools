@@ -350,6 +350,24 @@ namespace MDLN.Tools {
 				return Value.ToString();
 			}
 		}
+
+		/// <summary>
+		/// Retrieves the version number of the assembly that began execution.
+		/// </summary>
+		/// <param name="MajorMinorOnly">True to gets the major and minor numbers only, false to includ revision and build as well</param>
+		/// <returns>The version number as a string</returns>
+		public static string GetExecutableAssemblyVersion(bool MajorMinorOnly) {
+			string VersionText;
+			Version AssemblyVer = Assembly.GetEntryAssembly().GetName().Version;
+
+			VersionText = AssemblyVer.Major + "." + AssemblyVer.Minor;
+
+			if (MajorMinorOnly == false) {
+				VersionText = String.Format("{0}.{1}.{2}", VersionText, AssemblyVer.Build, AssemblyVer.Revision);
+			}
+
+			return VersionText;
+		}
 	}
 }
 

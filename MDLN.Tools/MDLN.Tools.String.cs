@@ -40,6 +40,25 @@ namespace MDLN.Tools {
 		}
 
 		/// <summary>
+		/// Retrives the value matched by a particular regular expression group
+		/// </summary>
+		/// <returns>The text matched by reg ex group, or null if the group doesn't exist or the regex doesn't match.</returns>
+		/// <param name="strText">String text.</param>
+		/// <param name="strRegEx">String reg ex.</param>
+		/// <param name="iGroupNum">The group number, 0 is the entire regular expression 1 and up is group identified by parenthesis.</param>
+		public static string GetRegExGroup(string strText, string strRegEx, int iGroupNum) {
+			Match rxResult;
+
+			rxResult = Regex.Match(strText, strRegEx, RegexOptions.IgnoreCase);
+
+			if ((rxResult.Success == true) && (rxResult.Groups.Count > iGroupNum)) {
+				return rxResult.Groups[iGroupNum].Value;
+			} else {
+				return null;
+			}
+		}
+
+		/// <summary>
 		/// Replaces all the spaces in a regular expression with the specified text.  
 		/// Attempts to avoid replacing spaces in bracket expressions as this may cause invalid regular expressions
 		/// </summary>

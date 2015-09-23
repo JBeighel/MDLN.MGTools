@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Input;
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MDLN.MarchingSquares {
 	public class MarchingSquares2D : Container {
@@ -91,7 +92,7 @@ namespace MDLN.MarchingSquares {
 				NewVertexList.Add(NewRow);
 
 				for (ColCtr = 0; ColCtr < cCellVertexes[RowCtr].Count; ColCtr++) {
-					NeighborCount = GetCellNeighborCount(RowCtr, ColCtr, GridEdge);
+					NeighborCount = GetCellSolidNeighborCount(RowCtr, ColCtr, GridEdge);
 
 					if (cCellVertexes[RowCtr][ColCtr] == CellCornerState.Solid) {
 						if ((NeighborCount < NeighborMinLmit) || (NeighborCount > NeighborMaxLimit)) {
@@ -128,7 +129,35 @@ namespace MDLN.MarchingSquares {
 		}
 
 		public void FloodFill(int CornerRow, int CornerCol) {
+			RevertCornersToEmpty();
 
+			if (cCellVertexes[CornerRow][CornerCol] == CellCornerState.Empty) {
+				FillCellAndEmptyNeighbors(CornerRow, CornerCol);
+			}
+
+			HasChanged = true;
+		}
+
+		public bool FindCave(int MinCorners) {
+			int RowCtr, ColCtr, CaveSize;
+
+			for (RowCtr = 0; RowCtr < cCellVertexes.Count; RowCtr++) {
+				for (ColCtr = 0; ColCtr < cCellVertexes[RowCtr].Count; ColCtr++) {
+					FloodFill(RowCtr, ColCtr);
+
+					CaveSize = 0;
+					foreach (List<CellCornerState> Col in cCellVertexes) {
+						CaveSize += Col.Count(x => x == CellCornerState.Flooded || x == CellCornerState.Perimeter || x == CellCornerState.Spawn);
+					}
+
+					if (CaveSize >= MinCorners) {
+						return true;
+					}
+				}
+			}
+
+			RevertCornersToEmpty();
+			return false;
 		}
 
 		protected override void DrawContents(GameTime CurrTime) {
@@ -160,7 +189,13 @@ namespace MDLN.MarchingSquares {
 						DrawRegion.Width = 5;
 
 						if (cCellVertexes[RowCtr][ColCtr] == CellCornerState.Empty) {
+							cDrawBatch.Draw(CornerTexture, DrawRegion, Color.Red);
+						} else if (cCellVertexes[RowCtr][ColCtr] == CellCornerState.Flooded) {
 							cDrawBatch.Draw(CornerTexture, DrawRegion, Color.Cyan);
+						} else if (cCellVertexes[RowCtr][ColCtr] == CellCornerState.Perimeter) {
+							cDrawBatch.Draw(CornerTexture, DrawRegion, Color.Purple);
+						} else if (cCellVertexes[RowCtr][ColCtr] == CellCornerState.Spawn) {
+							cDrawBatch.Draw(CornerTexture, DrawRegion, Color.Yellow);
 						} else {
 							cDrawBatch.Draw(CornerTexture, DrawRegion, Color.Olive);
 						}
@@ -220,16 +255,24 @@ namespace MDLN.MarchingSquares {
 			int TextureID = 0;
 
 			//Top left corner is bit 1
-			TextureID += (int)cCellVertexes[CellRow][CellCol];
+			if (cCellVertexes[CellRow][CellCol] == CellCornerState.Solid) {
+				TextureID += 1;
+			}
 
 			//Top right corner is bit 2
-			TextureID += 2 * (int)cCellVertexes[CellRow][CellCol + 1];
+			if (cCellVertexes[CellRow][CellCol + 1] == CellCornerState.Solid) {
+				TextureID += 2;
+			}
 
 			//Bottom right corner is bit 3
-			TextureID += 4 * (int)cCellVertexes[CellRow + 1][CellCol + 1];
+			if (cCellVertexes[CellRow + 1][CellCol + 1] == CellCornerState.Solid) {
+				TextureID += 4;
+			}
 
 			//Bottom left corner is bit 4
-			TextureID += 8 * (int)cCellVertexes[CellRow+ 1][CellCol];
+			if (cCellVertexes[CellRow + 1][CellCol] == CellCornerState.Solid) {
+				TextureID += 8;
+			}
 
 			return TextureID;
 		}
@@ -250,7 +293,7 @@ namespace MDLN.MarchingSquares {
 			return TextRegion;
 		}
 
-		private int GetCellNeighborCount(int Row, int Col, CellCornerState GridEdge) {
+		private int GetCellSolidNeighborCount(int Row, int Col, CellCornerState GridEdge) {
 			List<CellCornerState> Neighbors = new List<CellCornerState>();
 			int ColCtr, RowCtr;
 
@@ -280,13 +323,60 @@ namespace MDLN.MarchingSquares {
 
 			return ColCtr;
 		}
+
+		private void FillCellAndEmptyNeighbors(int CornerRow, int CornerCol) {
+			int AdjWallCnt;
+
+			if (cCellVertexes[CornerRow][CornerCol] != CellCornerState.Empty) {
+				return;
+			}
+
+			AdjWallCnt = GetCellSolidNeighborCount(CornerRow, CornerCol, CellCornerState.Solid);
+
+			if (AdjWallCnt <= 1) {
+				cCellVertexes[CornerRow][CornerCol] = CellCornerState.Flooded;
+			} else if (AdjWallCnt < 5) {
+				cCellVertexes[CornerRow][CornerCol] = CellCornerState.Perimeter;
+			} else {
+				cCellVertexes[CornerRow][CornerCol] = CellCornerState.Spawn;
+			}
+
+			if (CornerCol <= ColumnCount) {
+				FillCellAndEmptyNeighbors(CornerRow, CornerCol + 1);
+			}
+
+			if (CornerRow <= RowCount) {
+				FillCellAndEmptyNeighbors(CornerRow + 1, CornerCol);
+			}
+
+			if (CornerCol > 0) {
+				FillCellAndEmptyNeighbors(CornerRow, CornerCol - 1);
+			}
+
+			if (CornerRow > 0) {
+				FillCellAndEmptyNeighbors(CornerRow - 1, CornerCol);
+			}
+		}
+
+		private void RevertCornersToEmpty() {
+			int RowCtr, ColCtr;
+
+			for (RowCtr = 0; RowCtr < cCellVertexes.Count; RowCtr++) {
+				for (ColCtr = 0; ColCtr < cCellVertexes[RowCtr].Count; ColCtr++) {
+					if (cCellVertexes[RowCtr][ColCtr] != CellCornerState.Solid) {
+						cCellVertexes[RowCtr][ColCtr] = CellCornerState.Empty;
+					}
+				}
+			}
+		}
 	}
 
 	public enum CellCornerState : byte {
 		Solid = 1,
 		Empty = 0,
-		Flooded,
-		Unreachable
+		Flooded = 2,
+		Perimeter = 3,
+		Spawn = 4
 	}
 }
 	

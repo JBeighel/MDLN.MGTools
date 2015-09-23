@@ -24,6 +24,7 @@ namespace MDLN.MarchingSquares {
 		private GameConsole cDevConsole;
 		private Dictionary<Textures, Texture2D> cTextureDict;
 		private MarchingSquares2D cSquares;
+		private Button cNewMap;
 
 		public MarchingSquares() {
 			cGraphDevMgr = new GraphicsDeviceManager(this);
@@ -56,19 +57,38 @@ namespace MDLN.MarchingSquares {
 			cSquares.Top = 0;
 			cSquares.Left = 0;
 			cSquares.Visible = true;
-			cSquares.ColumnCount = 11 * 3;
-			cSquares.RowCount = 10 * 3;
+			cSquares.ColumnCount = 11 * 4;
+			cSquares.RowCount = 10 * 4;
 			cSquares.SendMouseEvents = true;
 			cSquares.MouseUp += new ContainerMouseButtonEventHandler(SquaresClick);
 
+			cNewMap = new Button(cGraphDevMgr.GraphicsDevice, null, 10, cSquares.Width + 40, 50, 150);
+			cNewMap.BackgroundColor = Color.BlueViolet;
+			cNewMap.Text = "New Map";
+			cNewMap.Font = new TextureFont(cTextureDict[Textures.Font]);
+			cNewMap.FontColor = Color.White;
+			cNewMap.Visible = true;
+			cNewMap.Click += NewMapClicked;
+
 			//Call monogame base
 			base.LoadContent();
+		}
+
+		void NewMapClicked (object Sender, MouseButton Button)
+		{
+			cSquares.RandomizeAllCornerStates(0.6f);
+			cSquares.CellularAutomatonPass(CellCornerState.Empty, 4, 2, 4);
+			cSquares.CellularAutomatonPass(CellCornerState.Empty, 4, 2, 4);
+			cSquares.CellularAutomatonPass(CellCornerState.Empty, 4, 2, 4);
+			cSquares.SetAllEdges(CellCornerState.Solid);
+			cSquares.FindCave(200);
 		}
 
 		protected override void Update(GameTime gameTime) {
 			
 			//Update visual objects
 			cSquares.Update(gameTime);
+			cNewMap.Update(gameTime);
 			cDevConsole.Update(gameTime);
 
 			//Call monogame base
@@ -80,6 +100,7 @@ namespace MDLN.MarchingSquares {
 
 			//Draw visual objects
 			cSquares.Draw();
+			cNewMap.Draw();
 			cDevConsole.Draw();
 
 			//Call monogame base
@@ -108,7 +129,13 @@ namespace MDLN.MarchingSquares {
 				cSquares.CellularAutomatonPass(CellCornerState.Empty, 4, 2, 4);
 				cSquares.CellularAutomatonPass(CellCornerState.Empty, 4, 2, 4);
 				cSquares.SetAllEdges(CellCornerState.Solid);
+				cSquares.FindCave(200);
 				cDevConsole.AddText("Generating new cave map");
+			} else if (RegEx.QuickTest(Command, @"^flood\s*([0-9]+)\s([0-9]+)$") == true) {
+				int Row = int.Parse(RegEx.GetRegExGroup(Command, @"^flood\s*([0-9]+)\s([0-9]+)$", 1));
+				int Col = int.Parse(RegEx.GetRegExGroup(Command, @"^flood\s*([0-9]+)\s([0-9]+)$", 2));
+				cDevConsole.AddText("Flooding map from cell row " + Row + " col " + Col);
+				cSquares.FloodFill(Row, Col);
 			} else {
 				cDevConsole.AddText("Unrecognized command: " + Command);
 			}

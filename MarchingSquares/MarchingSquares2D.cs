@@ -18,6 +18,8 @@ namespace MDLN.MarchingSquares {
 		/// </summary>
 		private List<List<CellCornerState>> cCellVertexes;
 		private Random cRandom;
+		private Vector2 cDisplayTopLeft, cDisplayBottomRight;
+		private bool cFitMapInDisplay;
 
 		public MarchingSquares2D(GraphicsDevice GraphDev, int Height, int Width) : base(GraphDev, Height, Width) {
 			BackgroundColor = new Color(0, 0, 0, 255);
@@ -25,6 +27,10 @@ namespace MDLN.MarchingSquares {
 
 			cRowCount = 0;
 			cColCount = 0;
+
+			cFitMapInDisplay = true;
+			CellDisplayHeight = 1;
+			CellDisplayWidth = 1;
 
 			CornerTexture = null;
 
@@ -54,6 +60,61 @@ namespace MDLN.MarchingSquares {
 			set {
 				cColCount = value;
 				ResizeVertexArrays();
+			}
+		}
+
+		public bool FitMapInDisplay {
+			get {
+				return cFitMapInDisplay;
+			}
+
+			set {
+				cFitMapInDisplay = value;
+				HasChanged = true;
+			}
+		}
+
+		public uint CellDisplayHeight { get; set; }
+
+		public uint CellDisplayWidth { get; set; }
+
+		public Vector2 DisplayCenterCoords {
+			get {
+				Vector2 DisplayCenter;
+				DisplayCenter.X = cDisplayTopLeft.X + (Width / 2);
+				DisplayCenter.Y = cDisplayTopLeft.Y + (Height / 2);
+
+				return DisplayCenter;
+			}
+
+			set {
+				cDisplayTopLeft.X = value.X - (Width / 2);
+				cDisplayBottomRight.X = value.X + (Width / 2);
+
+				cDisplayTopLeft.Y = value.Y - (Height / 2);
+				cDisplayBottomRight.Y = value.Y + (Height / 2);
+
+				if (cDisplayTopLeft.X < 0) {
+					cDisplayTopLeft.X = 0;
+					cDisplayBottomRight.X = Width;
+				}
+
+				if (cDisplayTopLeft.Y < 0) {
+					cDisplayTopLeft.Y = 0;
+					cDisplayBottomRight.Y = Height;
+				}
+
+				if (cDisplayBottomRight.X > cColCount * CellDisplayWidth) {
+					cDisplayTopLeft.X = cColCount * CellDisplayWidth - Width;
+					cDisplayBottomRight.X = cColCount * CellDisplayWidth;
+				}
+
+				if (cDisplayBottomRight.Y > cRowCount * CellDisplayWidth) {
+					cDisplayTopLeft.Y = cRowCount * CellDisplayWidth - Height;
+					cDisplayBottomRight.Y = cRowCount * CellDisplayWidth;
+				}
+
+				HasChanged = true;
 			}
 		}
 
@@ -161,44 +222,75 @@ namespace MDLN.MarchingSquares {
 		}
 
 		protected override void DrawContents(GameTime CurrTime) {
-			int ColCtr, RowCtr, TextureID;
+			int ColCtr, RowCtr, TextureID, TopLeftCornerRow, TopLeftCornerCol, NumRows, NumCols;
 			Rectangle DrawRegion = new Rectangle(), TextureRegion;
 
-			//Draw marching squares
-			for (ColCtr = 0; ColCtr < cColCount; ColCtr++) {
-				for (RowCtr = 0; RowCtr < cRowCount; RowCtr++) {
-					TextureID = GetCellTextureID(RowCtr, ColCtr);
-					TextureRegion = GetTextureRegionFromID(TextureID);
+			if (FitMapInDisplay == true) {
+				//Draw marching squares
+				for (ColCtr = 0; ColCtr < cColCount; ColCtr++) {
+					for (RowCtr = 0; RowCtr < cRowCount; RowCtr++) {
+						TextureID = GetCellTextureID(RowCtr, ColCtr);
+						TextureRegion = GetTextureRegionFromID(TextureID);
 
-					DrawRegion.X = (int)(ColCtr * cCellWidth);
-					DrawRegion.Y = (int)(RowCtr * cCellHeight);
-					DrawRegion.Height = (int)cCellHeight;
-					DrawRegion.Width = (int)cCellWidth;
+						DrawRegion.X = (int)(ColCtr * cCellWidth);
+						DrawRegion.Y = (int)(RowCtr * cCellHeight);
+						DrawRegion.Height = (int)cCellHeight;
+						DrawRegion.Width = (int)cCellWidth;
 
-					cDrawBatch.Draw(WallTexture, DrawRegion, TextureRegion, Color.White);
+						cDrawBatch.Draw(WallTexture, DrawRegion, TextureRegion, Color.White);
+					}
 				}
-			}
 
-			//If requested draw corner markers
-			if (CornerTexture != null) { //Draw markers on the cell corners
-				for (ColCtr = 0; ColCtr <= cColCount; ColCtr++) {
-					for (RowCtr = 0; RowCtr <= cRowCount; RowCtr++) {
-						DrawRegion.X = (int)((ColCtr * cCellWidth) - 2.5);
-						DrawRegion.Y = (int)((RowCtr * cCellHeight) - 2.5);
-						DrawRegion.Height = 5;
-						DrawRegion.Width = 5;
+				//If requested draw corner markers
+				if (CornerTexture != null) { //Draw markers on the cell corners
+					for (ColCtr = 0; ColCtr <= cColCount; ColCtr++) {
+						for (RowCtr = 0; RowCtr <= cRowCount; RowCtr++) {
+							DrawRegion.X = (int)((ColCtr * cCellWidth) - 2.5);
+							DrawRegion.Y = (int)((RowCtr * cCellHeight) - 2.5);
+							DrawRegion.Height = 5;
+							DrawRegion.Width = 5;
 
-						if (cCellVertexes[RowCtr][ColCtr] == CellCornerState.Empty) {
-							cDrawBatch.Draw(CornerTexture, DrawRegion, Color.Red);
-						} else if (cCellVertexes[RowCtr][ColCtr] == CellCornerState.Flooded) {
-							cDrawBatch.Draw(CornerTexture, DrawRegion, Color.Cyan);
-						} else if (cCellVertexes[RowCtr][ColCtr] == CellCornerState.Perimeter) {
-							cDrawBatch.Draw(CornerTexture, DrawRegion, Color.Purple);
-						} else if (cCellVertexes[RowCtr][ColCtr] == CellCornerState.Spawn) {
-							cDrawBatch.Draw(CornerTexture, DrawRegion, Color.Yellow);
-						} else {
-							cDrawBatch.Draw(CornerTexture, DrawRegion, Color.Olive);
+							if (cCellVertexes[RowCtr][ColCtr] == CellCornerState.Empty) {
+								cDrawBatch.Draw(CornerTexture, DrawRegion, Color.Red);
+							} else if (cCellVertexes[RowCtr][ColCtr] == CellCornerState.Flooded) {
+								cDrawBatch.Draw(CornerTexture, DrawRegion, Color.Cyan);
+							} else if (cCellVertexes[RowCtr][ColCtr] == CellCornerState.Perimeter) {
+								cDrawBatch.Draw(CornerTexture, DrawRegion, Color.Purple);
+							} else if (cCellVertexes[RowCtr][ColCtr] == CellCornerState.Spawn) {
+								cDrawBatch.Draw(CornerTexture, DrawRegion, Color.Yellow);
+							} else {
+								cDrawBatch.Draw(CornerTexture, DrawRegion, Color.Olive);
+							}
 						}
+					}
+				}
+			} else { //Draw zoomed map
+				//Figured out the corner just past the display top left
+				TopLeftCornerRow = (int)(cDisplayTopLeft.Y / CellDisplayHeight);
+				TopLeftCornerCol = (int)(cDisplayTopLeft.X / CellDisplayWidth);
+
+				//Figure out how many cells are shown
+				NumRows = (int)(Height / CellDisplayHeight) + 1;
+				if (NumRows > cRowCount) {
+					NumRows = (int)cRowCount - 1;
+				}
+
+				NumCols = (int)(Width / CellDisplayWidth) + 1;
+				if (NumCols > cColCount) {
+					NumCols = (int)cColCount - 1;
+				}
+
+				for (ColCtr = TopLeftCornerCol; ColCtr <= TopLeftCornerCol + NumCols && ColCtr < cColCount; ColCtr++) {
+					for (RowCtr = TopLeftCornerRow; RowCtr <= TopLeftCornerRow + NumRows && RowCtr < cRowCount; RowCtr++) {
+						TextureID = GetCellTextureID(RowCtr, ColCtr);
+						TextureRegion = GetTextureRegionFromID(TextureID);
+
+						DrawRegion.X = (int)(ColCtr * CellDisplayHeight) - (int)cDisplayTopLeft.X;
+						DrawRegion.Y = (int)(RowCtr * CellDisplayWidth) - (int)cDisplayTopLeft.Y;
+						DrawRegion.Height = (int)CellDisplayHeight;
+						DrawRegion.Width = (int)CellDisplayWidth;
+
+						cDrawBatch.Draw(WallTexture, DrawRegion, TextureRegion, Color.White);
 					}
 				}
 			}

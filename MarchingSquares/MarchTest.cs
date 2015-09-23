@@ -24,7 +24,7 @@ namespace MDLN.MarchingSquares {
 		private GameConsole cDevConsole;
 		private Dictionary<Textures, Texture2D> cTextureDict;
 		private MarchingSquares2D cSquares;
-		private Button cNewMap;
+		private Button cNewMap, cFlyMap;
 
 		public MarchingSquares() {
 			cGraphDevMgr = new GraphicsDeviceManager(this);
@@ -60,6 +60,9 @@ namespace MDLN.MarchingSquares {
 			cSquares.ColumnCount = 11 * 4;
 			cSquares.RowCount = 10 * 4;
 			cSquares.SendMouseEvents = true;
+			cSquares.CellDisplayHeight = 150;
+			cSquares.CellDisplayWidth = 150;
+			cSquares.DisplayCenterCoords = new Vector2(0, 0);
 			cSquares.MouseUp += new ContainerMouseButtonEventHandler(SquaresClick);
 
 			cNewMap = new Button(cGraphDevMgr.GraphicsDevice, null, 10, cSquares.Width + 40, 50, 150);
@@ -70,12 +73,19 @@ namespace MDLN.MarchingSquares {
 			cNewMap.Visible = true;
 			cNewMap.Click += NewMapClicked;
 
+			cFlyMap = new Button(cGraphDevMgr.GraphicsDevice, null, 70, cSquares.Width + 40, 50, 150);
+			cFlyMap.BackgroundColor = Color.BlueViolet;
+			cFlyMap.Text = "Fly Map";
+			cFlyMap.Font = new TextureFont(cTextureDict[Textures.Font]);
+			cFlyMap.FontColor = Color.White;
+			cFlyMap.Visible = true;
+			cFlyMap.Click += FlyMapClicked;
+
 			//Call monogame base
 			base.LoadContent();
 		}
 
-		void NewMapClicked (object Sender, MouseButton Button)
-		{
+		void NewMapClicked (object Sender, MouseButton Button) {
 			cSquares.RandomizeAllCornerStates(0.6f);
 			cSquares.CellularAutomatonPass(CellCornerState.Empty, 4, 2, 4);
 			cSquares.CellularAutomatonPass(CellCornerState.Empty, 4, 2, 4);
@@ -84,11 +94,40 @@ namespace MDLN.MarchingSquares {
 			cSquares.FindCave(200);
 		}
 
+		void FlyMapClicked (object Sender, MouseButton Button) {
+			if (cSquares.FitMapInDisplay == false) {
+				cSquares.FitMapInDisplay = true;
+			} else {
+				cSquares.FitMapInDisplay = false;
+			}
+		}
+
 		protected override void Update(GameTime gameTime) {
-			
+			KeyboardState CurrKeys = Keyboard.GetState();
+			Vector2 WorldPos = cSquares.DisplayCenterCoords;
+
+			if (CurrKeys.IsKeyDown(Keys.Left) == true) {
+				WorldPos.X -= 1;
+			}
+
+			if (CurrKeys.IsKeyDown(Keys.Right) == true) {
+				WorldPos.X += 1;
+			}
+
+			if (CurrKeys.IsKeyDown(Keys.Up) == true) {
+				WorldPos.Y -= 1;
+			}
+
+			if (CurrKeys.IsKeyDown(Keys.Down) == true) {
+				WorldPos.Y += 1;
+			}
+
+			cSquares.DisplayCenterCoords = WorldPos;
+
 			//Update visual objects
 			cSquares.Update(gameTime);
 			cNewMap.Update(gameTime);
+			cFlyMap.Update(gameTime);
 			cDevConsole.Update(gameTime);
 
 			//Call monogame base
@@ -101,6 +140,7 @@ namespace MDLN.MarchingSquares {
 			//Draw visual objects
 			cSquares.Draw();
 			cNewMap.Draw();
+			cFlyMap.Draw();
 			cDevConsole.Draw();
 
 			//Call monogame base

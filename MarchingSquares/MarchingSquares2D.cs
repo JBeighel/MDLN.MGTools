@@ -113,6 +113,24 @@ namespace MDLN.MarchingSquares {
 			HasChanged = true;
 		}
 
+		public void SetAllEdges(CellCornerState SetState) {
+			int Ctr;
+
+			for (Ctr = 0; Ctr < cCellVertexes.Count; Ctr++) {
+				cCellVertexes[Ctr][0] = SetState;
+				cCellVertexes[Ctr][(int)cColCount] = SetState;
+			}
+
+			for (Ctr = 0; Ctr <= cColCount; Ctr++) {
+				cCellVertexes[0][Ctr] = SetState;
+				cCellVertexes[(int)cRowCount][Ctr] = SetState;
+			}
+		}
+
+		public void FloodFill(int CornerRow, int CornerCol) {
+
+		}
+
 		protected override void DrawContents(GameTime CurrTime) {
 			int ColCtr, RowCtr, TextureID;
 			Rectangle DrawRegion = new Rectangle(), TextureRegion;
@@ -266,7 +284,9 @@ namespace MDLN.MarchingSquares {
 
 	public enum CellCornerState : byte {
 		Solid = 1,
-		Empty = 0
+		Empty = 0,
+		Flooded,
+		Unreachable
 	}
 }
 	

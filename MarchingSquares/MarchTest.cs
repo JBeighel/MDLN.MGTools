@@ -102,7 +102,14 @@ namespace MDLN.MarchingSquares {
 			} else if (RegEx.QuickTest(Command, @"^cell\s*step$") == true) {
 				cSquares.CellularAutomatonPass(CellCornerState.Empty, 4, 2, 4);
 				cDevConsole.AddText("Cellular Automaton step.");
-			}else {
+			} else if (RegEx.QuickTest(Command, @"^new\s*(map|caves?)$") == true) {
+				cSquares.RandomizeAllCornerStates(0.6f);
+				cSquares.CellularAutomatonPass(CellCornerState.Empty, 4, 2, 4);
+				cSquares.CellularAutomatonPass(CellCornerState.Empty, 4, 2, 4);
+				cSquares.CellularAutomatonPass(CellCornerState.Empty, 4, 2, 4);
+				cSquares.SetAllEdges(CellCornerState.Solid);
+				cDevConsole.AddText("Generating new cave map");
+			} else {
 				cDevConsole.AddText("Unrecognized command: " + Command);
 			}
 		}

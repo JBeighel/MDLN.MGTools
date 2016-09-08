@@ -1,47 +1,62 @@
-<aocards>
-	<card image="AO_Blitz-1.png" />
-	<card image="AO_Blitz-2.png" />
-	<card image="AO_Blitz-3.png" />
-	<card image="AO_Blitz-4.png" />
-	<card image="AO_Blitz-5.png" />
-	<card image="AO_Blitz-6.png" />
-	<card image="AO_Blitz-7.png" />
-	<card image="AO_Blitz-8.png" />
+<cardlist>
+	<autooverlord image="AO_Blitz-1.png" />
+	<autooverlord image="AO_Blitz-2.png" />
+	<autooverlord image="AO_Blitz-3.png" />
+	<autooverlord image="AO_Blitz-4.png" />
+	<autooverlord image="AO_Blitz-5.png" />
+	<autooverlord image="AO_Blitz-6.png" />
+	<autooverlord image="AO_Blitz-7.png" />
+	<autooverlord image="AO_Blitz-8.png" />
 
-	<card image="AO_Orange-1.png" />
-	<card image="AO_Orange-2.png" />
-	<card image="AO_Orange-3.png" />
-	<card image="AO_Orange-4.png" />
-	<card image="AO_Orange-5.png" />
-	<card image="AO_Orange-6.png" />
+	<autooverlord image="AO_Orange-1.png" />
+	<autooverlord image="AO_Orange-2.png" />
+	<autooverlord image="AO_Orange-3.png" />
+	<autooverlord image="AO_Orange-4.png" />
+	<autooverlord image="AO_Orange-5.png" />
+	<autooverlord image="AO_Orange-6.png" />
 
-	<card image="AO_Purple-1.png" />
-	<card image="AO_Purple-2.png" />
-	<card image="AO_Purple-3.png" />
-	<card image="AO_Purple-4.png" />
-	<card image="AO_Purple-5.png" />
-	<card image="AO_Purple-6.png" />
+	<autooverlord image="AO_Purple-1.png" />
+	<autooverlord image="AO_Purple-2.png" />
+	<autooverlord image="AO_Purple-3.png" />
+	<autooverlord image="AO_Purple-4.png" />
+	<autooverlord image="AO_Purple-5.png" />
+	<autooverlord image="AO_Purple-6.png" />
 
-	<card image="AO_Yellow-1.png" />
-	<card image="AO_Yellow-2.png" />
-	<card image="AO_Yellow-3.png" />
-	<card image="AO_Yellow-4.png" />
-	<card image="AO_Yellow-5.png" />
-	<card image="AO_Yellow-6.png" />
+	<autooverlord image="AO_Yellow-1.png" />
+	<autooverlord image="AO_Yellow-2.png" />
+	<autooverlord image="AO_Yellow-3.png" />
+	<autooverlord image="AO_Yellow-4.png" />
+	<autooverlord image="AO_Yellow-5.png" />
+	<autooverlord image="AO_Yellow-6.png" />
 
-	<card image="AO_White-1.png" />
-	<card image="AO_White-2.png" />
-	<card image="AO_White-3.png" />
-	<card image="AO_White-4.png" />
-	<card image="AO_White-5.png" />
-	<card image="AO_White-6.png" />
+	<autooverlord image="AO_White-1.png" />
+	<autooverlord image="AO_White-2.png" />
+	<autooverlord image="AO_White-3.png" />
+	<autooverlord image="AO_White-4.png" />
+	<autooverlord image="AO_White-5.png" />
+	<autooverlord image="AO_White-6.png" />
 
 
-	<back image="AO_Back-Blue.png" />
-	<back image="AO_Back-DelvenDeep.png" />
-	<back image="AO_Back-Green.png" />
+	<autooverlordback image="AO_Back-Blue.png" />
+	<autooverlordback image="AO_Back-DelvenDeep.png" />
+	<autooverlordback image="AO_Back-Green.png" />
 
 
 	<reference description="Surge Order" image="AO_Ref-SurgeOrder.png" />
 	<reference description="Target Priority" image="AO_Ref-TargetPriority.png" />
-</aocards>
+
+
+	<overlordback image="OL_Back.png" />
+
+	<overlord image="OL_Basic-CriticalBlow.jpg" set="Basic" count="1" />
+	<overlord image="OL_Basic-DarkCharm.jpg" set="Basic" count="1" />
+	<overlord image="OL_Basic-DarkFortune.jpg" set="Basic" count="2" />
+	<overlord image="OL_Basic-DarkMight.jpg" set="Basic" count="2" />
+	<overlord image="OL_Basic-Dash.jpg" set="Basic" count="2" />
+	<overlord image="OL_Basic-Frenzy.jpg" set="Basic" count="2" />
+	<overlord image="OL_Basic-PitTrap.jpg" set="Basic" count="1" />
+	<overlord image="OL_Basic-PoisonDart.jpg" set="Basic" count="1" />
+	<overlord image="OL_Basic-TripWire.jpg" set="Basic" count="2" />
+	<overlord image="OL_Basic-WordOfMisery.jpg" set="Basic" count="1" />
+
+</cardlist>

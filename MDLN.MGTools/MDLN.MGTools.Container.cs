@@ -101,6 +101,7 @@ namespace MDLN.MGTools {
 
 			set {
 				cBackTexture = value;
+				cHasChanges = true;
 			}
 		}
 
@@ -133,6 +134,7 @@ namespace MDLN.MGTools {
 				}
 
 				cIsVisible = value;
+				cHasChanges = true;
 			}
 		}
 
@@ -218,10 +220,13 @@ namespace MDLN.MGTools {
 			}
 
 			set {
-				cCurrDrawRegion.Height = (cCurrDrawRegion.Height / cFullDrawRegion.Height) * value;
+				if (cFullDrawRegion.Height != 0) {
+					cCurrDrawRegion.Height = (cCurrDrawRegion.Height / cFullDrawRegion.Height) * value;
+				}
 
 				cFullDrawRegion.Height = value;
 				cRenderToBuffer = new RenderTarget2D(cGraphicsDevice, cFullDrawRegion.Width, cFullDrawRegion.Height);
+				cHasChanges = true;
 			}
 		}
 
@@ -235,10 +240,13 @@ namespace MDLN.MGTools {
 			}
 
 			set {
-				cCurrDrawRegion.Width = (cCurrDrawRegion.Width / cFullDrawRegion.Width) * value;
+				if (cFullDrawRegion.Width != 0) {
+					cCurrDrawRegion.Width = (cCurrDrawRegion.Width / cFullDrawRegion.Width) * value;
+				}
 
 				cFullDrawRegion.Width = value;
 				cRenderToBuffer = new RenderTarget2D(cGraphicsDevice, cFullDrawRegion.Width, cFullDrawRegion.Height);
+				cHasChanges = true;
 			}
 		}
 
@@ -349,7 +357,8 @@ namespace MDLN.MGTools {
 		}
 
 		/// <summary>
-		/// Update function to be called during the game update routine.
+		/// Update function to be called during the game update routine.  Will attempt to collect currect keyboard
+		/// and mouse input for the update.
 		/// </summary>
 		/// <param name="CurrTime">Current time information in the game</param>
 		public void Update(GameTime CurrTime) {
@@ -357,7 +366,8 @@ namespace MDLN.MGTools {
 		}
 
 		/// <summary>
-		/// Update function to be called during the game update routine.
+		/// Update function to be called during the game update routine.  Will use the provided keybaord and mouse
+		/// state for determining effects from user input.
 		/// </summary>
 		/// <param name="CurrTime">Current time information in the game</param>
 		/// <param name="CurrKeyboard">Current state of the keyboard.</param>

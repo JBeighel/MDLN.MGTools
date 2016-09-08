@@ -216,6 +216,13 @@ namespace MDLN.MGTools {
 			get {
 				return cFullDrawRegion.Height;
 			}
+
+			set {
+				cCurrDrawRegion.Height = (cCurrDrawRegion.Height / cFullDrawRegion.Height) * value;
+
+				cFullDrawRegion.Height = value;
+				cRenderToBuffer = new RenderTarget2D(cGraphicsDevice, cFullDrawRegion.Width, cFullDrawRegion.Height);
+			}
 		}
 
 		/// <summary>
@@ -225,6 +232,13 @@ namespace MDLN.MGTools {
 		public int Width {
 			get {
 				return cFullDrawRegion.Width;
+			}
+
+			set {
+				cCurrDrawRegion.Width = (cCurrDrawRegion.Width / cFullDrawRegion.Width) * value;
+
+				cFullDrawRegion.Width = value;
+				cRenderToBuffer = new RenderTarget2D(cGraphicsDevice, cFullDrawRegion.Width, cFullDrawRegion.Height);
 			}
 		}
 

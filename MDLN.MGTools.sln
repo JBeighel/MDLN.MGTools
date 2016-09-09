@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MDLN.MGTools", "MDLN.MGTools\MDLN.MGTools.csproj", "{61F383D9-872B-4B2B-92CE-21D18A74EC13}"
 EndProject
@@ -9,6 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MGToolsTestApp", "MGToolsTe
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Content", "Content", "{12C398CF-78A3-452D-B046-F2B898BF9B7C}"
 	ProjectSection(SolutionItems) = preProject
+		Content\AOCardsList.xml = Content\AOCardsList.xml
 		Content\CardBack.png = Content\CardBack.png
 		Content\deck.xml = Content\deck.xml
 		Content\DiceTexture.png = Content\DiceTexture.png

@@ -51,6 +51,11 @@ namespace DescentApp {
 		/// </summary>
 		private DeckFrame cOLFrame;
 
+		private OverlordConfigFrame cOLConfigFrame;
+		private Button cOpenConfig;
+
+		private List<OverlordCard> cOverlordCards;
+
 		/// <summary>
 		/// Constructor to establish all graphical and interface settings as well as
 		/// prepare class variables.
@@ -60,6 +65,7 @@ namespace DescentApp {
 			IsMouseVisible = true;
 			Window.AllowUserResizing = true;
 			Window.ClientSizeChanged += ResizeHandler;
+			cOverlordCards = new List<OverlordCard>();
 		}
 
 		/// <summary>
@@ -83,7 +89,11 @@ namespace DescentApp {
 		/// Load all external content files that are needed
 		/// </summary>
 		protected override void LoadContent() {
+			TextureFont Font;
+
 			Content.RootDirectory = INTERFACECONTENTDIR;
+
+			Font = new TextureFont(Content.Load<Texture2D>("Font.png"));
 
 			try {
 				cDevConsole = new GameConsole(cGraphDevMgr.GraphicsDevice, Content, "Font.png", cGraphDevMgr.GraphicsDevice.Viewport.Width, cGraphDevMgr.GraphicsDevice.Viewport.Height / 2);
@@ -100,20 +110,25 @@ namespace DescentApp {
 
 			cDevConsole.AddText(String.Format("Viewport Height={0} Width={1}", cGraphDevMgr.GraphicsDevice.Viewport.Height, cGraphDevMgr.GraphicsDevice.Viewport.Width));
 
+			//Build card deck frames
 			cAOFrame = new DeckFrame(cGraphDevMgr.GraphicsDevice, cGraphDevMgr.GraphicsDevice.Viewport.Height, cGraphDevMgr.GraphicsDevice.Viewport.Width / 2);
 			cAOFrame.Visible = true;
 			cAOFrame.CloseEffect = DisplayEffect.SlideUp;
 			cAOFrame.OpenEffect = DisplayEffect.SlideDown;
-			cAOFrame.Font = new TextureFont(Content.Load<Texture2D>("Font.png"));
+			cAOFrame.Font = Font;
 			cAOFrame.MaxCardsShown = 1;
+			cAOFrame.OpenEffect = DisplayEffect.SlideDown;
+			cAOFrame.CloseEffect = DisplayEffect.SlideUp;
 
 			cOLFrame = new DeckFrame(cGraphDevMgr.GraphicsDevice, cGraphDevMgr.GraphicsDevice.Viewport.Height, cGraphDevMgr.GraphicsDevice.Viewport.Width / 2);
 			cOLFrame.Left = cGraphDevMgr.GraphicsDevice.Viewport.Width / 2;
 			cOLFrame.Visible = true;
 			cOLFrame.CloseEffect = DisplayEffect.SlideUp;
 			cOLFrame.OpenEffect = DisplayEffect.SlideDown;
-			cOLFrame.Font = new TextureFont(Content.Load<Texture2D>("Font.png"));
+			cOLFrame.Font = Font;
 			cOLFrame.CardClick += OLCardClickedHandler;
+			cOLFrame.OpenEffect = DisplayEffect.SlideDown;
+			cOLFrame.CloseEffect = DisplayEffect.SlideUp;
 
 			cDevConsole.AddText(LoadGameDecks(Content, INTERFACECONTENTDIR + Path.DirectorySeparatorChar + "AOCardsList.xml"));
 
@@ -121,6 +136,21 @@ namespace DescentApp {
 			cAOFrame.SelectRandomCardBack();
 			cOLFrame.ShuffleCompleteDeck(true, false);
 			cOLFrame.SelectRandomCardBack();
+
+			//build config frame
+			cOpenConfig = new Button(cGraphDevMgr.GraphicsDevice, null, 0, 0, 100, 100);
+			cOpenConfig.Font = Font;
+			cOpenConfig.FontColor = new Color(0.1f, 0.1f, 0.1f, 1.0f);
+			cOpenConfig.BackgroundColor = new Color(0.7f, 0.7f, 0.7f, 0.7f);
+			cOpenConfig.Text = "Config";
+			cOpenConfig.Visible = true;
+			cOpenConfig.Click += ConfigClickHandler;
+
+			cOLConfigFrame = new Container(cGraphDevMgr.GraphicsDevice, cGraphDevMgr.GraphicsDevice.Viewport.Height, cGraphDevMgr.GraphicsDevice.Viewport.Width);
+			cOLConfigFrame.Visible = false;
+			cOLConfigFrame.OpenEffect = DisplayEffect.SlideUp;
+			cOLConfigFrame.CloseEffect = DisplayEffect.SlideDown;
+			cOLConfigFrame.BackgroundColor = new Color(0.8f, 0.608f, 0.398f, 1.0f);
 		}
 
 		/// <summary>
@@ -132,6 +162,9 @@ namespace DescentApp {
 			cDevConsole.Update(gameTime);
 			cAOFrame.Update(gameTime);
 			cOLFrame.Update(gameTime);
+
+			cOLConfigFrame.Update(gameTime);
+			cOpenConfig.Update(gameTime);
 
 			//Use monogame update
 			base.Update(gameTime);
@@ -149,6 +182,9 @@ namespace DescentApp {
 
 			cAOFrame.Draw(cDrawBatch);
 			cOLFrame.Draw(cDrawBatch);
+
+			cOLConfigFrame.Draw(cDrawBatch);
+			cOpenConfig.Draw(cDrawBatch);
 
 			//Always draw console last
 			cDevConsole.Draw(cDrawBatch);
@@ -193,6 +229,25 @@ namespace DescentApp {
 			cOLFrame.Left = Window.ClientBounds.Width / 2;
 			cOLFrame.Width = Window.ClientBounds.Width / 2;
 			cOLFrame.Height = Window.ClientBounds.Height;
+
+			cOpenConfig.Height = Window.ClientBounds.Height / 10;
+			cOpenConfig.Width = Window.ClientBounds.Width / 10;
+
+			if (cOpenConfig.Width < cOpenConfig.Height) {
+				cOpenConfig.Height = cOpenConfig.Width;
+			} else {
+				cOpenConfig.Width = cOpenConfig.Height;
+			}
+
+			cOpenConfig.Top = Window.ClientBounds.Height - cOpenConfig.Height;
+			cOpenConfig.Left = Window.ClientBounds.Width - cOpenConfig.Width;
+			cOpenConfig.FontSize = cOpenConfig.Height / 6;
+		}
+
+		private void ConfigClickHandler(object Sender, MouseButton Button) {
+			cAOFrame.Visible = !cAOFrame.Visible;
+			cOLFrame.Visible = !cOLFrame.Visible;
+			cOLConfigFrame.Visible = !cOLConfigFrame.Visible;
 		}
 
 		private void OLCardClickedHandler(object Sender, int CardIndex, MouseButton Button) {
@@ -213,6 +268,7 @@ namespace DescentApp {
 			Texture2D CardImage;
 			string Message = "";
 			int Ctr, CardCnt;
+			OverlordCard NewOLCard;
 
 			Message = "Loading card list from " + DeckXMLFile + "\n";
 			cOLFrame.CardBackList.Clear();
@@ -290,6 +346,7 @@ namespace DescentApp {
 							break;
 						case "overlord":
 							if (Tag.Attributes["image"] != null) {
+								/*
 								CardImage = Content.Load<Texture2D>(Tag.Attributes["image"].InnerText);
 
 								try {
@@ -302,6 +359,16 @@ namespace DescentApp {
 									cOLFrame.CardFaceList.Add(CardImage);
 									CardCnt -= 1;
 								}
+								 */
+
+								NewOLCard = new OverlordCard();
+								NewOLCard.Image = Content.Load<Texture2D>(Tag.Attributes["image"].InnerText);
+								NewOLCard.Count = Int32.Parse(Tag.Attributes["count"].InnerText);
+								NewOLCard.Include = 0;
+								NewOLCard.Class = Tag.Attributes["class"].InnerText;
+								NewOLCard.Set = Tag.Attributes["set"].InnerText;
+
+								cOverlordCards.Add(NewOLCard);
 							} else {
 								Message += String.Format("Tag {0} '{1}' contains no image attribute, skipping.\n", Ctr, Tag.Name);
 							}
@@ -321,6 +388,14 @@ namespace DescentApp {
 			Message += String.Format("Overlord deck loaded.  {0} Cards, {1} Backs\n", cOLFrame.CardBackList.Count, cOLFrame.CardFaceList.Count);
 
 			return Message;
+		}
+
+		private struct OverlordCard {
+			public string Set;
+			public string Class;
+			public Texture2D Image;
+			public int Count;
+			public int Include;
 		}
 	}
 }

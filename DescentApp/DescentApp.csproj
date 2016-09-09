@@ -56,6 +56,7 @@
   <ItemGroup>
     <Compile Include="DeckFrame.cs" />
     <Compile Include="MainForm.cs" />
+    <Compile Include="OverlordConfigFrame.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -62,7 +62,7 @@ namespace MDLN.MGTools {
 				UpdateFontTexture(value);
 			}
 		}
-
+		
 		/// <summary>
 		/// Writes text to the screen
 		/// </summary>
@@ -168,7 +168,7 @@ namespace MDLN.MGTools {
 			if (CharHeight == cTextureRowHeight) {
 				return cTextureColWidth;
 			} else {
-				return (int)(((float)CharHeight / (float)cTextureRowHeight) * (float)cTextureRowHeight);
+				return (int)(((float)CharHeight / (float)cTextureRowHeight) * (float)cTextureColWidth);
 			}
 		}
 	}

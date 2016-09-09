@@ -43,7 +43,7 @@ namespace DescentApp {
 		private GameConsole cDevConsole;
 
 		private AutomatedOverlordFrame cAOFrame;
-		private OverlordFrame cOLFrame;
+		private DeckFrame cOLFrame;
 
 		/// <summary>
 		/// Constructor to establish all graphical and interface settings as well as
@@ -100,12 +100,13 @@ namespace DescentApp {
 			cAOFrame.CloseEffect = DisplayEffect.SlideUp;
 			cAOFrame.OpenEffect = DisplayEffect.SlideDown;
 
-			cOLFrame = new OverlordFrame(cGraphDevMgr.GraphicsDevice, cGraphDevMgr.GraphicsDevice.Viewport.Height, cGraphDevMgr.GraphicsDevice.Viewport.Width / 2);
+			cOLFrame = new DeckFrame(cGraphDevMgr.GraphicsDevice, cGraphDevMgr.GraphicsDevice.Viewport.Height, cGraphDevMgr.GraphicsDevice.Viewport.Width / 2);
 			cOLFrame.Left = cGraphDevMgr.GraphicsDevice.Viewport.Width / 2;
-			cDevConsole.AddText(cOLFrame.LoadContent(Content, INTERFACECONTENTDIR + Path.DirectorySeparatorChar + "AOCardsList.xml"));
+			//cDevConsole.AddText(cOLFrame.LoadContent(Content, INTERFACECONTENTDIR + Path.DirectorySeparatorChar + "AOCardsList.xml"));
 			cOLFrame.Visible = true;
 			cOLFrame.CloseEffect = DisplayEffect.SlideUp;
 			cOLFrame.OpenEffect = DisplayEffect.SlideDown;
+			cOLFrame.Font = new TextureFont(Content.Load<Texture2D>("Font.png"));
 		}
 
 		/// <summary>

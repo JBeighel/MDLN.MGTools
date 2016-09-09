@@ -207,6 +207,7 @@ namespace MDLN.MGTools {
 			set {
 				cFullDrawRegion.X = value;
 				cOrigin.X = cFullDrawRegion.X;
+				HasChanged = true;
 			}
 		}
 
@@ -362,7 +363,7 @@ namespace MDLN.MGTools {
 		/// </summary>
 		/// <param name="CurrTime">Current time information in the game</param>
 		public void Update(GameTime CurrTime) {
-			Update(CurrTime, Keyboard.GetState(), Mouse.GetState());
+			Update(CurrTime, Keyboard.GetState(), Mouse.GetState(), true);
 		}
 
 		/// <summary>
@@ -373,13 +374,28 @@ namespace MDLN.MGTools {
 		/// <param name="CurrKeyboard">Current state of the keyboard.</param>
 		/// <param name="CurrMouse">Current state of the mouse.</param>
 		public void Update(GameTime CurrTime, KeyboardState CurrKeyboard, MouseState CurrMouse) {
+			Update(CurrTime, CurrKeyboard, CurrMouse, true);
+		}
+
+		/// <summary>
+		/// Update function to be called during the game update routine.  Will use the provided keybaord and mouse
+		/// state for determining effects from user input.
+		/// </summary>
+		/// <param name="CurrTime">Current time information in the game</param>
+		/// <param name="CurrKeyboard">Current state of the keyboard.</param>
+		/// <param name="CurrMouse">Current state of the mouse.</param>
+		/// <param name="ProcessMouseEvent">True to have this container check it should check for mouse events.  False to ignore mouse input.</param>
+		/// <returns>True if this container recived a mouse input event.  False if no mouse input was accepted.</returns>
+		public bool Update(GameTime CurrTime, KeyboardState CurrKeyboard, MouseState CurrMouse, bool ProcessMouseEvent) {
+			bool TookMouseEvent = false;
+
 			if ((UseAccessKey == true) && (CurrKeyboard.IsKeyDown(AccessKey) == true) && (cPriorKeys.IsKeyDown(AccessKey) == false)) {
 				ToggleVisible();
 			}
 
 			if ((cIsVisible == false) && (cIsClosing == false)) { //Only draw if container is shown
 				cPriorKeys = CurrKeyboard;
-				return;
+				return false;
 			}
 
 			//Create a MouseState based on the top left of the container for inheriting classes to use
@@ -391,104 +407,118 @@ namespace MDLN.MGTools {
 			//Update the contents
 			UpdateContents (CurrTime, CurrKeyboard, ContMouse);
 
-			//Trigger events
-			if ((cFullDrawRegion.Contains(CurrMouse.Position) == true) && ((cFullDrawRegion.Contains(cPriorMouse.Position) == false))) {
-				if ((MouseEnter != null) && (cSendMouseEvents == true)) {
-					MouseEnter(this, CurrMouse);
+			if (ProcessMouseEvent == true) {
+				//Trigger events
+				if ((cFullDrawRegion.Contains(CurrMouse.Position) == true) && ((cFullDrawRegion.Contains(cPriorMouse.Position) == false))) {
+					if ((MouseEnter != null) && (cSendMouseEvents == true)) {
+						MouseEnter(this, CurrMouse);
+					}
+
+					MouseEventEnter(ContMouse);
+					TookMouseEvent = true;
 				}
 
-				MouseEventEnter(ContMouse);
-			}
+				if ((cFullDrawRegion.Contains(CurrMouse.Position) == false) && ((cFullDrawRegion.Contains(cPriorMouse.Position) == true))) {
+					if ((MouseLeave != null) && (cSendMouseEvents == true)) {
+						MouseLeave(this, CurrMouse);
+					}
 
-			if ((cFullDrawRegion.Contains(CurrMouse.Position) == false) && ((cFullDrawRegion.Contains(cPriorMouse.Position) == true))) {
-				if ((MouseLeave != null) && (cSendMouseEvents == true)) {
-					MouseLeave(this, CurrMouse);
+					MouseEventLeave(ContMouse);
+					TookMouseEvent = true;
 				}
 
-				MouseEventLeave(ContMouse);
-			}
+				if ((CurrMouse.LeftButton == ButtonState.Pressed) && (cPriorMouse.LeftButton == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+					if ((MouseDown != null) && (cSendMouseEvents == true)) {
+						MouseDown(this, MouseButton.Left, CurrMouse);
+					}
 
-			if ((CurrMouse.LeftButton == ButtonState.Pressed) && (cPriorMouse.LeftButton == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-				if ((MouseDown != null) && (cSendMouseEvents == true)) {
-					MouseDown(this, MouseButton.Left, CurrMouse);
+					MouseEventButtonDown(ContMouse, MouseButton.Left);
+					TookMouseEvent = true;
 				}
 
-				MouseEventButtonDown(ContMouse, MouseButton.Left);
-			}
+				if ((CurrMouse.RightButton == ButtonState.Pressed) && (cPriorMouse.RightButton == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+					if ((MouseDown != null) && (cSendMouseEvents == true)) {
+						MouseDown(this, MouseButton.Right, CurrMouse);
+					}
 
-			if ((CurrMouse.RightButton == ButtonState.Pressed) && (cPriorMouse.RightButton == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-				if ((MouseDown != null) && (cSendMouseEvents == true)) {
-					MouseDown(this, MouseButton.Right, CurrMouse);
+					MouseEventButtonDown(ContMouse, MouseButton.Right);
+					TookMouseEvent = true;
 				}
 
-				MouseEventButtonDown(ContMouse, MouseButton.Right);
-			}
+				if ((CurrMouse.MiddleButton == ButtonState.Pressed) && (cPriorMouse.MiddleButton == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+					if ((MouseDown != null) && (cSendMouseEvents == true)) {
+						MouseDown(this, MouseButton.Middle, CurrMouse);
+					}
 
-			if ((CurrMouse.MiddleButton == ButtonState.Pressed) && (cPriorMouse.MiddleButton == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-				if ((MouseDown != null) && (cSendMouseEvents == true)) {
-					MouseDown(this, MouseButton.Middle, CurrMouse);
+					MouseEventButtonDown(ContMouse, MouseButton.Middle);
+					TookMouseEvent = true;
 				}
 
-				MouseEventButtonDown(ContMouse, MouseButton.Middle);
-			}
+				if ((CurrMouse.XButton1 == ButtonState.Pressed) && (cPriorMouse.XButton1 == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+					if ((MouseDown != null) && (cSendMouseEvents == true)) {
+						MouseDown(this, MouseButton.XButton1, CurrMouse);
+					}
 
-			if ((CurrMouse.XButton1 == ButtonState.Pressed) && (cPriorMouse.XButton1 == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-				if ((MouseDown != null) && (cSendMouseEvents == true)) {
-					MouseDown(this, MouseButton.XButton1, CurrMouse);
+					MouseEventButtonDown(ContMouse, MouseButton.XButton1);
+					TookMouseEvent = true;
 				}
 
-				MouseEventButtonDown(ContMouse, MouseButton.XButton1);
-			}
+				if ((CurrMouse.XButton2 == ButtonState.Pressed) && (cPriorMouse.XButton2 == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+					if ((MouseDown != null) && (cSendMouseEvents == true)) {
+						MouseDown(this, MouseButton.XButton2, CurrMouse);
+					}
 
-			if ((CurrMouse.XButton2 == ButtonState.Pressed) && (cPriorMouse.XButton2 == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-				if ((MouseDown != null) && (cSendMouseEvents == true)) {
-					MouseDown(this, MouseButton.XButton2, CurrMouse);
+					MouseEventButtonDown(ContMouse, MouseButton.XButton2);
+					TookMouseEvent = true;
 				}
 
-				MouseEventButtonDown(ContMouse, MouseButton.XButton2);
-			}
+				if ((CurrMouse.LeftButton == ButtonState.Released) && (cPriorMouse.LeftButton == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+					if ((MouseUp != null) && (cSendMouseEvents == true)) {
+						MouseUp(this, MouseButton.Left, CurrMouse);
+					}
 
-			if ((CurrMouse.LeftButton == ButtonState.Released) && (cPriorMouse.LeftButton == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-				if ((MouseUp != null) && (cSendMouseEvents == true)) {
-					MouseUp(this, MouseButton.Left, CurrMouse);
+					MouseEventButtonUp(ContMouse, MouseButton.Left);
+					TookMouseEvent = true;
 				}
 
-				MouseEventButtonUp(ContMouse, MouseButton.Left);
-			}
+				if ((CurrMouse.RightButton == ButtonState.Released) && (cPriorMouse.RightButton == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+					if ((MouseUp != null) && (cSendMouseEvents == true)) {
+						MouseUp(this, MouseButton.Right, CurrMouse);
+					}
 
-			if ((CurrMouse.RightButton == ButtonState.Released) && (cPriorMouse.RightButton == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-				if ((MouseUp != null) && (cSendMouseEvents == true)) {
-					MouseUp(this, MouseButton.Right, CurrMouse);
+					MouseEventButtonUp(ContMouse, MouseButton.Right);
+					TookMouseEvent = true;
 				}
 
-				MouseEventButtonUp(ContMouse, MouseButton.Right);
-			}
+				if ((CurrMouse.MiddleButton == ButtonState.Released) && (cPriorMouse.MiddleButton == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+					if ((MouseUp != null) && (cSendMouseEvents == true)) {
+						MouseUp(this, MouseButton.Middle, CurrMouse);
+					}
 
-			if ((CurrMouse.MiddleButton == ButtonState.Released) && (cPriorMouse.MiddleButton == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-				if ((MouseUp != null) && (cSendMouseEvents == true)) {
-					MouseUp(this, MouseButton.Middle, CurrMouse);
+					MouseEventButtonUp(ContMouse, MouseButton.Middle);
+					TookMouseEvent = true;
 				}
 
-				MouseEventButtonUp(ContMouse, MouseButton.Middle);
-			}
+				if ((CurrMouse.XButton1 == ButtonState.Released) && (cPriorMouse.XButton1 == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+					if ((MouseUp != null) && (cSendMouseEvents == true)) {
+						MouseUp(this, MouseButton.XButton1, CurrMouse);
+					}
 
-			if ((CurrMouse.XButton1 == ButtonState.Released) && (cPriorMouse.XButton1 == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-				if ((MouseUp != null) && (cSendMouseEvents == true)) {
-					MouseUp(this, MouseButton.XButton1, CurrMouse);
+					MouseEventButtonUp(ContMouse, MouseButton.XButton1);
+					TookMouseEvent = true;
 				}
 
-				MouseEventButtonUp(ContMouse, MouseButton.XButton1);
-			}
+				if ((CurrMouse.XButton2 == ButtonState.Released) && (cPriorMouse.XButton2 == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+					if ((MouseUp != null) && (cSendMouseEvents == true)) {
+						MouseUp(this, MouseButton.XButton2, CurrMouse);
+					}
 
-			if ((CurrMouse.XButton2 == ButtonState.Released) && (cPriorMouse.XButton2 == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-				if ((MouseUp != null) && (cSendMouseEvents == true)) {
-					MouseUp(this, MouseButton.XButton2, CurrMouse);
+					MouseEventButtonUp(ContMouse, MouseButton.XButton2);
+					TookMouseEvent = true;
 				}
 
-				MouseEventButtonUp(ContMouse, MouseButton.XButton2);
+				cPriorMouse = CurrMouse;
 			}
-
-			cPriorMouse = CurrMouse;
 
 			if (cHasChanges == true) { //Don't recreate the texture unless changes need drawn
 				//Render container to texture
@@ -516,6 +546,8 @@ namespace MDLN.MGTools {
 			}
 
 			cPriorKeys = CurrKeyboard;
+
+			return TookMouseEvent;
 		}
 
 		/// <summary>
@@ -636,60 +668,65 @@ namespace MDLN.MGTools {
 
 			if (cIsClosing == true) { //Container is closing
 				switch (cCloseEffect) {
-					case DisplayEffect.SlideDown :
-						cCurrDrawRegion.Y += cSlideStepY;
+				case DisplayEffect.SlideDown:
+					cCurrDrawRegion.Y += cSlideStepY;
 
-						if (cCurrDrawRegion.Y >= cFullDrawRegion.Height) {
-							cIsClosing = false;
-						}
-
-						break;
-					case DisplayEffect.SlideUp :
-						cCurrDrawRegion.Height -= cSlideStepY;
-
-						if (cCurrDrawRegion.Height <= 0) {
-							cIsClosing = false;
-						}
-
-						break;
-					case DisplayEffect.SlideRight :
-						cCurrDrawRegion.X += cSlideStepX;
-
-						if (cCurrDrawRegion.X >= cFullDrawRegion.Width) {
-							cIsClosing = false;
-						}
-
-						break;
-					case DisplayEffect.SlideLeft :
-						cCurrDrawRegion.Width -= cSlideStepX;
-
-						if (cCurrDrawRegion.Width <= 0) {
-							cIsClosing = false;
-						}
-
-						break;
-					case DisplayEffect.Fade :
-						if (cAlphaOverlay.A - cFadeStep <= 0) {
-							cIsClosing = false;
-						} else {
-							cAlphaOverlay.A -= cFadeStep;
-						}
-						break;
-					case DisplayEffect.Zoom:
-						cCurrDrawRegion.Height -= cSlideStepY;
-						cCurrDrawRegion.Y += cSlideStepY;
-						cCurrDrawRegion.X += cSlideStepX;
-						cCurrDrawRegion.Width -= cSlideStepX;
-
-						if (cCurrDrawRegion.Height <= cFullDrawRegion.Height / 2) {
-							cIsClosing = false;
-						}
-
-						break;
-					default :
+					if (cCurrDrawRegion.Y >= cFullDrawRegion.Height) {
 						cIsClosing = false;
-						break;
+					}
+
+					break;
+				case DisplayEffect.SlideUp:
+					cCurrDrawRegion.Height -= cSlideStepY;
+
+					if (cCurrDrawRegion.Height <= 0) {
+						cIsClosing = false;
+					}
+
+					break;
+				case DisplayEffect.SlideRight:
+					cCurrDrawRegion.X += cSlideStepX;
+
+					if (cCurrDrawRegion.X >= cFullDrawRegion.Width) {
+						cIsClosing = false;
+					}
+
+					break;
+				case DisplayEffect.SlideLeft:
+					cCurrDrawRegion.Width -= cSlideStepX;
+
+					if (cCurrDrawRegion.Width <= 0) {
+						cIsClosing = false;
+					}
+
+					break;
+				case DisplayEffect.Fade:
+					if (cAlphaOverlay.A - cFadeStep <= 0) {
+						cIsClosing = false;
+					} else {
+						cAlphaOverlay.A -= cFadeStep;
+					}
+					break;
+				case DisplayEffect.Zoom:
+					cCurrDrawRegion.Height -= cSlideStepY;
+					cCurrDrawRegion.Y += cSlideStepY;
+					cCurrDrawRegion.X += cSlideStepX;
+					cCurrDrawRegion.Width -= cSlideStepX;
+
+					if (cCurrDrawRegion.Height <= cFullDrawRegion.Height / 2) {
+						cIsClosing = false;
+					}
+
+					break;
+				default:
+					cIsClosing = false;
+					break;
 				}
+			} else if (OpenEffect == DisplayEffect.None) {
+				cCurrDrawRegion.X = 0;
+				cCurrDrawRegion.Y = 0;
+				cCurrDrawRegion.Width = cFullDrawRegion.Width;
+				cCurrDrawRegion.Height = cFullDrawRegion.Height;
 			} else { //Container is opening 
 				if (cCurrDrawRegion.X > 0) {
 					cCurrDrawRegion.X -= cSlideStepX;

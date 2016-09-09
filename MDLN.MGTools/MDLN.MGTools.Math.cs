@@ -88,6 +88,26 @@ namespace MDLN.MGTools {
 				return (float)((Math.PI) + Math.Atan(LenY / LenX) + Math.PI);
 			}
 		}
+
+		public static bool IsPointInRect(Point Coord, Rectangle Rect) {
+			if (Coord.X < Rect.X) {
+				return false;
+			}
+
+			if (Coord.Y < Rect.Y) {
+				return false;
+			}
+
+			if (Coord.X > Rect.X + Rect.Width) {
+				return false;
+			}
+
+			if (Coord.Y > Rect.Y + Rect.Height) {
+				return false;
+			}
+
+			return true;
+		}
 	}
 }
 

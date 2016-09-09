@@ -59,7 +59,7 @@
 	<overlord image="OL_BaseGame-TripWire.jpg" set="Base Game" class="Basic" count="2" level="0" />
 	<overlord image="OL_BaseGame-WordOfMisery.jpg" set="Base Game" class="Basic" count="1" level="0" />
 
-	<overlord image="OL_BaseGame-Warlord DarkFortune.jpg" set="Base Game" class="Warlord" count="2" level="1" />
+	<overlord image="OL_BaseGame-Warlord DarkFortitude.jpg" set="Base Game" class="Warlord" count="2" level="1" />
 	<overlord image="OL_BaseGame-Warlord BloodRage.jpg" set="Base Game" class="Warlord" count="2" level="1" />
 	<overlord image="OL_BaseGame-Warlord ExpertBlow.jpg" set="Base Game" class="Warlord" count="1" level="2" />
 	<overlord image="OL_BaseGame-Warlord Bloodlust.jpg" set="Base Game" class="Warlord" count="1" level="2" />

@@ -67,16 +67,16 @@ namespace MDLN.MarchingSquares {
 
 			cNewMap = new Button(cGraphDevMgr.GraphicsDevice, null, 10, cSquares.Width + 40, 50, 150);
 			cNewMap.BackgroundColor = Color.BlueViolet;
-			cNewMap.cCaption = "New Map";
-			cNewMap.cFont = new TextureFont(cTextureDict[Textures.Font]);
+			cNewMap.Text = "New Map";
+			cNewMap.Font = new TextureFont(cTextureDict[Textures.Font]);
 			cNewMap.FontColor = Color.White;
 			cNewMap.Visible = true;
 			cNewMap.Click += NewMapClicked;
 
 			cFlyMap = new Button(cGraphDevMgr.GraphicsDevice, null, 70, cSquares.Width + 40, 50, 150);
 			cFlyMap.BackgroundColor = Color.BlueViolet;
-			cFlyMap.cCaption = "Fly Map";
-			cFlyMap.cFont = new TextureFont(cTextureDict[Textures.Font]);
+			cFlyMap.Text = "Fly Map";
+			cFlyMap.Font = new TextureFont(cTextureDict[Textures.Font]);
 			cFlyMap.FontColor = Color.White;
 			cFlyMap.Visible = true;
 			cFlyMap.Click += FlyMapClicked;

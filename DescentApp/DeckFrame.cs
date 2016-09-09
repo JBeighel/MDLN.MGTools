@@ -405,6 +405,12 @@ namespace DescentApp {
 		}
 
 		private int DetermineShownCardFromCoords(Point Coord) {
+			if ((SelectedCardIndex != -1) && (SelectedCardIsZoomed == true)) {
+				if (MGMath.IsPointInRect(Coord, cCardsShownList[SelectedCardIndex].DrawRegion) == true) {
+					return SelectedCardIndex;
+				}
+			}
+
 			for (int Ctr = cCardsShownList.Count - 1; Ctr >= 0; Ctr--) { //Cards are placed on top, so start from bottom to get most visible cards
 				if (MGMath.IsPointInRect(Coord, cCardsShownList[Ctr].DrawRegion) == true) {
 					return Ctr;

@@ -132,7 +132,7 @@ namespace MGTest
 			cTextTest = new TextBox(GraphicsDevice, null, GraphicsDevice.Viewport.Height - 150, GraphicsDevice.Viewport.Width - 200, 125, 175); 
 			cTextTest.BackgroundColor = Color.CornflowerBlue;
 			cTextTest.FontColor = Color.Bisque;
-			cTextTest.cFont = cFont;
+			cTextTest.Font = cFont;
 			cTextTest.Visible = true;
 
 			DevConsole.AddText("Viewport Bounds: X=" + GraphicsDevice.Viewport.Bounds.X + " Y=" + GraphicsDevice.Viewport.Bounds.Y + " Width=" + GraphicsDevice.Viewport.Bounds.Width + " Height=" + GraphicsDevice.Viewport.Bounds.Height);

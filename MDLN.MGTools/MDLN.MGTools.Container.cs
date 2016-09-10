@@ -192,6 +192,9 @@ namespace MDLN.MGTools {
 			set {
 				cFullDrawRegion.Y = value;
 				cOrigin.Y = cFullDrawRegion.Y;
+				HasChanged = true;
+
+				Repositioned();
 			}
 		}
 
@@ -208,6 +211,8 @@ namespace MDLN.MGTools {
 				cFullDrawRegion.X = value;
 				cOrigin.X = cFullDrawRegion.X;
 				HasChanged = true;
+
+				Repositioned();
 			}
 		}
 
@@ -228,6 +233,8 @@ namespace MDLN.MGTools {
 				cFullDrawRegion.Height = value;
 				cRenderToBuffer = new RenderTarget2D(cGraphicsDevice, cFullDrawRegion.Width, cFullDrawRegion.Height);
 				cHasChanges = true;
+
+				Resized();
 			}
 		}
 
@@ -248,6 +255,8 @@ namespace MDLN.MGTools {
 				cFullDrawRegion.Width = value;
 				cRenderToBuffer = new RenderTarget2D(cGraphicsDevice, cFullDrawRegion.Width, cFullDrawRegion.Height);
 				cHasChanges = true;
+
+				Resized();
 			}
 		}
 
@@ -587,6 +596,10 @@ namespace MDLN.MGTools {
 		/// This function is called whenever a mouse button is released while the mouse is in the screen space this container is displayed in
 		/// </summary>
 		protected virtual void MouseEventButtonUp(MouseState CurrMouse, MouseButton Button) { }
+
+		protected virtual void Resized() { }
+
+		protected virtual void Repositioned() { }
 
 		/// <summary>
 		/// Draw function to be called when a frame is rendered for the game.  The class will create it's own SpriteBatch to draw with.

@@ -1,0 +1,86 @@
+<cardlist>
+	<autooverlord image="AO_Blitz-1.png" />
+	<autooverlord image="AO_Blitz-2.png" />
+	<autooverlord image="AO_Blitz-3.png" />
+	<autooverlord image="AO_Blitz-4.png" />
+	<autooverlord image="AO_Blitz-5.png" />
+	<autooverlord image="AO_Blitz-6.png" />
+	<autooverlord image="AO_Blitz-7.png" />
+	<autooverlord image="AO_Blitz-8.png" />
+
+	<autooverlord image="AO_Orange-1.png" />
+	<autooverlord image="AO_Orange-2.png" />
+	<autooverlord image="AO_Orange-3.png" />
+	<autooverlord image="AO_Orange-4.png" />
+	<autooverlord image="AO_Orange-5.png" />
+	<autooverlord image="AO_Orange-6.png" />
+
+	<autooverlord image="AO_Purple-1.png" />
+	<autooverlord image="AO_Purple-2.png" />
+	<autooverlord image="AO_Purple-3.png" />
+	<autooverlord image="AO_Purple-4.png" />
+	<autooverlord image="AO_Purple-5.png" />
+	<autooverlord image="AO_Purple-6.png" />
+
+	<autooverlord image="AO_Yellow-1.png" />
+	<autooverlord image="AO_Yellow-2.png" />
+	<autooverlord image="AO_Yellow-3.png" />
+	<autooverlord image="AO_Yellow-4.png" />
+	<autooverlord image="AO_Yellow-5.png" />
+	<autooverlord image="AO_Yellow-6.png" />
+
+	<autooverlord image="AO_White-1.png" />
+	<autooverlord image="AO_White-2.png" />
+	<autooverlord image="AO_White-3.png" />
+	<autooverlord image="AO_White-4.png" />
+	<autooverlord image="AO_White-5.png" />
+	<autooverlord image="AO_White-6.png" />
+
+
+	<autooverlordback image="AO_Back-Blue.png" />
+	<autooverlordback image="AO_Back-DelvenDeep.png" />
+	<autooverlordback image="AO_Back-Green.png" />
+
+
+	<reference description="Surge Order" image="AO_Ref-SurgeOrder.png" />
+	<reference description="Target Priority" image="AO_Ref-TargetPriority.png" />
+
+  <icon type="enabled" image="Icon_Check.png" />
+  <icon type="disabled" image="Icon_Cross.png" />
+
+
+	<overlordback image="OL_Back.png" />
+
+	<overlord image="OL_BaseGame-CriticalBlow.jpg" set="Base Game" class="Basic" count="1" level="0" />
+	<overlord image="OL_BaseGame-DarkCharm.jpg" set="Base Game" class="Basic" count="1" level="0" />
+	<overlord image="OL_BaseGame-DarkFortune.jpg" set="Base Game" class="Basic" count="2" level="0" />
+	<overlord image="OL_BaseGame-DarkMight.jpg" set="Base Game" class="Basic" count="2" level="0" />
+	<overlord image="OL_BaseGame-Dash.jpg" set="Base Game" class="Basic" count="2" level="0" />
+	<overlord image="OL_BaseGame-Frenzy.jpg" set="Base Game" class="Basic" count="2" level="0" />
+	<overlord image="OL_BaseGame-PitTrap.jpg" set="Base Game" class="Basic" count="1" level="0" />
+	<overlord image="OL_BaseGame-PoisonDart.jpg" set="Base Game" class="Basic" count="1" level="0" />
+	<overlord image="OL_BaseGame-TripWire.jpg" set="Base Game" class="Basic" count="2" level="0" />
+	<overlord image="OL_BaseGame-WordOfMisery.jpg" set="Base Game" class="Basic" count="1" level="0" />
+
+	<overlord image="OL_BaseGame-Warlord DarkFortitude.jpg" set="Base Game" class="Warlord" count="2" level="1" />
+	<overlord image="OL_BaseGame-Warlord BloodRage.jpg" set="Base Game" class="Warlord" count="2" level="1" />
+	<overlord image="OL_BaseGame-Warlord ExpertBlow.jpg" set="Base Game" class="Warlord" count="1" level="2" />
+	<overlord image="OL_BaseGame-Warlord Bloodlust.jpg" set="Base Game" class="Warlord" count="1" level="2" />
+	<overlord image="OL_BaseGame-Warlord Reinforce.jpg" set="Base Game" class="Warlord" count="1" level="3" />
+	
+	<overlord image="OL_BaseGame-Magus UnholyRitual.jpg" set="Base Game" class="Magus" count="2" level="1" />
+	<overlord image="OL_BaseGame-Magus WordOfPain.jpg" set="Base Game" class="Magus" count="2" level="1" />
+	<overlord image="OL_BaseGame-Magus RiseAgain.jpg" set="Base Game" class="Magus" count="1" level="2" />
+	<overlord image="OL_BaseGame-Magus WordOfDespair.jpg" set="Base Game" class="Magus" count="1" level="2" />
+	<overlord image="OL_BaseGame-Magus DiabolicPower.jpg" set="Base Game" class="Magus" count="1" level="3" />
+
+	<overlord image="OL_BaseGame-Saboteur ExplosiveRunes.jpg" set="Base Game" class="Saboteur" count="2" level="1" />
+	<overlord image="OL_BaseGame-Saboteur WebTrap.jpg" set="Base Game" class="Saboteur" count="2" level="1" />
+	<overlord image="OL_BaseGame-Saboteur WickedLaughter.jpg" set="Base Game" class="Saboteur" count="1" level="2" />
+	<overlord image="OL_BaseGame-Saboteur CurseOfTheMonkeyGod.jpg" set="Base Game" class="Saboteur" count="1" level="2" />
+	<overlord image="OL_BaseGame-Saboteur UthukDemonTrap.jpg" set="Base Game" class="Saboteur" count="1" level="3" />
+
+	<overlord image="OL_BaseGame-Universal PlanAhead.jpg" set="Base Game" class="Universal" count="1" level="1" />
+	<overlord image="OL_BaseGame-Universal DarkResilience.jpg" set="Base Game" class="Universal" count="1" level="1" />
+	<overlord image="OL_BaseGame-Universal Schemes.jpg" set="Base Game" class="Universal" count="1" level="1" />
+</cardlist>

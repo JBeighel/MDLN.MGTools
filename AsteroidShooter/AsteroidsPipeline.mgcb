@@ -19,3 +19,9 @@
 /processorParam:DebugMode=Auto
 /build:ShaderEffect.fx
 
+#begin BumpMap.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:BumpMap.fx
+

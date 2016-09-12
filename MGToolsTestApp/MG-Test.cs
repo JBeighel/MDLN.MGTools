@@ -47,6 +47,7 @@ namespace MGTest
 		private CardDisplay TestCard;
 		private CardInfo cCard;
 		private double cMouseEnterTime;
+		private TextBox cTextTest;
 
 		private int FrameNum;
 
@@ -127,6 +128,12 @@ namespace MGTest
 			NestedCont = new Container(GraphicsDevice, null, 350, 600, 100, 100);
 			NestedCont.BackgroundColor = Color.BurlyWood;
 			NestedCont.Visible = true;
+
+			cTextTest = new TextBox(GraphicsDevice, null, GraphicsDevice.Viewport.Height - 150, GraphicsDevice.Viewport.Width - 200, 125, 175); 
+			cTextTest.BackgroundColor = Color.CornflowerBlue;
+			cTextTest.FontColor = Color.Bisque;
+			cTextTest.Font = cFont;
+			cTextTest.Visible = true;
 
 			DevConsole.AddText("Viewport Bounds: X=" + GraphicsDevice.Viewport.Bounds.X + " Y=" + GraphicsDevice.Viewport.Bounds.Y + " Width=" + GraphicsDevice.Viewport.Bounds.Width + " Height=" + GraphicsDevice.Viewport.Bounds.Height);
 		}
@@ -214,6 +221,8 @@ namespace MGTest
 
 			NestedCont.Update(gameTime);
 
+			cTextTest.Update(gameTime);
+
 			//Use monogame update
 			base.Update(gameTime);
 		}
@@ -285,6 +294,8 @@ namespace MGTest
 			TestCont.Draw();
 
 			NestedCont.Draw();
+
+			cTextTest.Draw();
 
 			DevConsole.Draw();
 

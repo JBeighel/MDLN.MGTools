@@ -12,6 +12,8 @@ namespace MDLN.MGTools {
 	public class Button : Container, IControl {
 		private bool cMouseDown;
 		private MouseButton cMouseButtonDown;
+		private string cCaption;
+		private TextureFont cFont;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="MDLN.MGTools.Button"/> class.
@@ -24,20 +26,39 @@ namespace MDLN.MGTools {
 		/// <param name="Width">Width of control</param>
 		public Button(GraphicsDevice GraphDev, Texture2D Background, int Top , int Left, int Height, int Width) : base(GraphDev, Background, Top, Left, Height, Width) {
 			Alignment = Justify.MiddleCenter;
-			Text = "";
+			cCaption = "";
+			FontSize = 10;
 		}
 
 		/// <summary>
 		/// Gets or sets the text being displayed on the control
 		/// </summary>
 		/// <value>The text.</value>
-		public string Text { get; set; }
+		public string Text {
+			get {
+				return cCaption;
+			}
+
+			set {
+				cCaption = value;
+				HasChanged = true;
+			}
+		}
 
 		/// <summary>
 		/// Texture font object to use in rendering the text
 		/// </summary>
 		/// <value>The font object</value>
-		public TextureFont Font { get; set; }
+		public TextureFont Font {
+			get {
+				return cFont;
+			}
+
+			set {
+				cFont = value;
+				HasChanged = true;
+			}
+		}
 
 		/// <summary>
 		/// Gets or sets the alignment of the text inside the control area
@@ -50,6 +71,11 @@ namespace MDLN.MGTools {
 		/// </summary>
 		/// <value>The color of the font.</value>
 		public Color FontColor{ get; set; }
+
+		/// <summary>
+		/// Sets or gets the size of the font in pixels
+		/// </summary>
+		public int FontSize { get; set; }
 
 		/// <summary>
 		/// Occurs when the mouse clicks this control.
@@ -97,54 +123,54 @@ namespace MDLN.MGTools {
 			string[] Lines;
 			int Ctr, LineWidth, LinesHeight, TextTop, TextLeft;
 
-			if (Text.Length != 0) {
-				Lines = Text.Split('\n');
+			if (cCaption.Length != 0) {
+				Lines = cCaption.Split('\n');
 
-				LinesHeight = Lines.Length * Font.CharacterHeight;
+				LinesHeight = Lines.Length * FontSize;
 
 				for (Ctr = 0; Ctr < Lines.Length; Ctr++) {
-					LineWidth = Font.DetermineRenderWidth(Lines[Ctr]);
+					LineWidth = cFont.DetermineRenderWidth(Lines[Ctr], FontSize);
 
 					switch (Alignment) {
 						case Justify.TopLeft:
-							TextTop = 0 + (Ctr * Font.CharacterHeight);
+							TextTop = 0 + (Ctr * FontSize);
 							TextLeft = 0;
 							break;
 						case Justify.TopCenter:
-							TextTop = 0 + (Ctr * Font.CharacterHeight);
+							TextTop = 0 + (Ctr * FontSize);
 							TextLeft = (Width - LineWidth) / 2;
 							break;
 						case Justify.TopRight:
-							TextTop = 0 + (Ctr * Font.CharacterHeight);
+							TextTop = 0 + (Ctr * FontSize);
 							TextLeft = Width - LineWidth;
 							break;
 						case Justify.MiddleLeft:
-							TextTop = ((Height - LinesHeight) / 2) + (Ctr * Font.CharacterHeight);
+							TextTop = ((Height - LinesHeight) / 2) + (Ctr * FontSize);
 							TextLeft = 0;
 							break;
 						case Justify.MiddleRight:
-							TextTop = ((Height - LinesHeight) / 2) + (Ctr * Font.CharacterHeight);
+							TextTop = ((Height - LinesHeight) / 2) + (Ctr * FontSize);
 							TextLeft = Width - LineWidth;
 							break;
 						case Justify.BottomLeft:
-							TextTop = (Height - LinesHeight) + (Ctr * Font.CharacterHeight);
+							TextTop = (Height - LinesHeight) + (Ctr * FontSize);
 							TextLeft = 0;
 							break;
 						case Justify.BottomCenter:
-							TextTop = (Height - LinesHeight) + (Ctr * Font.CharacterHeight);
+							TextTop = (Height - LinesHeight) + (Ctr * FontSize);
 							TextLeft = (Width - LineWidth) / 2;
 							break;
 						case Justify.BottomRight:
-							TextTop = (Height - LinesHeight) + (Ctr * Font.CharacterHeight);
+							TextTop = (Height - LinesHeight) + (Ctr * FontSize);
 							TextLeft = Width - LineWidth;
 							break;
 						default : //Middle Center
-							TextTop = ((Height - LinesHeight) / 2) + (Ctr * Font.CharacterHeight);
+							TextTop = ((Height - LinesHeight) / 2) + (Ctr * FontSize);
 							TextLeft = (Width - LineWidth) / 2;
 							break;
 					}
 
-					Font.WriteText(cDrawBatch, Lines[Ctr], TextTop, TextLeft, FontColor);
+					cFont.WriteText(cDrawBatch, Lines[Ctr], FontSize, TextTop, TextLeft, FontColor);
 				}
 			}
 		}
@@ -170,6 +196,7 @@ namespace MDLN.MGTools {
 		/// </summary>
 		/// <param name="CurrTime">Current game time.</param>
 		void Update(GameTime CurrTime);
+
 		/// <summary>
 		/// Draws the control to the screen
 		/// </summary>

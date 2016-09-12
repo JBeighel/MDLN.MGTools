@@ -80,7 +80,7 @@ namespace MDLN.Cards {
 			cCard.Changed = false;
 		}
 
-		protected override void UpdateContents(GameTime CurrTime, KeyboardState CurrKeyboard, MouseState CurrMouse) {
+		protected override void UpdateContents(GameTime CurrTime, KeyboardState CurrKeyboard, MouseState CurrMouse, bool ProcessMOuseEvent) {
 			if (cCard.Changed == true) {
 				HasChanged = true;
 			}

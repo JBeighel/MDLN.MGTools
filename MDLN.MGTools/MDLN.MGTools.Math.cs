@@ -89,6 +89,12 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Determines if a point is contained within a rectangular region
+		/// </summary>
+		/// <param name="Coord">Point to test</param>
+		/// <param name="Rect">Rectangular region to test within.</param>
+		/// <returns>True if the point is in the region, fasle if it is not.</returns>
 		public static bool IsPointInRect(Point Coord, Rectangle Rect) {
 			if (Coord.X < Rect.X) {
 				return false;

@@ -114,8 +114,6 @@ namespace DescentApp {
 			cAOFrame.OpenEffect = DisplayEffect.SlideDown;
 			cAOFrame.Font = Font;
 			cAOFrame.MaxCardsShown = 1;
-			cAOFrame.OpenEffect = DisplayEffect.SlideDown;
-			cAOFrame.CloseEffect = DisplayEffect.SlideUp;
 
 			cOLFrame = new DeckFrame(cGraphDevMgr.GraphicsDevice, cGraphDevMgr.GraphicsDevice.Viewport.Height, cGraphDevMgr.GraphicsDevice.Viewport.Width / 2);
 			cOLFrame.Left = cGraphDevMgr.GraphicsDevice.Viewport.Width / 2;
@@ -124,8 +122,6 @@ namespace DescentApp {
 			cOLFrame.OpenEffect = DisplayEffect.SlideDown;
 			cOLFrame.Font = Font;
 			cOLFrame.CardClick += OLCardClickedHandler;
-			cOLFrame.OpenEffect = DisplayEffect.SlideDown;
-			cOLFrame.CloseEffect = DisplayEffect.SlideUp;
 			
 			//build config frame
 			cOpenConfig = new Button(cGraphDevMgr.GraphicsDevice, null, 0, 0, 100, 100);
@@ -140,7 +136,6 @@ namespace DescentApp {
 			cOLConfigFrame.Visible = false;
 			cOLConfigFrame.OpenEffect = DisplayEffect.SlideUp;
 			cOLConfigFrame.CloseEffect = DisplayEffect.SlideDown;
-			cOLConfigFrame.BackgroundColor = new Color(0.8f, 0.608f, 0.398f, 1.0f);
 			cOLConfigFrame.Font = Font;
 
 			//Load config files

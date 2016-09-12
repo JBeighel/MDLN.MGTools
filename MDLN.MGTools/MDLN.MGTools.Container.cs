@@ -135,6 +135,7 @@ namespace MDLN.MGTools {
 
 				cIsVisible = value;
 				cHasChanges = true;
+				VisibleChanged();
 			}
 		}
 
@@ -250,6 +251,8 @@ namespace MDLN.MGTools {
 			set {
 				if (cFullDrawRegion.Width != 0) {
 					cCurrDrawRegion.Width = (cCurrDrawRegion.Width / cFullDrawRegion.Width) * value;
+				} else if (cFullDrawRegion.Width == cCurrDrawRegion.Width) {
+					cCurrDrawRegion.Width = value;
 				}
 
 				cFullDrawRegion.Width = value;
@@ -597,9 +600,20 @@ namespace MDLN.MGTools {
 		/// </summary>
 		protected virtual void MouseEventButtonUp(MouseState CurrMouse, MouseButton Button) { }
 
+		/// <summary>
+		/// Called when the container is resized, height or width changed
+		/// </summary>
 		protected virtual void Resized() { }
 
+		/// <summary>
+		/// Called when the container is moved, top or left changed
+		/// </summary>
 		protected virtual void Repositioned() { }
+
+		/// <summary>
+		/// Called when the container is shown or hidden, visible changed
+		/// </summary>
+		protected virtual void VisibleChanged() { }
 
 		/// <summary>
 		/// Draw function to be called when a frame is rendered for the game.  The class will create it's own SpriteBatch to draw with.
@@ -628,7 +642,7 @@ namespace MDLN.MGTools {
 			ScreenRegion.Height = cCurrDrawRegion.Height - cCurrDrawRegion.Y;
 
 			TextureRegion.X = cFullDrawRegion.Width - cCurrDrawRegion.Width;
-			TextureRegion.Y = cCurrDrawRegion.Y + (cFullDrawRegion.Height - cCurrDrawRegion.Height);
+			TextureRegion.Y = cFullDrawRegion.Height - cCurrDrawRegion.Height;
 			TextureRegion.Width = cCurrDrawRegion.Width - cCurrDrawRegion.X;
 			TextureRegion.Height = cCurrDrawRegion.Height - cCurrDrawRegion.Y;
 

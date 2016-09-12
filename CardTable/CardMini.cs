@@ -25,12 +25,12 @@ namespace MDLN.CardTable {
 			}
 		}
 
-		protected override void UpdateContents(GameTime CurrTime, KeyboardState CurrKeyboard, MouseState CurrMouse) {
+		protected override void UpdateContents(GameTime CurrTime, KeyboardState CurrKeyboard, MouseState CurrMouse, bool ProcessMOuseEvent) {
 			if (cCard.HasChanged == true) { //Trigger a redraw if the card information changes
 				HasChanged = true;
 			}
 
-			base.UpdateContents(CurrTime, CurrKeyboard, CurrMouse);
+			base.UpdateContents(CurrTime, CurrKeyboard, CurrMouse, ProcessMOuseEvent);
 		}
 
 		protected override void DrawContents(GameTime CurrTime) {

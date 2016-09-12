@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml;
 
 namespace DescentApp {
@@ -54,6 +55,8 @@ namespace DescentApp {
 		private OverlordDecksFrame cOLConfigFrame;
 		private Button cOpenConfig;
 
+		private Dictionary<string, Texture2D> cIconImages;
+
 		/// <summary>
 		/// Constructor to establish all graphical and interface settings as well as
 		/// prepare class variables.
@@ -63,6 +66,7 @@ namespace DescentApp {
 			IsMouseVisible = true;
 			Window.AllowUserResizing = true;
 			Window.ClientSizeChanged += ResizeHandler;
+			cIconImages = new Dictionary<string, Texture2D>();
 		}
 
 		/// <summary>
@@ -145,6 +149,8 @@ namespace DescentApp {
 			cAOFrame.SelectRandomCardBack();
 			cOLFrame.ShuffleCompleteDeck(true, false);
 			cOLFrame.SelectRandomCardBack();
+
+			cOLConfigFrame.SetIconImageSet(cIconImages);
 		}
 
 		/// <summary>
@@ -153,12 +159,19 @@ namespace DescentApp {
 		/// </summary>
 		/// <param name="gameTime">Current time information of the application</param>
 		protected override void Update(GameTime gameTime) {
+			bool MouseUsed;
+			
 			cDevConsole.Update(gameTime);
 			cAOFrame.Update(gameTime);
 			cOLFrame.Update(gameTime);
 
-			cOLConfigFrame.Update(gameTime);
-			cOpenConfig.Update(gameTime);
+			MouseUsed = cOpenConfig.Update(gameTime, Keyboard.GetState(), Mouse.GetState(), true);
+			if (MouseUsed == true) {
+				MouseUsed = true;
+			}
+
+			MouseUsed = cOLConfigFrame.Update(gameTime, Keyboard.GetState(), Mouse.GetState(), !MouseUsed);
+			
 
 			//Use monogame update
 			base.Update(gameTime);
@@ -251,6 +264,17 @@ namespace DescentApp {
 			if (cOLConfigFrame.Visible == true) {
 				cOLConfigFrame.Height = Window.ClientBounds.Height;
 				cOLConfigFrame.Width = Window.ClientBounds.Width / 4;
+			} else {
+				//Update card deck
+				cOLFrame.EmptyDeck();
+
+				foreach (OverlordCard OLCard in cOLConfigFrame.CardList.Where(rec => rec.Include > 0)) {
+					for (int Ctr = 0; Ctr < OLCard.Include; Ctr++) {
+						cOLFrame.CardFaceList.Add(OLCard.Image);
+					}
+				}
+
+				cOLFrame.ShuffleCompleteDeck(true, true);
 			}
 		}
 
@@ -350,21 +374,6 @@ namespace DescentApp {
 							break;
 						case "overlord":
 							if (Tag.Attributes["image"] != null) {
-								/*
-								CardImage = Content.Load<Texture2D>(Tag.Attributes["image"].InnerText);
-
-								try {
-									CardCnt = Int32.Parse(Tag.Attributes["count"].InnerText);
-								} catch (Exception) {
-									CardCnt = 1;
-								}
-
-								while (CardCnt > 0) {
-									cOLFrame.CardFaceList.Add(CardImage);
-									CardCnt -= 1;
-								}
-								 */
-
 								NewOLCard = new OverlordCard();
 								NewOLCard.Image = Content.Load<Texture2D>(Tag.Attributes["image"].InnerText);
 								NewOLCard.Count = Int32.Parse(Tag.Attributes["count"].InnerText);
@@ -373,6 +382,16 @@ namespace DescentApp {
 								NewOLCard.Set = Tag.Attributes["set"].InnerText;
 
 								cOLConfigFrame.AddOverlordCard(NewOLCard);
+							} else {
+								Message += String.Format("Tag {0} '{1}' contains no image attribute, skipping.\n", Ctr, Tag.Name);
+							}
+
+							break;
+						case "icon":
+							if (Tag.Attributes["image"] != null) {
+								CardImage = Content.Load<Texture2D>(Tag.Attributes["image"].InnerText);
+
+								cIconImages.Add(Tag.Attributes["type"].InnerText, CardImage);
 							} else {
 								Message += String.Format("Tag {0} '{1}' contains no image attribute, skipping.\n", Ctr, Tag.Name);
 							}

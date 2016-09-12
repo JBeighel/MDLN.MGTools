@@ -166,7 +166,7 @@ namespace MDLN.AsteroidShooter
 			cDrawBatch.Draw(cShipTexture, cDrawRegion, cShipTexture.Bounds, cTint, -1 * cRotation + ImageInitialAngle, cOrigin, SpriteEffects.None, 0);
 		}
 
-		protected override void UpdateContents(GameTime CurrTime, KeyboardState CurrKeys, MouseState CurrMouse) {
+		protected override void UpdateContents(GameTime CurrTime, KeyboardState CurrKeys, MouseState CurrMouse, bool ProcessMOuseEvent) {
 			Vector2 SpeedAdjust, NewPos, ShipCenter;
 			//float RotatDegrees;
 

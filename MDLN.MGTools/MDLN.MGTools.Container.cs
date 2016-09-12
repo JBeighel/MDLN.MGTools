@@ -417,120 +417,122 @@ namespace MDLN.MGTools {
 			UpdateEffect(CurrTime.ElapsedGameTime.TotalMilliseconds);
 
 			//Update the contents
-			UpdateContents (CurrTime, CurrKeyboard, ContMouse);
+			UpdateContents (CurrTime, CurrKeyboard, ContMouse, ProcessMouseEvent);
 
-			if (ProcessMouseEvent == true) {
-				//Trigger events
-				if ((cFullDrawRegion.Contains(CurrMouse.Position) == true) && ((cFullDrawRegion.Contains(cPriorMouse.Position) == false))) {
-					if ((MouseEnter != null) && (cSendMouseEvents == true)) {
-						MouseEnter(this, CurrMouse);
-					}
-
-					MouseEventEnter(ContMouse);
-					TookMouseEvent = true;
-				}
-
-				if ((cFullDrawRegion.Contains(CurrMouse.Position) == false) && ((cFullDrawRegion.Contains(cPriorMouse.Position) == true))) {
-					if ((MouseLeave != null) && (cSendMouseEvents == true)) {
-						MouseLeave(this, CurrMouse);
-					}
-
-					MouseEventLeave(ContMouse);
-					TookMouseEvent = true;
-				}
-
-				if ((CurrMouse.LeftButton == ButtonState.Pressed) && (cPriorMouse.LeftButton == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-					if ((MouseDown != null) && (cSendMouseEvents == true)) {
-						MouseDown(this, MouseButton.Left, CurrMouse);
-					}
-
-					MouseEventButtonDown(ContMouse, MouseButton.Left);
-					TookMouseEvent = true;
-				}
-
-				if ((CurrMouse.RightButton == ButtonState.Pressed) && (cPriorMouse.RightButton == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-					if ((MouseDown != null) && (cSendMouseEvents == true)) {
-						MouseDown(this, MouseButton.Right, CurrMouse);
-					}
-
-					MouseEventButtonDown(ContMouse, MouseButton.Right);
-					TookMouseEvent = true;
-				}
-
-				if ((CurrMouse.MiddleButton == ButtonState.Pressed) && (cPriorMouse.MiddleButton == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-					if ((MouseDown != null) && (cSendMouseEvents == true)) {
-						MouseDown(this, MouseButton.Middle, CurrMouse);
-					}
-
-					MouseEventButtonDown(ContMouse, MouseButton.Middle);
-					TookMouseEvent = true;
-				}
-
-				if ((CurrMouse.XButton1 == ButtonState.Pressed) && (cPriorMouse.XButton1 == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-					if ((MouseDown != null) && (cSendMouseEvents == true)) {
-						MouseDown(this, MouseButton.XButton1, CurrMouse);
-					}
-
-					MouseEventButtonDown(ContMouse, MouseButton.XButton1);
-					TookMouseEvent = true;
-				}
-
-				if ((CurrMouse.XButton2 == ButtonState.Pressed) && (cPriorMouse.XButton2 == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-					if ((MouseDown != null) && (cSendMouseEvents == true)) {
-						MouseDown(this, MouseButton.XButton2, CurrMouse);
-					}
-
-					MouseEventButtonDown(ContMouse, MouseButton.XButton2);
-					TookMouseEvent = true;
-				}
-
-				if ((CurrMouse.LeftButton == ButtonState.Released) && (cPriorMouse.LeftButton == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-					if ((MouseUp != null) && (cSendMouseEvents == true)) {
-						MouseUp(this, MouseButton.Left, CurrMouse);
-					}
-
-					MouseEventButtonUp(ContMouse, MouseButton.Left);
-					TookMouseEvent = true;
-				}
-
-				if ((CurrMouse.RightButton == ButtonState.Released) && (cPriorMouse.RightButton == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-					if ((MouseUp != null) && (cSendMouseEvents == true)) {
-						MouseUp(this, MouseButton.Right, CurrMouse);
-					}
-
-					MouseEventButtonUp(ContMouse, MouseButton.Right);
-					TookMouseEvent = true;
-				}
-
-				if ((CurrMouse.MiddleButton == ButtonState.Released) && (cPriorMouse.MiddleButton == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-					if ((MouseUp != null) && (cSendMouseEvents == true)) {
-						MouseUp(this, MouseButton.Middle, CurrMouse);
-					}
-
-					MouseEventButtonUp(ContMouse, MouseButton.Middle);
-					TookMouseEvent = true;
-				}
-
-				if ((CurrMouse.XButton1 == ButtonState.Released) && (cPriorMouse.XButton1 == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-					if ((MouseUp != null) && (cSendMouseEvents == true)) {
-						MouseUp(this, MouseButton.XButton1, CurrMouse);
-					}
-
-					MouseEventButtonUp(ContMouse, MouseButton.XButton1);
-					TookMouseEvent = true;
-				}
-
-				if ((CurrMouse.XButton2 == ButtonState.Released) && (cPriorMouse.XButton2 == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
-					if ((MouseUp != null) && (cSendMouseEvents == true)) {
-						MouseUp(this, MouseButton.XButton2, CurrMouse);
-					}
-
-					MouseEventButtonUp(ContMouse, MouseButton.XButton2);
-					TookMouseEvent = true;
-				}
-
+			if (ProcessMouseEvent == false) {
 				cPriorMouse = CurrMouse;
 			}
+
+			//Trigger events
+			if ((cFullDrawRegion.Contains(CurrMouse.Position) == true) && ((cFullDrawRegion.Contains(cPriorMouse.Position) == false))) {
+				if ((MouseEnter != null) && (cSendMouseEvents == true)) {
+					MouseEnter(this, CurrMouse);
+				}
+
+				MouseEventEnter(ContMouse);
+				TookMouseEvent = true;
+			}
+
+			if ((cFullDrawRegion.Contains(CurrMouse.Position) == false) && ((cFullDrawRegion.Contains(cPriorMouse.Position) == true))) {
+				if ((MouseLeave != null) && (cSendMouseEvents == true)) {
+					MouseLeave(this, CurrMouse);
+				}
+
+				MouseEventLeave(ContMouse);
+				TookMouseEvent = true;
+			}
+
+			if ((CurrMouse.LeftButton == ButtonState.Pressed) && (cPriorMouse.LeftButton == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+				if ((MouseDown != null) && (cSendMouseEvents == true)) {
+					MouseDown(this, MouseButton.Left, CurrMouse);
+				}
+
+				MouseEventButtonDown(ContMouse, MouseButton.Left);
+				TookMouseEvent = true;
+			}
+
+			if ((CurrMouse.RightButton == ButtonState.Pressed) && (cPriorMouse.RightButton == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+				if ((MouseDown != null) && (cSendMouseEvents == true)) {
+					MouseDown(this, MouseButton.Right, CurrMouse);
+				}
+
+				MouseEventButtonDown(ContMouse, MouseButton.Right);
+				TookMouseEvent = true;
+			}
+
+			if ((CurrMouse.MiddleButton == ButtonState.Pressed) && (cPriorMouse.MiddleButton == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+				if ((MouseDown != null) && (cSendMouseEvents == true)) {
+					MouseDown(this, MouseButton.Middle, CurrMouse);
+				}
+
+				MouseEventButtonDown(ContMouse, MouseButton.Middle);
+				TookMouseEvent = true;
+			}
+
+			if ((CurrMouse.XButton1 == ButtonState.Pressed) && (cPriorMouse.XButton1 == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+				if ((MouseDown != null) && (cSendMouseEvents == true)) {
+					MouseDown(this, MouseButton.XButton1, CurrMouse);
+				}
+
+				MouseEventButtonDown(ContMouse, MouseButton.XButton1);
+				TookMouseEvent = true;
+			}
+
+			if ((CurrMouse.XButton2 == ButtonState.Pressed) && (cPriorMouse.XButton2 == ButtonState.Released) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+				if ((MouseDown != null) && (cSendMouseEvents == true)) {
+					MouseDown(this, MouseButton.XButton2, CurrMouse);
+				}
+
+				MouseEventButtonDown(ContMouse, MouseButton.XButton2);
+				TookMouseEvent = true;
+			}
+
+			if ((CurrMouse.LeftButton == ButtonState.Released) && (cPriorMouse.LeftButton == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+				if ((MouseUp != null) && (cSendMouseEvents == true)) {
+					MouseUp(this, MouseButton.Left, CurrMouse);
+				}
+
+				MouseEventButtonUp(ContMouse, MouseButton.Left);
+				TookMouseEvent = true;
+			}
+
+			if ((CurrMouse.RightButton == ButtonState.Released) && (cPriorMouse.RightButton == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+				if ((MouseUp != null) && (cSendMouseEvents == true)) {
+					MouseUp(this, MouseButton.Right, CurrMouse);
+				}
+
+				MouseEventButtonUp(ContMouse, MouseButton.Right);
+				TookMouseEvent = true;
+			}
+
+			if ((CurrMouse.MiddleButton == ButtonState.Released) && (cPriorMouse.MiddleButton == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+				if ((MouseUp != null) && (cSendMouseEvents == true)) {
+					MouseUp(this, MouseButton.Middle, CurrMouse);
+				}
+
+				MouseEventButtonUp(ContMouse, MouseButton.Middle);
+				TookMouseEvent = true;
+			}
+
+			if ((CurrMouse.XButton1 == ButtonState.Released) && (cPriorMouse.XButton1 == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+				if ((MouseUp != null) && (cSendMouseEvents == true)) {
+					MouseUp(this, MouseButton.XButton1, CurrMouse);
+				}
+
+				MouseEventButtonUp(ContMouse, MouseButton.XButton1);
+				TookMouseEvent = true;
+			}
+
+			if ((CurrMouse.XButton2 == ButtonState.Released) && (cPriorMouse.XButton2 == ButtonState.Pressed) && (cFullDrawRegion.Contains(CurrMouse.Position) == true)) {
+				if ((MouseUp != null) && (cSendMouseEvents == true)) {
+					MouseUp(this, MouseButton.XButton2, CurrMouse);
+				}
+
+				MouseEventButtonUp(ContMouse, MouseButton.XButton2);
+				TookMouseEvent = true;
+			}
+
+			cPriorMouse = CurrMouse;
 
 			if (cHasChanges == true) { //Don't recreate the texture unless changes need drawn
 				//Render container to texture
@@ -577,7 +579,7 @@ namespace MDLN.MGTools {
 		/// <param name="CurrTime">Currend time information</param>
 		/// <param name="CurrKeyboard">Current state of the keyboard.</param>
 		/// <param name="CurrMouse">Current state of the mouse.</param>
-		protected virtual void UpdateContents(GameTime CurrTime, KeyboardState CurrKeyboard, MouseState CurrMouse) { }
+		protected virtual void UpdateContents(GameTime CurrTime, KeyboardState CurrKeyboard, MouseState CurrMouse, bool ProcessMouseEvent) { }
 
 		/// <summary>
 		/// This function is called whenever the mouse enters the screen space this container is displayed in

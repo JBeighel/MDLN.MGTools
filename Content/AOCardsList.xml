@@ -45,6 +45,9 @@
 	<reference description="Surge Order" image="AO_Ref-SurgeOrder.png" />
 	<reference description="Target Priority" image="AO_Ref-TargetPriority.png" />
 
+  <icon type="enabled" image="Icon_Check.png" />
+  <icon type="disabled" image="Icon_Cross.png" />
+
 
 	<overlordback image="OL_Back.png" />
 

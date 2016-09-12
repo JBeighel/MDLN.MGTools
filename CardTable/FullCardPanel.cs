@@ -54,7 +54,7 @@ namespace MDLN.CardTable {
 			cCloseBtn.Draw(cDrawBatch);
 		}
 
-		protected override void UpdateContents(GameTime CurrTime, KeyboardState CurrKeyboard, MouseState CurrMouse) {
+		protected override void UpdateContents(GameTime CurrTime, KeyboardState CurrKeyboard, MouseState CurrMouse, bool ProcessMOuseEvent) {
 			if (cCard.HasChanged == true) { //Trigger a redraw if the card information changes
 				HasChanged = true;
 			}

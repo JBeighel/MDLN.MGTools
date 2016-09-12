@@ -235,6 +235,14 @@ namespace DescentApp {
 			SelectedBackIndex = cRandNumber.Next(0, CardBackList.Count);
 		}
 
+		public void EmptyDeck() {
+			cCardsShownList.Clear();
+			CardFaceList.Clear();
+
+			ShuffleCompleteDeck(false, true);
+			HasChanged = true;
+		}
+
 		public void RemoveShownCard(int Index) {
 			if ((Index >= 0) && (Index < cCardsShownList.Count)) {
 				cCardsShownList.RemoveAt(Index);
@@ -271,7 +279,7 @@ namespace DescentApp {
 		/// <param name="CurrTime">Current time information of the game</param>
 		/// <param name="CurrKeyboard">Current state of the keyboard</param>
 		/// <param name="CurrMouse">Current state of the mouse</param>
-		protected override void UpdateContents(GameTime CurrTime, KeyboardState CurrKeyboard, MouseState CurrMouse) {
+		protected override void UpdateContents(GameTime CurrTime, KeyboardState CurrKeyboard, MouseState CurrMouse, bool ProcessMouseEvent) {
 			int MarginVert, MarginHoriz, CardHeight, CardWidth, FontHeight;
 			Rectangle CurrCardRegion;
 

@@ -1,5 +1,12 @@
-<tilesets>
-	<tiles name="walls" file="TileA3.png" columns="16" rows="8" columnwidth="32" rowheight="32" />
-	<tiles name="floors" file="TileA4.png" columns="16" rows="15" columnwidth="32" rowheight="32" />
-	<tiles name="floors small" file="TileA4.png" columns="32" rows="30" columnwidth="16" rowheight="16" />
-</tilesets>
+<tilescene>
+	<tilesets>
+		<tiles name="walls" file="TileA3.png" columns="16" rows="8" columnwidth="32" rowheight="32" />
+		<tiles name="floors big" file="TileA4.png" columns="16" rows="15" columnwidth="32" rowheight="32" />
+		<tiles name="floors" file="TileA4.png" columns="32" rows="30" columnwidth="16" rowheight="16" />
+	</tilesets>
+
+	<scene name="test" tilewidth="32" tileheight="32">
+		<tile setname="floors" tilecol="0" tilerow="0" scenecol="0" scenerow="0" />
+		<tile setname="floors" tilecol="1" tilerow="0" scenecol="0" scenerow="1" />
+	</scene>
+</tilescene>

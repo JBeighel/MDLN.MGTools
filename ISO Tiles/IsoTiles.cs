@@ -45,6 +45,7 @@ namespace ISOTiles {
 		/// </summary>
 		private GameConsole cDevConsole;
 		private TileSetManager cTileSets;
+		private TileSceneManager cSceneMgr;
 		
 		/// <summary>
 		/// Constructor to initialize class variables
@@ -96,7 +97,9 @@ namespace ISOTiles {
 				return;
 			}
 
-			cTileSets = new TileSetManager(Content, INTERFACECONTENTDIR + @"\Tiles.XML", "/tilesets");
+			cTileSets = new TileSetManager(Content, INTERFACECONTENTDIR + @"\Tiles.XML", "/tilescene/tilesets");
+
+			cSceneMgr = new TileSceneManager(Content, cTileSets, INTERFACECONTENTDIR + @"\Tiles.XML", "/tilescene");
 		}
 
 		/// <summary>
@@ -123,24 +126,7 @@ namespace ISOTiles {
 
 			cDrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
 
-			Position.X = 0;
-			Position.Y = 0;
-			Position.Width = 48;
-			Position.Height = 48;
-			for (int Ctr = 0; Ctr < 5; Ctr++) {
-				cTileSets.DrawTile("floors", Ctr, 0, cDrawBatch, Position, Color.White);
-
-				Position.X += 52;
-				Position.Y += 52;
-			}
-
-			Position.Y = 0;
-			for (int Ctr = 0; Ctr < 5; Ctr++) {
-				cTileSets.DrawTile("floors small", Ctr, 0, cDrawBatch, Position, Color.White);
-
-				Position.X += 52;
-				Position.Y += 52;
-			}
+			cSceneMgr.DrawScene("test", cDrawBatch, new Point(0, 0), Color.White);
 
 			//Always draw console last
 			cDevConsole.Draw(cDrawBatch);
@@ -167,6 +153,141 @@ namespace ISOTiles {
 		/// <param name="CommandEvent">The text string entered</param>
 		private void ConsoleCommandEvent(object Sender, string CommandEvent) {
 
+		}
+	}
+
+	public class TileSceneManager {
+		private Dictionary<string, SceneInfo> cSceneList;
+		private TileSetManager cTileSetMgr;
+
+		public TileSceneManager(ContentManager ContentMgr, TileSetManager TileSetObj, string XMLFile, string RootPath) {
+			cSceneList = new Dictionary<string, SceneInfo>();
+			cTileSetMgr = TileSetObj;
+
+			LoadSceneXML(ContentMgr, XMLFile, RootPath);
+		}
+
+		public void LoadSceneXML(ContentManager ContentMgr, string XMLFile, string RootPath) {
+			XmlDocument SceneXML;
+			XmlNodeList SceneList, TileList;
+			SceneInfo NewScene;
+			SceneTileInfo NewTile;
+			
+			cSceneList.Clear();
+
+			try {
+				SceneXML = new XmlDocument();
+				SceneXML.Load(XMLFile);
+			} catch (Exception ExErr) {
+				throw new Exception(String.Format("Failed to load XML File {1}{0}Exception {2}{0}Message {3}", Environment.NewLine, XMLFile, ExErr.GetType().ToString(), ExErr.Message));
+			}
+
+			SceneList = SceneXML.DocumentElement.SelectNodes(RootPath + "/scene");
+			foreach (XmlNode SceneNode in SceneList) {
+				
+
+				//Load all details regarding this scene
+				if (SceneNode.Attributes["name"] != null) {
+					NewScene = new SceneInfo(SceneNode.Attributes["name"].InnerText);
+				} else {
+					throw new Exception(String.Format("Failed to load XML File {1}{0}Encountered a scene tag with no name attribute.", Environment.NewLine, XMLFile));
+				}
+
+				if (SceneNode.Attributes["tilewidth"] != null) {
+					if (Int32.TryParse(SceneNode.Attributes["tilewidth"].InnerText, out NewScene.TileWidth) == false) {
+						throw new Exception(String.Format("Failed to load XML File {1}{0}In scene named {2} Encountered a scene tag with an invalid tilewidth attribute.", Environment.NewLine, XMLFile, NewScene.Name));
+					}
+				} else {
+					throw new Exception(String.Format("Failed to load XML File {1}{0}In scene named {2} Encountered a scene tag with no tilewidth attribute.", Environment.NewLine, XMLFile, NewScene.Name));
+				}
+
+				if (SceneNode.Attributes["tileheight"] != null) {
+					if (Int32.TryParse(SceneNode.Attributes["tileheight"].InnerText, out NewScene.TileHeight) == false) {
+						throw new Exception(String.Format("Failed to load XML File {1}{0}In scene named {2} Encountered a scene tag with an invalid tileheight attribute.", Environment.NewLine, XMLFile, NewScene.Name));
+					}
+				} else {
+					throw new Exception(String.Format("Failed to load XML File {1}{0}In scene named {2} Encountered a scene tag with no tileheight attribute.", Environment.NewLine, XMLFile, NewScene.Name));
+				}
+
+				//Load individual tiles to draw in this scene
+				TileList = SceneNode.SelectNodes("/tile");
+				foreach (XmlNode TileNode in TileList) {
+					NewTile = new SceneTileInfo();
+
+					//Load all tile details from the XML file
+					if (TileNode.Attributes["setname"] != null) {
+						NewTile.TileSetName = TileNode.Attributes["setname"].InnerText;
+					} else {
+						throw new Exception(String.Format("Failed to load XML File {1}{0}Encountered a tile tag with no name attribute in scene {2}.", Environment.NewLine, XMLFile, NewScene.Name));
+					}
+
+					if (TileNode.Attributes["tilecol"] != null) {
+						if (Int32.TryParse(TileNode.Attributes["tilecol"].InnerText, out NewTile.TileCoords.X) == false) {
+							throw new Exception(String.Format("Failed to load XML File {1}{0}In scene named {2} Encountered a tile tag with an invalid tilecol attribute.", Environment.NewLine, XMLFile, NewScene.Name));
+						}
+					} else {
+						throw new Exception(String.Format("Failed to load XML File {1}{0}In scene named {2} Encountered a tile tag with no tilecol attribute.", Environment.NewLine, XMLFile, NewScene.Name));
+					}
+
+					if (TileNode.Attributes["tilerow"] != null) {
+						if (Int32.TryParse(TileNode.Attributes["tilerow"].InnerText, out NewTile.TileCoords.X) == false) {
+							throw new Exception(String.Format("Failed to load XML File {1}{0}In scene named {2} Encountered a tile tag with an invalid tilerow attribute.", Environment.NewLine, XMLFile, NewScene.Name));
+						}
+					} else {
+						throw new Exception(String.Format("Failed to load XML File {1}{0}In scene named {2} Encountered a tile tag with no tilerow attribute.", Environment.NewLine, XMLFile, NewScene.Name));
+					}
+
+					if (TileNode.Attributes["scenecol"] != null) {
+						if (Int32.TryParse(TileNode.Attributes["scenecol"].InnerText, out NewTile.TileCoords.X) == false) {
+							throw new Exception(String.Format("Failed to load XML File {1}{0}In scene named {2} Encountered a tile tag with an invalid scenecol attribute.", Environment.NewLine, XMLFile, NewScene.Name));
+						}
+					} else {
+						throw new Exception(String.Format("Failed to load XML File {1}{0}In scene named {2} Encountered a tile tag with no scenecol attribute.", Environment.NewLine, XMLFile, NewScene.Name));
+					}
+
+					if (TileNode.Attributes["scenerow"] != null) {
+						if (Int32.TryParse(TileNode.Attributes["scenerow"].InnerText, out NewTile.TileCoords.X) == false) {
+							throw new Exception(String.Format("Failed to load XML File {1}{0}In scene named {2} Encountered a tile tag with an invalid scenerow attribute.", Environment.NewLine, XMLFile, NewScene.Name));
+						}
+					} else {
+						throw new Exception(String.Format("Failed to load XML File {1}{0}In scene named {2} Encountered a tile tag with no scenerow attribute.", Environment.NewLine, XMLFile, NewScene.Name));
+					}
+
+					NewScene.TileList.Add(NewTile);
+				}
+
+				cSceneList.Add(NewScene.Name, NewScene);
+			}
+		}
+
+		public void DrawScene(string SceneName, SpriteBatch DrawBatch, Point Origin, Color TintColor) {
+			SceneInfo CurrScene;
+
+			if (cSceneList.ContainsKey(SceneName) == false) {
+				throw new Exception("Request to draw an unknown scened, name: " + SceneName);
+			}
+
+			CurrScene = cSceneList[SceneName];
+		}
+
+		private struct SceneInfo {
+			public SceneInfo(string SceneName) {
+				Name = SceneName;
+				TileList = new List<SceneTileInfo>();
+				TileWidth = 0;
+				TileHeight = 0;
+			}
+
+			public string Name;
+			public List<SceneTileInfo> TileList;
+			public int TileWidth;
+			public int TileHeight;
+		}
+
+		private struct SceneTileInfo {
+			public Point TileCoords;
+			public Point SceneCoords;
+			public string TileSetName;
 		}
 	}
 
@@ -271,6 +392,15 @@ namespace ISOTiles {
 			}
 		}
 
+		/// <summary>
+		/// Draws a single tile onto the screen
+		/// </summary>
+		/// <param name="SetName">The name of the tile set to get the image data from</param>
+		/// <param name="ColNum">The column number in the tile set to grab the tile from</param>
+		/// <param name="RowNum">The row number in the tile set to grab the tile from</param>
+		/// <param name="DrawBatch">The draw batch to use to render this image</param>
+		/// <param name="DrawPos">The position on the screen to draw the tile</param>
+		/// <param name="TintColor">Any color to apply to the image, use Color.White for no change</param>
 		public void DrawTile(string SetName, int ColNum, int RowNum, SpriteBatch DrawBatch, Rectangle DrawPos, Color TintColor) {
 			TileSetInfo TileSet;
 			Vector2 Origin; //Origin is used to rotate about the tile's center

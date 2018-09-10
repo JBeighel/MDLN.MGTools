@@ -123,6 +123,7 @@ namespace MDLN.MGTools {
 		/// <param name="CurrKeys">Current state of the keyboard.</param>
 		/// <param name="CurrMouse">Current state of the mouse.</param>
 		/// <param name="TotalTime">Current time information</param>
+		/// <param name="ProcessMouseEvent">Set true to allow this object to process mouse events, false to ignore them</param>
 		protected override void UpdateContents(GameTime TotalTime, KeyboardState CurrKeys, MouseState CurrMouse, bool ProcessMouseEvent) {
 			string NewKeys = MGInput.GetTypedChars(CurrKeys, cPriorKeys);
 

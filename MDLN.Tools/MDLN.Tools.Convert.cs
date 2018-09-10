@@ -334,24 +334,6 @@ namespace MDLN.Tools {
 		}
 
 		/// <summary>
-		/// Retrieve the description attribute of a Enumerated type value.
-		/// If no description is set it returns the value as a string
-		/// </summary>
-		/// <param name="Value">Enumerated type value</param>
-		/// <returns>The description attribute of the value</returns>
-		public static string GetEnumDescriptionAttribute(Enum Value) {
-			FieldInfo Field = Value.GetType().GetField(Value.ToString());
-
-			DescriptionAttribute[] AttribList = (DescriptionAttribute[])Field.GetCustomAttributes(typeof(DescriptionAttribute), false);
-
-			if ((AttribList != null) && (AttribList.Length > 0)) {
-				return AttribList[0].Description;
-			} else {
-				return Value.ToString();
-			}
-		}
-
-		/// <summary>
 		/// Retrieves the version number of the assembly that began execution.
 		/// </summary>
 		/// <param name="MajorMinorOnly">True to gets the major and minor numbers only, false to includ revision and build as well</param>
@@ -367,6 +349,58 @@ namespace MDLN.Tools {
 			}
 
 			return VersionText;
+		}
+
+		/// <summary>
+		/// Converts a DateTime value into astandardized date and time string.
+		/// YYYY/MM/DD HH:MM:SS.mmm
+		/// </summary>
+		/// <param name="Time">Date and time value to convert</param>
+		/// <returns>Date and time in a standard string format</returns>
+		public static string DateTimeToStandardString(DateTime Time) {
+			string TimeStamp;
+
+			TimeStamp = Time.Year + "/";
+
+			if (Time.Month < 10) {
+				TimeStamp += "0" + Time.Month + "/";
+			} else {
+				TimeStamp += Time.Month + "/";
+			}
+
+			if (Time.Day < 10) {
+				TimeStamp += "0" + Time.Day + " ";
+			} else {
+				TimeStamp += Time.Day + " ";
+			}
+
+			if (Time.Hour < 10) {
+				TimeStamp += "0" + Time.Hour + ":";
+			} else {
+				TimeStamp += Time.Hour + ":";
+			}
+
+			if (Time.Minute < 10) {
+				TimeStamp += "0" + Time.Minute + ":";
+			} else {
+				TimeStamp += Time.Minute + ":";
+			}
+
+			if (Time.Second < 10) {
+				TimeStamp += "0" + Time.Second + ".";
+			} else {
+				TimeStamp += Time.Second + ".";
+			}
+
+			if (Time.Millisecond < 10) {
+				TimeStamp += "00" + Time.Millisecond;
+			} else if (Time.Millisecond < 100) {
+				TimeStamp += "0" + Time.Millisecond;
+			} else {
+				TimeStamp += Time.Millisecond;
+			}
+
+			return TimeStamp;
 		}
 	}
 }

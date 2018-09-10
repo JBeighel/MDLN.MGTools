@@ -76,7 +76,7 @@ namespace MDLN.AsteroidShooter {
 			cSolidTexture.SetData (new[] { Color.White });
 
 			foreach (Textures CurrTexture in Enum.GetValues(typeof(Textures))) {
-				cTextureDict.Add(CurrTexture, Content.Load<Texture2D>(Tools.Tools.GetEnumDescriptionAttribute(CurrTexture)));
+				cTextureDict.Add(CurrTexture, Content.Load<Texture2D>(Tools.EnumTools.GetEnumDescriptionAttribute(CurrTexture)));
 			}
 
 			cShader = Content.Load<Effect>("ShaderEffect");

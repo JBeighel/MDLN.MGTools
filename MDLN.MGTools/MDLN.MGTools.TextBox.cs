@@ -37,6 +37,7 @@ namespace MDLN.MGTools {
 		/// <param name="CurrTime">Currend time information</param>
 		/// <param name="CurrKeyboard">Current state of the keyboard.</param>
 		/// <param name="CurrMouse">Current state of the mouse.</param>
+		/// <param name="ProcessMouseEvent">Set true to allow this object to process mouse events, false to ignore them</param>
 		protected override void UpdateContents(GameTime CurrTime, Microsoft.Xna.Framework.Input.KeyboardState CurrKeyboard, Microsoft.Xna.Framework.Input.MouseState CurrMouse, bool ProcessMouseEvent) {
 			if ((ProcessMouseEvent == true) && ((CurrMouse.LeftButton == ButtonState.Pressed) || (CurrMouse.LeftButton == ButtonState.Pressed))) { //Mouse button is pressed
 				if (ClientRegion.Contains(CurrMouse.Position) == false) {//Mouse is outside of the control, it has lost focus

@@ -41,10 +41,10 @@ namespace MDLN.MarchingSquares {
 		protected override void LoadContent() {
 			cTextureDict = new Dictionary<Textures, Texture2D>();
 			foreach (Textures CurrTexture in Enum.GetValues(typeof(Textures))) {
-				cTextureDict.Add(CurrTexture, Content.Load<Texture2D>(Tools.Tools.GetEnumDescriptionAttribute(CurrTexture)));
+				cTextureDict.Add(CurrTexture, Content.Load<Texture2D>(Tools.EnumTools.GetEnumDescriptionAttribute(CurrTexture)));
 			}
 
-			cDevConsole = new GameConsole(cGraphDevMgr.GraphicsDevice, Content, Tools.Tools.GetEnumDescriptionAttribute(Textures.Font), 0, 0, cGraphDevMgr.GraphicsDevice.Viewport.Bounds.Width, cGraphDevMgr.GraphicsDevice.Viewport.Bounds.Height / 2);
+			cDevConsole = new GameConsole(cGraphDevMgr.GraphicsDevice, Content, Tools.EnumTools.GetEnumDescriptionAttribute(Textures.Font), 0, 0, cGraphDevMgr.GraphicsDevice.Viewport.Bounds.Width, cGraphDevMgr.GraphicsDevice.Viewport.Bounds.Height / 2);
 			cDevConsole.CommandSent += new CommandSentEventHandler(CommandSentEventHandler);
 			cDevConsole.OpenEffect = DisplayEffect.SlideDown;
 			cDevConsole.CloseEffect = DisplayEffect.SlideUp;

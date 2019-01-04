@@ -498,9 +498,9 @@ namespace MDLN.Tools {
 			}
 
 			if (IncludeLogLevel == true) {
-				Header = String.Format("{0}-{1}", Tools.DateTimeToStandardString(DateTime.Now), EntryLevel);
+				Header = String.Format("{0}-{1}", TypeTools.DateTimeToStandardString(DateTime.Now), EntryLevel);
 			} else {
-				Header = String.Format("{0}", Tools.DateTimeToStandardString(DateTime.Now));
+				Header = String.Format("{0}", TypeTools.DateTimeToStandardString(DateTime.Now));
 			}
 
 			FullEntry = String.Format("{0}: {1}", Header, LogMessage) + Environment.NewLine;

@@ -36,7 +36,7 @@
   <ItemGroup>
     <Compile Include="MDLN.Tools.Enum.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="MDLN.Tools.Convert.cs" />
+    <Compile Include="MDLN.Tools.TypeTools.cs" />
     <Compile Include="MDLN.Tools.FileTools.cs" />
     <Compile Include="MDLN.Tools.String.cs" />
     <Compile Include="MDLN.Tools.MsSql.cs" />

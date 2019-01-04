@@ -6,21 +6,58 @@
 		<tiles name="floors" file="TileA4.png" columns="32" rows="30" columnwidth="16" rowheight="16" />
 
 		<tiles name="sprites" file="Sprites.png" columns="12" rows="8" columnwidth="48" rowheight="48" />
+
+		<tiles name="house" file="tilesethouse.png" columns="9" rows="12" columnwidth="32" rowheight="32">
+			<namedtile name="outside top left" marchid="1101" column="0" row="1" />
+			<namedtile name="outside top right" marchid="1110" column="3" row="1" />
+			<namedtile name="outside bottom left" marchid="1011" column="0" row="3" />
+			<namedtile name="outside bottom right" marchid="0111" column="3" row="3" />
+			<namedtile name="top" marchid="1100" column="4" row="1" />
+			<namedtile name="bottom" marchid="0011" column="4" row="3" />
+			<namedtile name="left" marchid="1001" column="7" row="6" />
+			<namedtile name="right" marchid="0110" column="6" row="6" />
+			<namedtile name="inside top left" marchid="0001" column="5" row="1" />
+			<namedtile name="inside top right" marchid="0010" column="6" row="1" />
+			<namedtile name="inside bottom left" marchid="1000" column="5" row="4" />
+			<namedtile name="inside bottom right" marchid="0100" column="6" row="4" />
+			<namedtile name="blocked" marchid="1111" column="0" row="6" />
+			<namedtile name="open" marchid="0000" column="1" row="6" />
+		</tiles>
+
+		<tiles name="rooms" file="Room-TileSet.png" columns="5" rows="3" columnwidth="32" rowheight="32">
+			<namedtile name="outside top left" marchid="1101" column="0" row="0" />
+			<namedtile name="outside top right" marchid="1110" column="2" row="0" />
+			<namedtile name="outside bottom left" marchid="1011" column="0" row="2" />
+			<namedtile name="outside bottom right" marchid="0111" column="2" row="2" />
+			<namedtile name="top" marchid="1100" column="1" row="0" />
+			<namedtile name="bottom" marchid="0011" column="1" row="2" />
+			<namedtile name="left" marchid="1001" column="0" row="1" />
+			<namedtile name="right" marchid="0110" column="2" row="1" />
+			<namedtile name="inside top left" marchid="0001" column="3" row="0" />
+			<namedtile name="inside top right" marchid="0010" column="4" row="0" />
+			<namedtile name="inside bottom left" marchid="1000" column="3" row="1" />
+			<namedtile name="inside bottom right" marchid="0100" column="4" row="1" />
+			<namedtile name="blocked" marchid="1111" column="3" row="2" />
+			<namedtile name="open" marchid="0000" column="1" row="1" />
+		</tiles>
 	</tilesets>
 
 	<sprite name="bluehat" tileset="sprites" height="32" width="32">
 		<default down="1,0" left="1,1" right="1,2" up="1,3" />
-		<animation name="walk" duration="250">
+		<animation name="walk" duration="300">
 			<frame down="0,0" left="0,1" right="0,2" up="0,3" />
+			<frame down="0,0" left="0,1" right="0,2" up="0,3" />
+			<frame down="2,0" left="2,1" right="2,2" up="2,3" />
 			<frame down="2,0" left="2,1" right="2,2" up="2,3" />
 		</animation>
 	</sprite>
 
-	<sprite name="whitehair" tileset="sprites" height="32" width="32">
+	<sprite name="whitehair" tileset="sprites" height="64" width="64">
 		<default down="1,4" left="1,5" right="1,6" up="1,7" />
-		<animation name="walk" duration="150">
+		<animation name="walk" duration="300">
 			<frame down="0,4" left="0,5" right="0,6" up="0,7" />
 			<frame down="2,4" left="2,5" right="2,6" up="2,7" />
+			<frame down="0,4" left="0,5" right="0,6" up="0,7" />
 		</animation>
 	</sprite>
 
@@ -136,5 +173,90 @@
 		<tile setname="floors medium" tilecol="1" tilerow="2" scenecol="3" scenerow="0" />
 		<tile setname="floors medium" tilecol="1" tilerow="2" scenecol="4" scenerow="0" />
 		<tile setname="floors medium" tilecol="2" tilerow="2" scenecol="5" scenerow="0" />
+	</scene>
+
+	<scene name="house" tilewidth="48" tileheight="48">
+		<tile setname="house" tilename="outside top left" scenecol="0" scenerow="0" />
+		<tile setname="house" tilename="top" scenecol="1" scenerow="0" />
+		<tile setname="house" tilename="outside top right" scenecol="2" scenerow="0" />
+		
+		<tile setname="house" tilename="left" scenecol="0" scenerow="1" />
+		<tile setname="house" tilename="open" scenecol="1" scenerow="1" />
+		<tile setname="house" tilename="right" scenecol="2" scenerow="1" />
+
+		<tile setname="house" tilename="outside bottom left" scenecol="0" scenerow="2" />
+		<tile setname="house" tilename="bottom" scenecol="1" scenerow="2" />
+		<tile setname="house" tilename="outside bottom right" scenecol="2" scenerow="2" />
+	</scene>
+
+	<scene name="rooms" tilewidth="64" tileheight="64">
+		<tile setname="rooms" tilename="outside top left" scenecol="0" scenerow="0" />
+		<tile setname="rooms" tilename="top" scenecol="1" scenerow="0" />
+		<tile setname="rooms" tilename="top" scenecol="2" scenerow="0" />
+		<tile setname="rooms" tilename="top" scenecol="3" scenerow="0" />
+		<tile setname="rooms" tilename="outside top right" scenecol="4" scenerow="0" />
+		<tile setname="rooms" tilename="outside top left" scenecol="5" scenerow="0" />
+		<tile setname="rooms" tilename="top" scenecol="6" scenerow="0" />
+		<tile setname="rooms" tilename="top" scenecol="7" scenerow="0" />
+		<tile setname="rooms" tilename="outside top right" scenecol="8" scenerow="0" />
+
+		<tile setname="rooms" tilename="left" scenecol="0" scenerow="1" />
+		<tile setname="rooms" tilename="open" scenecol="1" scenerow="1" />
+		<tile setname="rooms" tilename="open" scenecol="2" scenerow="1" />
+		<tile setname="rooms" tilename="open" scenecol="3" scenerow="1" />
+		<tile setname="rooms" tilename="right" scenecol="4" scenerow="1" />
+		<tile setname="rooms" tilename="left" scenecol="5" scenerow="1" />
+		<tile setname="rooms" tilename="open" scenecol="6" scenerow="1" />
+		<tile setname="rooms" tilename="open" scenecol="7" scenerow="1" />
+		<tile setname="rooms" tilename="right" scenecol="8" scenerow="1" />
+
+		<tile setname="rooms" tilename="left" scenecol="0" scenerow="2" />
+		<tile setname="rooms" tilename="open" scenecol="1" scenerow="2" />
+		<tile setname="rooms" tilename="open" scenecol="2" scenerow="2" />
+		<tile setname="rooms" tilename="open" scenecol="3" scenerow="2" />
+		<tile setname="rooms" tilename="inside bottom left" scenecol="4" scenerow="2" />
+		<tile setname="rooms" tilename="inside bottom right" scenecol="5" scenerow="2" />
+		<tile setname="rooms" tilename="open" scenecol="6" scenerow="2" />
+		<tile setname="rooms" tilename="open" scenecol="7" scenerow="2" />
+		<tile setname="rooms" tilename="right" scenecol="8" scenerow="2" />
+
+		<tile setname="rooms" tilename="left" scenecol="0" scenerow="3" />
+		<tile setname="rooms" tilename="open" scenecol="1" scenerow="3" />
+		<tile setname="rooms" tilename="open" scenecol="2" scenerow="3" />
+		<tile setname="rooms" tilename="open" scenecol="3" scenerow="3" />
+		<tile setname="rooms" tilename="inside top left" scenecol="4" scenerow="3" />
+		<tile setname="rooms" tilename="inside top right" scenecol="5" scenerow="3" />
+		<tile setname="rooms" tilename="open" scenecol="6" scenerow="3" />
+		<tile setname="rooms" tilename="open" scenecol="7" scenerow="3" />
+		<tile setname="rooms" tilename="right" scenecol="8" scenerow="3" />
+
+		<tile setname="rooms" tilename="outside bottom left" scenecol="0" scenerow="4" />
+		<tile setname="rooms" tilename="inside top right" scenecol="1" scenerow="4" />
+		<tile setname="rooms" tilename="open" scenecol="2" scenerow="4" />
+		<tile setname="rooms" tilename="inside top left" scenecol="3" scenerow="4" />
+		<tile setname="rooms" tilename="outside bottom right" scenecol="4" scenerow="4" />
+		<tile setname="rooms" tilename="outside bottom left" scenecol="5" scenerow="4" />
+		<tile setname="rooms" tilename="bottom" scenecol="6" scenerow="4" />
+		<tile setname="rooms" tilename="bottom" scenecol="7" scenerow="4" />
+		<tile setname="rooms" tilename="outside bottom right" scenecol="8" scenerow="4" />
+
+		<tile setname="rooms" tilename="outside top left" scenecol="0" scenerow="5" />
+		<tile setname="rooms" tilename="inside bottom right" scenecol="1" scenerow="5" />
+		<tile setname="rooms" tilename="open" scenecol="2" scenerow="5" />
+		<tile setname="rooms" tilename="inside bottom left" scenecol="3" scenerow="5" />
+		<tile setname="rooms" tilename="outside top right" scenecol="4" scenerow="5" />
+		
+		
+		<tile setname="rooms" tilename="left" scenecol="0" scenerow="6" />
+		<tile setname="rooms" tilename="open" scenecol="1" scenerow="6" />
+		<tile setname="rooms" tilename="open" scenecol="2" scenerow="6" />
+		<tile setname="rooms" tilename="open" scenecol="3" scenerow="6" />
+		<tile setname="rooms" tilename="right" scenecol="4" scenerow="6" />
+
+		<tile setname="rooms" tilename="outside bottom left" scenecol="0" scenerow="7" />
+		<tile setname="rooms" tilename="bottom" scenecol="1" scenerow="7" />
+		<tile setname="rooms" tilename="bottom" scenecol="2" scenerow="7" />
+		<tile setname="rooms" tilename="bottom" scenecol="3" scenerow="7" />
+		<tile setname="rooms" tilename="outside bottom right" scenecol="4" scenerow="7" />
 	</scene>
 </tilescene>

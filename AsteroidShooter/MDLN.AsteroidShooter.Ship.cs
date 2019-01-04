@@ -210,6 +210,9 @@ namespace MDLN.AsteroidShooter
 				ShipCenter.X = Width / 2;
 
 				cRotation = MGMath.GetAngleFromPoints(ShipCenter, CurrMouse.Position.ToVector2(), true) + ImageInitialAngle;
+				if (cRotation != ImageInitialAngle) { //Ship rotation has changed
+					HasChanged = true;
+				}
 
 				if (CurrKeys.IsKeyDown(Keys.W) == true) {
 					cSpeedY -= SPEEDSTEP;

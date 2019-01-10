@@ -57,6 +57,38 @@ namespace MDLN.MGTools {
 
 			cFont.FontTexture = ContentMgr.Load<Texture2D>(FontFile);
 
+			Initialize();
+		}
+
+		/// <summary>
+		/// Initialize a new instance of the class by using a previously prepared texture font
+		/// </summary>
+		/// <param name="GraphicsDev">Connection to the Graphics device</param>
+		/// <param name="ImageFont">Texture font object to use when drawing the text</param>
+		/// <param name="Width">Width of the console on screen</param>
+		/// <param name="Height">Height of the console on screen</param>
+		public GameConsole(GraphicsDevice GraphicsDev, TextureFont ImageFont, int Width, int Height) : this(GraphicsDev, ImageFont, new Rectangle(0, 0, Width, Height)) { }
+
+		/// <summary>
+		/// Initialize a new instance of the class by using a previously prepared texture font
+		/// </summary>
+		/// <param name="GraphicsDev">Connection to the Graphics device</param>
+		/// <param name="ImageFont">Texture font object to use when drawing the text</param>
+		/// <param name="Region">Region on the screen to draw the console</param>
+		public GameConsole(GraphicsDevice GraphicsDev, TextureFont ImageFont, Rectangle Region) : base(GraphicsDev, null, Region) {
+			cFontColor = new Color(Color.LightBlue, 1.0f);
+			BackgroundColor = new Color(0.1f, 0.1f, 0.1f, 0.75f);
+
+			cFont = ImageFont;
+
+			Initialize();
+		}
+
+		/// <summary>
+		/// Used to initialize the class variables, there are multiple constructor paths so to ensure
+		/// the class is prepared the same way this function dose all the common work.
+		/// </summary>
+		private void Initialize() {
 			cMaxLines = (ClientRegion.Height / cFont.CharacterHeight) - 1; //Remove 1 line for the command input
 
 			cPriorKeys = new KeyboardState();

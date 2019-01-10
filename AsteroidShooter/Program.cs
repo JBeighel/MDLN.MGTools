@@ -44,6 +44,10 @@ namespace MDLN.AsteroidShooter {
 			cGraphDevMgr = new GraphicsDeviceManager(this);
 			cGraphDevMgr.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
 
+			cGraphDevMgr.PreferredBackBufferWidth = 1024;//Set the window size
+			cGraphDevMgr.PreferredBackBufferHeight = 768;
+			cGraphDevMgr.ApplyChanges();
+
 			Content.RootDirectory = "Content";
 			IsMouseVisible = true;
 

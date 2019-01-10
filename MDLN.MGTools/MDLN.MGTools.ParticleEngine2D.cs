@@ -120,39 +120,40 @@ namespace MDLN.MGTools {
 		public void Update(GameTime CurrTime) {
 			int Ctr;
 			Particle2D CurrBullet;
+			List<int> IndexesToRemove = new List<int>();
 
 			for (Ctr = 0; Ctr < cParticleList.Count; Ctr++) {
 				CurrBullet = cParticleList[Ctr];
 
 				if (CurrBullet.Update(CurrTime) == false) { //Particle update says this particle no longer exists
-					cParticleList.RemoveAt(Ctr);
+					IndexesToRemove.Add(Ctr);
 					continue;
 				}
 
 				if ((CurrBullet.SpeedX <= 0) && (CurrBullet.TopLeft.X < -1 * cParticleList[Ctr].Width)) {  //Bullet moved off screen left
 					if (WrapScreenEdges == false) {
-						cParticleList.RemoveAt(Ctr);
+						IndexesToRemove.Add(Ctr);
 						continue;
 					} else {
 						CurrBullet.TopLeft.X = cGraphDev.Viewport.Bounds.Width;
 					}
 				} else if ((CurrBullet.SpeedX >= 0) && (CurrBullet.TopLeft.X > cGraphDev.Viewport.Bounds.Width)) {  //Bullet moved off screen right
 					if (WrapScreenEdges == false) {
-						cParticleList.RemoveAt(Ctr);
+						IndexesToRemove.Add(Ctr);
 						continue;
 					} else {
 						CurrBullet.TopLeft.X = cParticleList[Ctr].Width * -1;
 					}
 				} else if ((CurrBullet.SpeedY >= 0) && (CurrBullet.TopLeft.Y < -1 * cParticleList[Ctr].Height)) {  //Bullet moved off screen top
 					if (WrapScreenEdges == false) {
-						cParticleList.RemoveAt(Ctr);
+						IndexesToRemove.Add(Ctr);
 						continue;
 					} else {
 						CurrBullet.TopLeft.Y = cGraphDev.Viewport.Bounds.Height;
 					}
 				} else if ((CurrBullet.SpeedY <= 0) && (CurrBullet.TopLeft.Y > cGraphDev.Viewport.Bounds.Height)) {  //Bullet moved off screen bottom
 					if (WrapScreenEdges == false) {
-						cParticleList.RemoveAt(Ctr);
+						IndexesToRemove.Add(Ctr);
 						continue;
 					} else {
 						CurrBullet.TopLeft.Y = cParticleList[Ctr].Height * -1;
@@ -160,6 +161,10 @@ namespace MDLN.MGTools {
 				}
 
 				cParticleList[Ctr] = CurrBullet;
+			}
+
+			for (Ctr = IndexesToRemove.Count - 1; Ctr > 0; Ctr--) {
+				cParticleList.RemoveAt(Ctr);
 			}
 		}
 
@@ -248,6 +253,7 @@ namespace MDLN.MGTools {
 			List<CollisionRegion> RegionList = new List<CollisionRegion>();
 			CollisionRegion NewRegion = new CollisionRegion();
 
+			NewRegion.Type = CollideType.Circle;
 			NewRegion.Origin.X = TopLeft.X + (Width / 2);
 			NewRegion.Origin.Y = TopLeft.Y + (Height / 2);
 
@@ -285,8 +291,26 @@ namespace MDLN.MGTools {
 
 			foreach (CollisionRegion CurrRegion in TestRegions) {
 				foreach (CollisionRegion MyRegion in MyRegionsList) {
-					if (MGMath.TestCircleCollision(CurrRegion.Origin, CurrRegion.Radius, MyRegion.Origin, MyRegion.Radius) == true) {
-						return true;
+					if (MyRegion.Type == CollideType.Circle) {
+						if (CurrRegion.Type == CollideType.Circle) {
+							if (MGMath.TestCircleCollisions(CurrRegion.Origin, CurrRegion.Radius, MyRegion.Origin, MyRegion.Radius) == true) {
+								return true;
+							}
+						} else { //CurrRegion is a rectangle (MyRegion is Circle)
+							if (MGMath.TestCircleRectangleCollision(CurrRegion.Origin, CurrRegion.RectOffsets, MyRegion.Origin, MyRegion.Radius) == true) {
+								return true;
+							}
+						}
+					} else { //My Region is a rectangle
+						if (CurrRegion.Type == CollideType.Circle) {
+							if (MGMath.TestCircleRectangleCollision(MyRegion.Origin, MyRegion.RectOffsets, CurrRegion.Origin, CurrRegion.Radius) == true) {
+								return true;
+							}
+						} else { //CurrRegion is a rectangle (MyRegion is Rectangle)
+							if (MGMath.TestRectangleCollisions(CurrRegion.Origin, CurrRegion.RectOffsets, MyRegion.Origin, MyRegion.RectOffsets) == true) {
+								return true;
+							}
+						}
 					}
 				}
 			}
@@ -354,6 +378,10 @@ namespace MDLN.MGTools {
 	/// </summary>
 	public struct CollisionRegion {
 		/// <summary>
+		/// Speicifes how to test this collision region
+		/// </summary>
+		public CollideType Type;
+		/// <summary>
 		/// The center point of the circle
 		/// </summary>
 		public Vector2 Origin;
@@ -361,6 +389,10 @@ namespace MDLN.MGTools {
 		/// The radius of the circle
 		/// </summary>
 		public float Radius;
+		/// <summary>
+		/// For the rectangular version of this region these are offsets to the boundaries
+		/// </summary>
+		public Rectangle RectOffsets;
 	}
 
 	/// <summary>
@@ -389,11 +421,25 @@ namespace MDLN.MGTools {
 	}
 
 	/// <summary>
+	/// Specifies how to test this collision region
+	/// </summary>
+	public enum CollideType {
+		/// <summary>
+		/// The region is a circle
+		/// </summary>
+		Circle,
+		/// <summary>
+		/// The region is a rectangle
+		/// </summary>
+		Rectangle
+	}
+
+	/// <summary>
 	/// Interface that offers common controls for any object that might be visible on the screen
 	/// </summary>
 	public interface IVisible {
 		/// <summary>
-		/// Retrieves teh coordinates of the center of the control
+		/// Retrieves the coordinates of the center of the control
 		/// </summary>
 		/// <returns>The center coordinates.</returns>
 		Vector2 GetCenterCoordinates();

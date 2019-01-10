@@ -172,10 +172,6 @@ namespace MDLN.MGTools {
 				throw new Exception("Request to draw non-existant named tile, " + TileName + ", in set " + SetName);
 			}
 
-			if (RegEx.QuickTest(TileName, "inside bottom") == true) {
-				TileName = TileName;
-			}
-
 			DrawTile(SetName, cTileSetList[SetName].NamedTileList[TileName].X, cTileSetList[SetName].NamedTileList[TileName].Y, DrawBatch, DrawPos, TintColor);
 		}
 
@@ -266,26 +262,59 @@ namespace MDLN.MGTools {
 		/// 0001    0010
 		/// </summary>
 		public enum MarchingSquaresTiles {
+			/// <summary>
+			/// Empty square, no walls
+			/// </summary>
 			[StringValue("open|Marching squares ID=0000")]
 			Open= 0x00,
+			/// <summary>
+			/// Inside top left
+			/// </summary>
 			[StringValue("inside top left|Marching squares ID=0001")]
 			InTopLeft= 0x01,
+			/// <summary>
+			/// Inside top right
+			/// </summary>
 			[StringValue("inside top right|Marching squares ID=0010")]
 			InTopRight = 0x02,
+			/// <summary>
+			/// Bottom
+			/// </summary>
 			[StringValue("bottom|Marching squares ID=0011")]
 			Bottom = 0x03,
+			/// <summary>
+			/// Inside bottom right
+			/// </summary>
 			[StringValue("inside bottom right|Marching squares ID=0100")]
 			InBottomRight= 0x04,
+			/// <summary>
+			/// Right
+			/// </summary>
 			[StringValue("right|Marching squares ID=0110")]
 			Right = 0x06,
+			/// <summary>
+			/// Outside bottom right
+			/// </summary>
 			[StringValue("outside bottom right|Marching squares ID=1110")]
 			OutBottomRight = 0x07,
+			/// <summary>
+			/// Outside bottom left
+			/// </summary>
 			[StringValue("outside bottom left|Marching squares ID=1110")]
 			OutBottomLeft = 0x0B,
+			/// <summary>
+			/// Outside top right
+			/// </summary>
 			[StringValue("outside top right|Marching squares ID=1110")]
 			OutTopRight = 0x0E,
+			/// <summary>
+			/// Outside top left
+			/// </summary>
 			[StringValue("outside top left|Marching squares ID=1101")]
 			OutTopLeft = 0x0D,
+			/// <summary>
+			/// Blocked, entire tile is wall
+			/// </summary>
 			[StringValue("blocked|Marching squares ID=1111")]
 			Blocked = 0x0F
 		}

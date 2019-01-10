@@ -35,6 +35,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MDLN.Tools.Enum.cs" />
+    <Compile Include="MDLN.Tools.Vectors.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MDLN.Tools.TypeTools.cs" />
     <Compile Include="MDLN.Tools.FileTools.cs" />

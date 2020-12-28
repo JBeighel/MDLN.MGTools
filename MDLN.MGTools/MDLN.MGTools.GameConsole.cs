@@ -54,7 +54,7 @@ namespace MDLN.MGTools {
 			cFont = new TextureFont();
 
 			cFontColor = new Color(Color.LightBlue, 1.0f);
-			BackgroundColor = new Color(0.1f, 0.1f, 0.1f, 0.75f);
+			BackgroundColor = new Color(0.1f, 0.5f, 0.5f, 0.75f);
 
 			//cFont.FontTexture = ContentMgr.Load<Texture2D>(FontFile);
 			cFont.FontTexture = Texture2D.FromStream(GraphicsDev, new FileStream(FontFile, FileMode.Open));

@@ -29,8 +29,9 @@ namespace ParticleTest {
 		/// </summary>
 		private GameConsole cDevConsole;
 		private ParticleEngine2D cSparkles;
+		private MDLN.MGTools.Container cSettingsCont;
+		Button cAddParitclesBtn;
 		private Dictionary<TextureFiles, Texture2D> cTextureDict;
-		private KeyboardState cPriorKeyState;
 		private Random cRand;
 
 		public ParticleTester() {
@@ -47,6 +48,7 @@ namespace ParticleTest {
 
 		private void FormResizeHandler(object Sender, EventArgs Args) {
 			cDevConsole.Width = Window.ClientBounds.Width;
+			cSettingsCont.Height = GraphicsDevice.Viewport.Height;
 
 			return;
 		}
@@ -76,22 +78,27 @@ namespace ParticleTest {
 					return;
 				}
 
+				//Randomly generate the number of particles requested
 				for (nCtr = 0; nCtr < nNumParticles; nCtr++) {
 					NewParticle = new Particle2D();
+					//Particle images should be grayscale, allowing this tint value to color them
 					NewParticle.Tint = new Color(cRand.Next(0, 255), cRand.Next(0, 255), cRand.Next(0, 255));
-					
+					NewParticle.Image = cTextureDict[eTexture];
+
+					//Set the dimensions of the image on screen
 					NewParticle.Height = cTextureDict[eTexture].Height / 2;
 					NewParticle.Width = cTextureDict[eTexture].Width / 2;
+					//Set the position of the image
 					NewParticle.TopLeft.X = (GraphicsDevice.Viewport.Width / 2) - (NewParticle.Width / 2);
 					NewParticle.TopLeft.Y = (GraphicsDevice.Viewport.Height / 2) - (NewParticle.Height / 2);
+					NewParticle.Rotation = (float)((cRand.Next(0, 360) * (2 * Math.PI)) / 360);
 
-					NewParticle.Image = cTextureDict[eTexture];
+					//Set the total movement the particle will travel
 					NewParticle.TotalDistance.X = cRand.Next(GraphicsDevice.Viewport.Width / -2, GraphicsDevice.Viewport.Width / 2);
 					NewParticle.TotalDistance.Y = cRand.Next(GraphicsDevice.Viewport.Height / -2, GraphicsDevice.Viewport.Height / 2);
-
-					NewParticle.Rotation = (float)((cRand.Next(0, 360) * (2 * Math.PI)) / 360);
 					NewParticle.TotalRotate = (float)(cRand.Next(-5, 5) * 2 * Math.PI);
 
+					//Set how long the particle will live in milliseconds
 					NewParticle.TimeToLive = cRand.Next(1000, 10000);
 					NewParticle.AlphaFade = true;
 
@@ -100,6 +107,39 @@ namespace ParticleTest {
 			} else {
 				cDevConsole.AddText("Unrecognized command: " + CommandEvent);
 			}
+		}
+
+		private void AddParticlesClickHandler(object Sender, MouseButton eButton) {
+			Particle2D NewParticle;
+			TextureFiles eTexture = TextureFiles.dirt_01;
+
+			if (eButton == MouseButton.Left) {
+				NewParticle = new Particle2D();
+				//Particle images should be grayscale, allowing this tint value to color them
+				NewParticle.Tint = new Color(cRand.Next(0, 255), cRand.Next(0, 255), cRand.Next(0, 255));
+				NewParticle.Image = cTextureDict[eTexture];
+
+				//Set the dimensions of the image on screen
+				NewParticle.Height = cTextureDict[eTexture].Height / 2;
+				NewParticle.Width = cTextureDict[eTexture].Width / 2;
+				//Set the position of the image
+				NewParticle.TopLeft.X = (GraphicsDevice.Viewport.Width / 2) - (NewParticle.Width / 2);
+				NewParticle.TopLeft.Y = (GraphicsDevice.Viewport.Height / 2) - (NewParticle.Height / 2);
+				NewParticle.Rotation = (float)((cRand.Next(0, 360) * (2 * Math.PI)) / 360);
+
+				//Set the total movement the particle will travel
+				NewParticle.TotalDistance.X = cRand.Next(GraphicsDevice.Viewport.Width / -2, GraphicsDevice.Viewport.Width / 2);
+				NewParticle.TotalDistance.Y = cRand.Next(GraphicsDevice.Viewport.Height / -2, GraphicsDevice.Viewport.Height / 2);
+				NewParticle.TotalRotate = (float)(cRand.Next(-5, 5) * 2 * Math.PI);
+
+				//Set how long the particle will live in milliseconds
+				NewParticle.TimeToLive = cRand.Next(1000, 10000);
+				NewParticle.AlphaFade = true;
+
+				cSparkles.AddParticle(NewParticle);
+			}
+
+			return;
 		}
 
 		/// <summary>
@@ -127,6 +167,14 @@ namespace ParticleTest {
 		protected override void LoadContent() {
 			String strFileName;
 			Texture2D NewTexture;
+			TextureFont Font = new TextureFont();
+			FileStream FileLoad;
+
+			strFileName = INTERFACECONTENTDIR + "\\Font.png";
+			FileLoad = new FileStream(strFileName, FileMode.Open);
+			NewTexture = Texture2D.FromStream(cGraphDevMgr.GraphicsDevice, FileLoad);
+			Font.FontTexture = NewTexture;
+			FileLoad.Close();
 
 			try {
 				cDevConsole = new GameConsole(cGraphDevMgr.GraphicsDevice, Content, INTERFACECONTENTDIR + "\\Font.png", cGraphDevMgr.GraphicsDevice.Viewport.Width, cGraphDevMgr.GraphicsDevice.Viewport.Height / 2);
@@ -140,6 +188,22 @@ namespace ParticleTest {
 				Exit();
 				return;
 			}
+
+			cSettingsCont = new MDLN.MGTools.Container(GraphicsDevice, GraphicsDevice.Viewport.Height, 300);
+			cSettingsCont.Width = 300;
+			cSettingsCont.Height = GraphicsDevice.Viewport.Height;
+			cSettingsCont.Visible = true;
+			cSettingsCont.BackgroundColor = new Color(Color.White, 0.5f);
+			cSettingsCont.Top = 0;
+			cSettingsCont.Left = 0;
+
+			cAddParitclesBtn = new Button(GraphicsDevice, null, 10, 10, 20, 280);
+			cAddParitclesBtn.Text = "Add Particles";
+			cAddParitclesBtn.Visible = true;
+			cAddParitclesBtn.Font = Font;
+			cAddParitclesBtn.BackgroundColor = Color.LightGray;
+			cAddParitclesBtn.FontColor = Color.Black;
+			cAddParitclesBtn.Click += AddParticlesClickHandler;
 
 			foreach (TextureFiles CurrTexture in Enum.GetValues(typeof(TextureFiles))) {
 				strFileName = INTERFACECONTENTDIR + "\\" + EnumTools.GetEnumDescriptionAttribute(CurrTexture);
@@ -161,11 +225,8 @@ namespace ParticleTest {
 		protected override void Update(GameTime gameTime) {
 			cDevConsole.Update(gameTime);
 			cSparkles.Update(gameTime);
-			KeyboardState CurrKeys = Keyboard.GetState();
-
-			//Handle keyboard input
-
-			cPriorKeyState = CurrKeys;
+			cSettingsCont.Update(gameTime);
+			cAddParitclesBtn.Update(gameTime);
 
 			//Use monogame update
 			base.Update(gameTime);
@@ -182,6 +243,9 @@ namespace ParticleTest {
 			cSparkles.Draw();
 
 			cDrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
+
+			cSettingsCont.Draw(cDrawBatch);
+			cAddParitclesBtn.Draw(cDrawBatch);
 
 			//Always draw console last
 			cDevConsole.Draw(cDrawBatch);

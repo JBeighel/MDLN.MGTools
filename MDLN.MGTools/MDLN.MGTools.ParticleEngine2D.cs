@@ -123,7 +123,7 @@ namespace MDLN.MGTools {
 			List<int> IndexesToRemove = new List<int>();
 
 			for (Ctr = 0; Ctr < cParticleList.Count; Ctr++) {
-				CurrBullet = cParticleList[Ctr];
+				CurrBullet = cParticleList[Ctr]; //Pull out he particle to update
 
 				if (CurrBullet.Update(CurrTime) == false) { //Particle update says this particle no longer exists
 					IndexesToRemove.Add(Ctr);
@@ -160,7 +160,7 @@ namespace MDLN.MGTools {
 					}
 				}
 
-				cParticleList[Ctr] = CurrBullet;
+				cParticleList[Ctr] = CurrBullet; //Place the changed values into the list
 			}
 
 			for (Ctr = IndexesToRemove.Count - 1; Ctr > 0; Ctr--) {
@@ -244,8 +244,13 @@ namespace MDLN.MGTools {
 		/// This does not factor in the SpeedRotate variable
 		/// </summary>
 		public float TotalRotate;
-
+		/// <summary>
+		/// Time that the particle was created determined by its first update
+		/// </summary>
 		private double cCreationTime;
+		/// <summary>
+		/// Time when the particle was last updated
+		/// </summary>
 		private double ctLastUpdate;
 
 		/// <summary>

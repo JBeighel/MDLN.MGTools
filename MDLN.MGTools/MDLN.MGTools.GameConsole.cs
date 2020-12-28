@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Input;
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace MDLN.MGTools {
@@ -55,7 +56,8 @@ namespace MDLN.MGTools {
 			cFontColor = new Color(Color.LightBlue, 1.0f);
 			BackgroundColor = new Color(0.1f, 0.1f, 0.1f, 0.75f);
 
-			cFont.FontTexture = ContentMgr.Load<Texture2D>(FontFile);
+			//cFont.FontTexture = ContentMgr.Load<Texture2D>(FontFile);
+			cFont.FontTexture = Texture2D.FromStream(GraphicsDev, new FileStream(FontFile, FileMode.Open));
 
 			Initialize();
 		}

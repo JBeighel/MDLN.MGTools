@@ -86,11 +86,11 @@ namespace ParticleTest {
 					NewParticle.TopLeft.Y = (GraphicsDevice.Viewport.Height / 2) - (NewParticle.Height / 2);
 
 					NewParticle.Image = cTextureDict[eTexture];
-					NewParticle.SpeedX = cRand.Next(-1 * GraphicsDevice.Viewport.Width / 20, GraphicsDevice.Viewport.Width / 20);
-					NewParticle.SpeedY = cRand.Next(-1 * GraphicsDevice.Viewport.Height / 20, GraphicsDevice.Viewport.Height / 20);
+					NewParticle.TotalDistance.X = cRand.Next(GraphicsDevice.Viewport.Width / -2, GraphicsDevice.Viewport.Width / 2);
+					NewParticle.TotalDistance.Y = cRand.Next(GraphicsDevice.Viewport.Height / -2, GraphicsDevice.Viewport.Height / 2);
 
 					NewParticle.Rotation = (float)((cRand.Next(0, 360) * (2 * Math.PI)) / 360);
-					NewParticle.SpeedRotate = (float)((cRand.Next(-15, 15) * (2 * Math.PI)) / 360);
+					NewParticle.TotalRotate = (float)(cRand.Next(-5, 5) * 2 * Math.PI);
 
 					NewParticle.TimeToLive = cRand.Next(1000, 10000);
 					NewParticle.AlphaFade = true;

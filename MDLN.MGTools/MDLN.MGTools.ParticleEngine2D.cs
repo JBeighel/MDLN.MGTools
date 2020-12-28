@@ -207,7 +207,7 @@ namespace MDLN.MGTools {
 		/// </summary>
 		public int Width;
 		/// <summary>
-		/// Current rotation of the particle
+		/// Current rotation in radians of the particle
 		/// </summary>
 		public float Rotation;
 		/// <summary>
@@ -215,15 +215,15 @@ namespace MDLN.MGTools {
 		/// </summary>
 		public Texture2D Image;
 		/// <summary>
-		/// The speed of the particle in the X direction
+		/// The speed of the particle in the X direction each frame
 		/// </summary>
 		public float SpeedX;
 		/// <summary>
-		/// Speed of the particle  alont the Y axis
+		/// Speed of the particle  alont the Y axis each frame
 		/// </summary>
 		public float SpeedY;
 		/// <summary>
-		/// Speed at which the particle is rotating
+		/// Speed at which the particle is rotating in radians each frame
 		/// </summary>
 		public float SpeedRotate;
 		/// <summary>
@@ -234,8 +234,19 @@ namespace MDLN.MGTools {
 		/// True to have the particle fade over time, false to not fade
 		/// </summary>
 		public bool AlphaFade;
+		/// <summary>
+		/// Total distance the particle will travel across its life
+		/// This does not factor in the SpeedX and SpeedY variables
+		/// </summary>
+		public Vector2 TotalDistance;
+		/// <summary>
+		/// Total distance the particle will rotate across its life
+		/// This does not factor in the SpeedRotate variable
+		/// </summary>
+		public float TotalRotate;
 
 		private double cCreationTime;
+		private double ctLastUpdate;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="MDLN.MGTools.Particle2D"/> class.
@@ -243,6 +254,7 @@ namespace MDLN.MGTools {
 		public Particle2D() {
 			TimeToLive = 0;
 			AlphaFade = false;
+			cCreationTime = -1;
 		}
 
 		/// <summary>
@@ -323,11 +335,18 @@ namespace MDLN.MGTools {
 		/// </summary>
 		/// <param name="CurrTime">Curr time.</param>
 		public virtual bool Update(GameTime CurrTime) {
+			double nLastUpdPct, nTotLifePct;
+
 			TopLeft.X += SpeedX;
 			TopLeft.Y -= SpeedY;
 
-			if (cCreationTime == 0) {
+			if (cCreationTime < 0) {
 				cCreationTime = CurrTime.TotalGameTime.TotalMilliseconds;
+				nLastUpdPct = 0;
+				nTotLifePct = 0;
+			} else {
+				nLastUpdPct = (CurrTime.TotalGameTime.TotalMilliseconds - ctLastUpdate) / TimeToLive;
+				nTotLifePct = (CurrTime.TotalGameTime.TotalMilliseconds - cCreationTime) / TimeToLive;
 			}
 
 			if ((TimeToLive > 0) && (CurrTime.TotalGameTime.TotalMilliseconds - cCreationTime >= TimeToLive)) {
@@ -336,18 +355,24 @@ namespace MDLN.MGTools {
 
 			Rotation += SpeedRotate;
 
+			TopLeft.X += (float)(TotalDistance.X * nLastUpdPct);
+			TopLeft.Y += (float)(TotalDistance.Y * nLastUpdPct);
+			Rotation += (float)(TotalRotate * nLastUpdPct);
+
 			//Make sure the rotation stays between 0 and 360 degrees in radians
 			if (Rotation <= 0) {
-				Rotation = 6.28318531f;
+				Rotation += 2 * (float)Math.PI;
 			}
 
-			if (Rotation > 6.28318531f) {
-				Rotation = 0;
+			if (Rotation > 2 * (float)Math.PI) {
+				Rotation -= 2 * (float)Math.PI; ;
 			}
 
 			if (AlphaFade == true) {
-				Tint.A = (byte)(255 - (((CurrTime.TotalGameTime.TotalMilliseconds - cCreationTime) / TimeToLive) * 255));
+				Tint.A = (byte)(255 - (nTotLifePct * 255));
 			}
+
+			ctLastUpdate = CurrTime.TotalGameTime.TotalMilliseconds;
 
 			return true;
 		}

@@ -34,7 +34,8 @@ namespace ParticleTest {
 		private MDLN.MGTools.Container cSettingsCont;
 		private MDLN.MGTools.TextBox cNumParticlesTxt, cHeightMinTxt, cHeightMaxTxt, cWidthMinTxt, cWidthMaxTxt;
 		private MDLN.MGTools.TextBox cRedMinTxt, cRedMaxTxt, cGreenMinTxt, cGreenMaxTxt, cBlueMinTxt, cBlueMaxTxt;
-		private Button cAddParitclesBtn, cNumParticlesLbl, cShowingLbl, cHeightLbl, cWidthLbl, cRedLbl, cGreenLbl, cBlueLbl;
+		private MDLN.MGTools.TextBox cLifeMinTxt, cLifeMaxTxt, cXDistMinTxt, cXDistMaxTxt, cYDistMinTxt, cYDistMaxTxt;
+		private Button cAddParitclesBtn, cNumParticlesLbl, cShowingLbl, cHeightLbl, cWidthLbl, cRedLbl, cGreenLbl, cBlueLbl, cLifeLbl, cXDistLbl, cYDistLbl;
 		private Dictionary<TextureFiles, Texture2D> cTextureDict;
 		private Random cRand;
 
@@ -117,7 +118,7 @@ namespace ParticleTest {
 			Particle2D NewParticle;
 			TextureFiles eTexture = TextureFiles.dirt_01;
 			int nCtr, nParticleCnt;
-			Vector2 nHeight, nWidth, nRed, nGreen, nBlue;
+			Vector2 nHeight, nWidth, nRed, nGreen, nBlue, nLife, nXDist, nYDist;
 
 			if (Int32.TryParse(cNumParticlesTxt.Text, out nParticleCnt) == false) {
 				nParticleCnt = 1;
@@ -151,7 +152,7 @@ namespace ParticleTest {
 				nGreen.X = 0;
 			}
 
-			if ((float.TryParse(cGreenMaxTxt.Text, out nGreen.Y) == false) || (nGreen.X > nRed.Y) || (nGreen.Y > 255)) {
+			if ((float.TryParse(cGreenMaxTxt.Text, out nGreen.Y) == false) || (nGreen.X > nGreen.Y) || (nGreen.Y > 255)) {
 				nGreen.Y = nGreen.X;
 			}
 
@@ -161,6 +162,30 @@ namespace ParticleTest {
 
 			if ((float.TryParse(cBlueMaxTxt.Text, out nBlue.Y) == false) || (nBlue.X > nBlue.Y) || (nBlue.Y > 255)) {
 				nBlue.Y = nBlue.X;
+			}
+
+			if ((float.TryParse(cLifeMinTxt.Text, out nLife.X) == false) || (nLife.X < 0)) {
+				nLife.X = 1;
+			}
+
+			if ((float.TryParse(cLifeMaxTxt.Text, out nLife.Y) == false) || (nLife.X > nLife.Y)) {
+				nLife.Y = nLife.X;
+			}
+
+			if (float.TryParse(cXDistMinTxt.Text, out nXDist.X) == false) {
+				nXDist.X = GraphicsDevice.Viewport.Width / -2;
+			}
+
+			if ((float.TryParse(cXDistMaxTxt.Text, out nXDist.Y) == false) || (nXDist.X > nXDist.Y)) {
+				nXDist.Y = nXDist.X;
+			}
+
+			if (float.TryParse(cYDistMinTxt.Text, out nYDist.X) == false) {
+				nYDist.X = GraphicsDevice.Viewport.Height / -2;
+			}
+
+			if ((float.TryParse(cYDistMaxTxt.Text, out nYDist.Y) == false) || (nYDist.X > nYDist.Y)) {
+				nYDist.Y = nYDist.X;
 			}
 
 			if (eButton == MouseButton.Left) {
@@ -179,12 +204,12 @@ namespace ParticleTest {
 					NewParticle.Rotation = (float)((cRand.Next(0, 360) * (2 * Math.PI)) / 360);
 
 					//Set the total movement the particle will travel
-					NewParticle.TotalDistance.X = cRand.Next(GraphicsDevice.Viewport.Width / -2, GraphicsDevice.Viewport.Width / 2);
-					NewParticle.TotalDistance.Y = cRand.Next(GraphicsDevice.Viewport.Height / -2, GraphicsDevice.Viewport.Height / 2);
+					NewParticle.TotalDistance.X = cRand.Next((int)nXDist.X, (int)nXDist.Y);
+					NewParticle.TotalDistance.Y = cRand.Next((int)nYDist.X, (int)nYDist.Y);
 					NewParticle.TotalRotate = (float)(cRand.Next(-5, 5) * 2 * Math.PI);
 
 					//Set how long the particle will live in milliseconds
-					NewParticle.TimeToLive = cRand.Next(1000, 10000);
+					NewParticle.TimeToLive = cRand.Next((int)nLife.X, (int)nLife.Y);
 					NewParticle.AlphaFade = true;
 
 					cSparkles.AddParticle(NewParticle);
@@ -394,6 +419,75 @@ namespace ParticleTest {
 			cBlueMaxTxt.FontColor = Color.White;
 			cBlueMaxTxt.Alignment = Justify.MiddleCenter;
 
+			cLifeLbl = new Button(GraphicsDevice, null, 250, 10, 20, 90);
+			cLifeLbl.Text = "mSec";
+			cLifeLbl.Visible = true;
+			cLifeLbl.Font = Font;
+			cLifeLbl.BackgroundColor = Color.Transparent;
+			cLifeLbl.FontColor = LBLTEXTCOLOR;
+
+			cLifeMinTxt	= new TextBox(GraphicsDevice, null, 250, 100, 20, 90);
+			cLifeMinTxt.Text = "1000";
+			cLifeMinTxt.Visible = true;
+			cLifeMinTxt.Font = Font;
+			cLifeMinTxt.BackgroundColor = Color.Black;
+			cLifeMinTxt.FontColor = Color.White;
+			cLifeMinTxt.Alignment = Justify.MiddleCenter;
+
+			cLifeMaxTxt = new TextBox(GraphicsDevice, null, 250, 200, 20, 90);
+			cLifeMaxTxt.Text = "5000";
+			cLifeMaxTxt.Visible = true;
+			cLifeMaxTxt.Font = Font;
+			cLifeMaxTxt.BackgroundColor = Color.Black;
+			cLifeMaxTxt.FontColor = Color.White;
+			cLifeMaxTxt.Alignment = Justify.MiddleCenter;
+
+			cXDistLbl = new Button(GraphicsDevice, null, 280, 10, 20, 90);
+			cXDistLbl.Text = "X Dist";
+			cXDistLbl.Visible = true;
+			cXDistLbl.Font = Font;
+			cXDistLbl.BackgroundColor = Color.Transparent;
+			cXDistLbl.FontColor = LBLTEXTCOLOR;
+
+			cXDistMinTxt = new TextBox(GraphicsDevice, null, 280, 100, 20, 90);
+			cXDistMinTxt.Text = "1";
+			cXDistMinTxt.Visible = true;
+			cXDistMinTxt.Font = Font;
+			cXDistMinTxt.BackgroundColor = Color.Black;
+			cXDistMinTxt.FontColor = Color.White;
+			cXDistMinTxt.Alignment = Justify.MiddleCenter;
+
+			cXDistMaxTxt = new TextBox(GraphicsDevice, null, 280, 200, 20, 90);
+			cXDistMaxTxt.Text = "255";
+			cXDistMaxTxt.Visible = true;
+			cXDistMaxTxt.Font = Font;
+			cXDistMaxTxt.BackgroundColor = Color.Black;
+			cXDistMaxTxt.FontColor = Color.White;
+			cXDistMaxTxt.Alignment = Justify.MiddleCenter;
+
+			cYDistLbl = new Button(GraphicsDevice, null, 310, 10, 20, 90);
+			cYDistLbl.Text = "Y Dist";
+			cYDistLbl.Visible = true;
+			cYDistLbl.Font = Font;
+			cYDistLbl.BackgroundColor = Color.Transparent;
+			cYDistLbl.FontColor = LBLTEXTCOLOR;
+
+			cYDistMinTxt = new TextBox(GraphicsDevice, null, 310, 100, 20, 90);
+			cYDistMinTxt.Text = "1";
+			cYDistMinTxt.Visible = true;
+			cYDistMinTxt.Font = Font;
+			cYDistMinTxt.BackgroundColor = Color.Black;
+			cYDistMinTxt.FontColor = Color.White;
+			cYDistMinTxt.Alignment = Justify.MiddleCenter;
+
+			cYDistMaxTxt = new TextBox(GraphicsDevice, null, 310, 200, 20, 90);
+			cYDistMaxTxt.Text = "255";
+			cYDistMaxTxt.Visible = true;
+			cYDistMaxTxt.Font = Font;
+			cYDistMaxTxt.BackgroundColor = Color.Black;
+			cYDistMaxTxt.FontColor = Color.White;
+			cYDistMaxTxt.Alignment = Justify.MiddleCenter;
+
 			foreach (TextureFiles CurrTexture in Enum.GetValues(typeof(TextureFiles))) {
 				strFileName = INTERFACECONTENTDIR + "\\" + EnumTools.GetEnumDescriptionAttribute(CurrTexture);
 
@@ -436,6 +530,15 @@ namespace ParticleTest {
 			cBlueLbl.Update(gameTime);
 			cBlueMinTxt.Update(gameTime);
 			cBlueMaxTxt.Update(gameTime);
+			cLifeLbl.Update(gameTime);
+			cLifeMinTxt.Update(gameTime);
+			cLifeMaxTxt.Update(gameTime);
+			cXDistLbl.Update(gameTime);
+			cXDistMinTxt.Update(gameTime);
+			cXDistMaxTxt.Update(gameTime);
+			cYDistLbl.Update(gameTime);
+			cYDistMinTxt.Update(gameTime);
+			cYDistMaxTxt.Update(gameTime);
 
 			//Use monogame update
 			base.Update(gameTime);
@@ -471,6 +574,15 @@ namespace ParticleTest {
 			cBlueLbl.Draw(cDrawBatch);
 			cBlueMinTxt.Draw(cDrawBatch);
 			cBlueMaxTxt.Draw(cDrawBatch);
+			cLifeLbl.Draw(cDrawBatch);
+			cLifeMinTxt.Draw(cDrawBatch);
+			cLifeMaxTxt.Draw(cDrawBatch);
+			cXDistLbl.Draw(cDrawBatch);
+			cXDistMinTxt.Draw(cDrawBatch);
+			cXDistMaxTxt.Draw(cDrawBatch);
+			cYDistLbl.Draw(cDrawBatch);
+			cYDistMinTxt.Draw(cDrawBatch);
+			cYDistMaxTxt.Draw(cDrawBatch);
 
 			cSparkles.Draw(cDrawBatch);
 

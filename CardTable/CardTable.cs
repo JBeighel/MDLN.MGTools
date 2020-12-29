@@ -63,7 +63,7 @@ namespace MDLN.CardTable {
 			Content.RootDirectory = INTERFACECONTENTDIR;
 
 			foreach (Textures CurrTexture in Enum.GetValues(typeof(Textures))) {
-				cTextureDict.Add(CurrTexture, Content.Load<Texture2D>(Tools.Tools.GetEnumDescriptionAttribute(CurrTexture)));
+				cTextureDict.Add(CurrTexture, Content.Load<Texture2D>(Tools.EnumTools.GetEnumDescriptionAttribute(CurrTexture)));
 			}
 
 			cFont = new TextureFont(cTextureDict[Textures.Font]);
@@ -74,7 +74,7 @@ namespace MDLN.CardTable {
 			ButtonArea.Y = 0;
 			foreach (MenuButtons CurrBtn in Enum.GetValues(typeof(MenuButtons))) {
 				cMenuBtns.Add(CurrBtn, new Button(cGraphDevMgr.GraphicsDevice, null, ButtonArea.Y, ButtonArea.X, ButtonArea.Height, ButtonArea.Width));
-				cMenuBtns[CurrBtn].Text = Tools.Tools.GetEnumDescriptionAttribute(CurrBtn);
+				cMenuBtns[CurrBtn].Text = Tools.EnumTools.GetEnumDescriptionAttribute(CurrBtn);
 				cMenuBtns[CurrBtn].Font = cFont;
 				cMenuBtns[CurrBtn].Visible = true;
 				cMenuBtns[CurrBtn].BackgroundColor = Color.Navy;

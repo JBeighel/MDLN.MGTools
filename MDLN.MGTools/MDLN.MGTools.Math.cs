@@ -42,12 +42,93 @@ namespace MDLN.MGTools {
 		/// <param name="Circle1Radius">Circle 1 radius.</param>
 		/// <param name="Circle2Origin">Circle 2 origin.</param>
 		/// <param name="Circle2Radius">Circle 2 radius.</param>
-		public static bool TestCircleCollision(Vector2 Circle1Origin, float Circle1Radius, Vector2 Circle2Origin, float Circle2Radius) {
+		public static bool TestCircleCollisions(Vector2 Circle1Origin, float Circle1Radius, Vector2 Circle2Origin, float Circle2Radius) {
 			if (SquaredDistanceBetweenPoints(Circle1Origin, Circle2Origin) <= (Circle1Radius + Circle2Radius) * (Circle1Radius + Circle2Radius)) {
 				return true;
 			} else {
 				return false;
 			}
+		}
+
+		/// <summary>
+		/// Test to see if two rectangles defined by an origin and offsets to the rectangular 
+		/// boundaries.
+		/// </summary>
+		/// <param name="Rect1Origin">Origin point of the first rectangle</param>
+		/// <param name="Rect1Bounds">Offsets from the origin to the boundaries of the first rectangle</param>
+		/// <param name="Rect2Origin">Origin point of the second rectangle</param>
+		/// <param name="Rect2Bounds">Offsets from the origin to the boundaries of the second rectangle</param>
+		/// <returns></returns>
+		public static bool TestRectangleCollisions(Vector2 Rect1Origin, Rectangle Rect1Bounds, Vector2 Rect2Origin, Rectangle Rect2Bounds) {
+			if (Rect1Origin.X + Rect1Bounds.Left < Rect2Origin.X + Rect2Bounds.Left) {
+				return false;
+			}
+
+			if (Rect1Origin.X + Rect1Bounds.Left + Rect1Bounds.Width > Rect2Origin.X + Rect2Bounds.Left + Rect2Bounds.Width) {
+				return false;
+			}
+
+			if (Rect1Origin.Y + Rect1Bounds.Top < Rect2Origin.Y + Rect2Bounds.Top) {
+				return false;
+			}
+
+			if (Rect1Origin.Y + Rect1Bounds.Top + Rect1Bounds.Height > Rect2Origin.Y + Rect2Bounds.Top + Rect2Bounds.Height) {
+				return false;
+			}
+
+			return true;
+		}
+
+		/// <summary>
+		/// Test to see if a rectangular and circle collide.
+		/// </summary>
+		/// <param name="RectOrigin">Origin of the rectangle</param>
+		/// <param name="RectBounds">Offsets from the origin to all sides of the rectangle</param>
+		/// <param name="CircleOrigin">Origin of the circle</param>
+		/// <param name="CircleRadius">Radius of the circle</param>
+		/// <returns></returns>
+		public static bool TestCircleRectangleCollision(Vector2 RectOrigin, Rectangle RectBounds, Vector2 CircleOrigin, float CircleRadius) {
+			Vector2 CornerPt;
+
+			//See if circle overlaps any of the rectangle sides
+			if ((RectOrigin.X + RectBounds.Left <= CircleOrigin.X) && (RectOrigin.X + RectBounds.Left + RectBounds.Width >= CircleOrigin.X)) {
+				if ((RectOrigin.Y + RectBounds.Top <= CircleOrigin.Y + CircleRadius) && (RectOrigin.Y + RectBounds.Top + RectBounds.Height >= CircleOrigin.Y - CircleRadius)) {
+					return true;
+				}
+			}
+
+			if ((RectOrigin.Y + RectBounds.Top <= CircleOrigin.Y) && (RectOrigin.Y + RectBounds.Top + RectBounds.Height >= CircleOrigin.Y)) {
+				if ((RectOrigin.X + RectBounds.Left <= CircleOrigin.X + CircleRadius) && (RectOrigin.X + RectBounds.Left + RectBounds.Width >= CircleOrigin.X - CircleRadius)) {
+					return true;
+				}
+			}
+
+			//See if the circle overlaps any of the rectangle corners
+			CornerPt.X = RectOrigin.X + RectBounds.Left;
+			CornerPt.Y = RectOrigin.Y + RectBounds.Top;
+			if (SquaredDistanceBetweenPoints(CircleOrigin, CornerPt) < CircleRadius * CircleRadius) {
+				return true;
+			}
+
+			CornerPt.X = RectOrigin.X + RectBounds.Left;
+			CornerPt.Y = RectOrigin.Y + RectBounds.Top + RectBounds.Height;
+			if (SquaredDistanceBetweenPoints(CircleOrigin, CornerPt) < CircleRadius * CircleRadius) {
+				return true;
+			}
+
+			CornerPt.X = RectOrigin.X + RectBounds.Left + RectBounds.Width;
+			CornerPt.Y = RectOrigin.Y + RectBounds.Top;
+			if (SquaredDistanceBetweenPoints(CircleOrigin, CornerPt) < CircleRadius * CircleRadius) {
+				return true;
+			}
+
+			CornerPt.X = RectOrigin.X + RectBounds.Left + RectBounds.Width;
+			CornerPt.Y = RectOrigin.Y + RectBounds.Top + RectBounds.Height;
+			if (SquaredDistanceBetweenPoints(CircleOrigin, CornerPt) < CircleRadius * CircleRadius) {
+				return true;
+			}
+
+			return false;
 		}
 
 		/// <summary>

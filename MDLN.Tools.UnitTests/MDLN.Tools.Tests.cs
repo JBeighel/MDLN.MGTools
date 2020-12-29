@@ -25,17 +25,17 @@ namespace MDLN.Tools.UnitTests {
 
 			//Default behavior is least significant byte first
 			TestName = "UshortToBytes() LSBFirst=default: ";
-			Results = Tools.UshortToBytes(StartVal);
+			Results = TypeTools.UshortToBytes(StartVal);
 			Assert.AreEqual(0xFF, Results[0], TestName + "Verify first byte.");
 			Assert.AreEqual(0x11, Results[1], TestName + "Verify second byte.");
 
 			TestName = "UshortToBytes() LSBFirst=true: ";
-			Results = Tools.UshortToBytes(StartVal, true);
+			Results = TypeTools.UshortToBytes(StartVal, true);
 			Assert.AreEqual(0xFF, Results[0], TestName + "Verify first byte.");
 			Assert.AreEqual(0x11, Results[1], TestName + "Verify second byte.");
 
 			TestName = "UshortToBytes() LSBFirst=false: ";
-			Results = Tools.UshortToBytes(StartVal, false);
+			Results = TypeTools.UshortToBytes(StartVal, false);
 			Assert.AreEqual(0x11, Results[0], TestName + "Verify first byte.");
 			Assert.AreEqual(0xFF, Results[1], TestName + "Verify second byte.");
 		}
@@ -51,21 +51,21 @@ namespace MDLN.Tools.UnitTests {
 
 			//Default behavior is least significant byte first
 			TestName = "Uint32ToBytes() LSBFirst=default: ";
-			Results = Tools.Uint32ToBytes(StartVal);
+			Results = TypeTools.Uint32ToBytes(StartVal);
 			Assert.AreEqual(0x44, Results[0], TestName + "Verify first byte.");
 			Assert.AreEqual(0x33, Results[1], TestName + "Verify second byte.");
 			Assert.AreEqual(0x22, Results[2], TestName + "Verify third byte.");
 			Assert.AreEqual(0x11, Results[3], TestName + "Verify fourth byte.");
 
 			TestName = "Uint32ToBytes() LSBFirst=true: ";
-			Results = Tools.Uint32ToBytes(StartVal, true);
+			Results = TypeTools.Uint32ToBytes(StartVal, true);
 			Assert.AreEqual(0x44, Results[0], TestName + "Verify first byte.");
 			Assert.AreEqual(0x33, Results[1], TestName + "Verify second byte.");
 			Assert.AreEqual(0x22, Results[2], TestName + "Verify third byte.");
 			Assert.AreEqual(0x11, Results[3], TestName + "Verify fourth byte.");
 
 			TestName = "Uint32ToBytes() LSBFirst=false: ";
-			Results = Tools.Uint32ToBytes(StartVal, false);
+			Results = TypeTools.Uint32ToBytes(StartVal, false);
 			Assert.AreEqual(0x11, Results[0], TestName + "Verify first byte.");
 			Assert.AreEqual(0x22, Results[1], TestName + "Verify second byte.");
 			Assert.AreEqual(0x33, Results[2], TestName + "Verify third byte.");
@@ -82,7 +82,7 @@ namespace MDLN.Tools.UnitTests {
 			string TestName;
 
 			TestName = "Uint32ToBytes() LSBFirst=true: ";
-			Results = Tools.IntTo6Bytes(StartVal, true);
+			Results = TypeTools.IntTo6Bytes(StartVal, true);
 			Assert.AreEqual(0x88, Results[0], TestName + "Verify first byte.");
 			Assert.AreEqual(0x77, Results[1], TestName + "Verify second byte.");
 			Assert.AreEqual(0x66, Results[2], TestName + "Verify third byte.");
@@ -91,7 +91,7 @@ namespace MDLN.Tools.UnitTests {
 			Assert.AreEqual(0x33, Results[5], TestName + "Verify sixth byte.");
 
 			TestName = "Uint32ToBytes() LSBFirst=false: ";
-			Results = Tools.IntTo6Bytes(StartVal, false);
+			Results = TypeTools.IntTo6Bytes(StartVal, false);
 			Assert.AreEqual(0x33, Results[0], TestName + "Verify first byte.");
 			Assert.AreEqual(0x44, Results[1], TestName + "Verify second byte.");
 			Assert.AreEqual(0x55, Results[2], TestName + "Verify third byte.");
@@ -110,38 +110,38 @@ namespace MDLN.Tools.UnitTests {
 			string TestName;
 
 			TestName = "BytesToUshort() Specify bytes: ";
-			Result = Tools.BytesToUshort(0x11, 0xFF);
+			Result = TypeTools.BytesToUshort(0x11, 0xFF);
 			Assert.AreEqual(0x11FF, Result, TestName + "Verify conversion.");
 
 			//Default behavior is least significant byte first
 			TestName = "BytesToUshort() LSBFirst=default: ";
-			Result = Tools.BytesToUshort(StartVal);
+			Result = TypeTools.BytesToUshort(StartVal);
 			Assert.AreEqual(0x11FF, Result, TestName + "Verify conversion.");
 
 			TestName = "BytesToUshort() LSBFirst=true: ";
-			Result = Tools.BytesToUshort(StartVal, true);
+			Result = TypeTools.BytesToUshort(StartVal, true);
 			Assert.AreEqual(0x11FF, Result, TestName + "Verify conversion.");
 
 			TestName = "BytesToUshort() LSBFirst=false: ";
-			Result = Tools.BytesToUshort(StartVal, false);
+			Result = TypeTools.BytesToUshort(StartVal, false);
 			Assert.AreEqual(0xFF11, Result, TestName + "Verify conversion.");
 
 			TestName = "BytesToUshort() Offset=0 LSBFirst=true: ";
-			Result = Tools.BytesToUshort(StartVal, 0, true);
+			Result = TypeTools.BytesToUshort(StartVal, 0, true);
 			Assert.AreEqual(0x11FF, Result, TestName + "Verify conversion.");
 
 			TestName = "BytesToUshort() Offset=0 LSBFirst=false: ";
-			Result = Tools.BytesToUshort(StartVal, 0, false);
+			Result = TypeTools.BytesToUshort(StartVal, 0, false);
 			Assert.AreEqual(0xFF11, Result, TestName + "Verify conversion.");
 
 			StartVal = new byte[] { 0x01, 0x02, 0xFF, 0x11, 0x03, 0x04 };
 
 			TestName = "BytesToUshort() Offset=2 LSBFirst=true: ";
-			Result = Tools.BytesToUshort(StartVal, 2, true);
+			Result = TypeTools.BytesToUshort(StartVal, 2, true);
 			Assert.AreEqual(0x11FF, Result, TestName + "Verify conversion.");
 
 			TestName = "BytesToUshort() Offset=2 LSBFirst=false: ";
-			Result = Tools.BytesToUshort(StartVal, 2, false);
+			Result = TypeTools.BytesToUshort(StartVal, 2, false);
 			Assert.AreEqual(0xFF11, Result, TestName + "Verify conversion.");
 		}
 

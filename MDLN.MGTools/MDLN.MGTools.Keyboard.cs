@@ -36,41 +36,40 @@ namespace MDLN.MGTools {
 						string Num = ((int)(CurrKey - Keys.D0)).ToString();
 
 						if (ShiftDown == true) {
-							switch (Num)
-							{
-								case "1":
-									NewKeys += "!";
-									break;
-								case "2":
-									NewKeys += "@";
-									break;
-								case "3":
-									NewKeys += "#";
-									break;
-								case "4":
-									NewKeys += "$";
-									break;
-								case "5":
-									NewKeys += "%";
-									break;
-								case "6":
-									NewKeys += "^";
-									break;
-								case "7":
-									NewKeys += "&";
-									break;
-								case "8":
-									NewKeys += "*";
-									break;
-								case "9":
-									NewKeys += "(";
-									break;
-								case "0":
-									NewKeys += ")";
-									break;
-								default:
-									//wtf?
-									break;
+							switch (Num) {
+							case "1":
+								NewKeys += "!";
+								break;
+							case "2":
+								NewKeys += "@";
+								break;
+							case "3":
+								NewKeys += "#";
+								break;
+							case "4":
+								NewKeys += "$";
+								break;
+							case "5":
+								NewKeys += "%";
+								break;
+							case "6":
+								NewKeys += "^";
+								break;
+							case "7":
+								NewKeys += "&";
+								break;
+							case "8":
+								NewKeys += "*";
+								break;
+							case "9":
+								NewKeys += "(";
+								break;
+							case "0":
+								NewKeys += ")";
+								break;
+							default:
+								//wtf?
+								break;
 							}
 						} else {
 							NewKeys += ((int)(CurrKey - Keys.D0)).ToString();
@@ -83,7 +82,25 @@ namespace MDLN.MGTools {
 						} else {
 							NewKeys += "=";
 						}
-					}else if (CurrKey == Keys.Space) {
+					} else if (CurrKey == Keys.OemMinus) {
+						if (ShiftDown == true) {
+							NewKeys += "_";
+						} else {
+							NewKeys += "-";
+						}
+					} else if (CurrKey == Keys.OemOpenBrackets) {
+						if (ShiftDown == true) {
+							NewKeys += "{";
+						} else {
+							NewKeys += "[";
+						}
+					} else if (CurrKey == Keys.OemCloseBrackets) {
+						if (ShiftDown == true) {
+							NewKeys += "}";
+						} else {
+							NewKeys += "]";
+						}
+					} else if (CurrKey == Keys.Space) {
 						NewKeys += " ";
 					} else if (CurrKey == Keys.Enter) {
 						NewKeys += "\n";

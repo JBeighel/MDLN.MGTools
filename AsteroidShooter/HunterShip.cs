@@ -77,6 +77,7 @@ namespace MDLN.AsteroidShooter {
 				BulletOrigin.Y = TopLeft.Y + (Height / 2);
 				BulletOrigin.X = TopLeft.X + (Height / 2);
 
+				Rotation += (float)(cRand.Next(-10, 10) * (Math.PI / 180.0)); //Randmize the direction so that it's not perfect (+/- 10 degrees)
 				BulletManager.AddParticle(BulletTexture, BulletOrigin.Y - 10, BulletOrigin.X - 10, 20, 20, Rotation, 8, new Color(255, 75, 75, 255));
 
 				cLastShot = CurrTime.TotalGameTime.TotalMilliseconds + 1500 + cRand.Next(1000);

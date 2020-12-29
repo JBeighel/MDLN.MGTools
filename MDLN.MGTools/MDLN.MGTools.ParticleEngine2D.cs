@@ -120,46 +120,51 @@ namespace MDLN.MGTools {
 		public void Update(GameTime CurrTime) {
 			int Ctr;
 			Particle2D CurrBullet;
+			List<int> IndexesToRemove = new List<int>();
 
 			for (Ctr = 0; Ctr < cParticleList.Count; Ctr++) {
-				CurrBullet = cParticleList[Ctr];
+				CurrBullet = cParticleList[Ctr]; //Pull out he particle to update
 
 				if (CurrBullet.Update(CurrTime) == false) { //Particle update says this particle no longer exists
-					cParticleList.RemoveAt(Ctr);
+					IndexesToRemove.Add(Ctr);
 					continue;
 				}
 
 				if ((CurrBullet.SpeedX <= 0) && (CurrBullet.TopLeft.X < -1 * cParticleList[Ctr].Width)) {  //Bullet moved off screen left
 					if (WrapScreenEdges == false) {
-						cParticleList.RemoveAt(Ctr);
+						IndexesToRemove.Add(Ctr);
 						continue;
 					} else {
 						CurrBullet.TopLeft.X = cGraphDev.Viewport.Bounds.Width;
 					}
 				} else if ((CurrBullet.SpeedX >= 0) && (CurrBullet.TopLeft.X > cGraphDev.Viewport.Bounds.Width)) {  //Bullet moved off screen right
 					if (WrapScreenEdges == false) {
-						cParticleList.RemoveAt(Ctr);
+						IndexesToRemove.Add(Ctr);
 						continue;
 					} else {
 						CurrBullet.TopLeft.X = cParticleList[Ctr].Width * -1;
 					}
 				} else if ((CurrBullet.SpeedY >= 0) && (CurrBullet.TopLeft.Y < -1 * cParticleList[Ctr].Height)) {  //Bullet moved off screen top
 					if (WrapScreenEdges == false) {
-						cParticleList.RemoveAt(Ctr);
+						IndexesToRemove.Add(Ctr);
 						continue;
 					} else {
 						CurrBullet.TopLeft.Y = cGraphDev.Viewport.Bounds.Height;
 					}
 				} else if ((CurrBullet.SpeedY <= 0) && (CurrBullet.TopLeft.Y > cGraphDev.Viewport.Bounds.Height)) {  //Bullet moved off screen bottom
 					if (WrapScreenEdges == false) {
-						cParticleList.RemoveAt(Ctr);
+						IndexesToRemove.Add(Ctr);
 						continue;
 					} else {
 						CurrBullet.TopLeft.Y = cParticleList[Ctr].Height * -1;
 					}
 				}
 
-				cParticleList[Ctr] = CurrBullet;
+				cParticleList[Ctr] = CurrBullet; //Place the changed values into the list
+			}
+
+			for (Ctr = IndexesToRemove.Count - 1; Ctr >= 0; Ctr--) {
+				cParticleList.RemoveAt(Ctr);
 			}
 		}
 
@@ -178,6 +183,19 @@ namespace MDLN.MGTools {
 			}
 
 			cDrawBatch.End();
+		}
+
+		/// <summary>
+		/// Draw all of the particles to current render device using an externally defined sprite batch
+		/// </summary>
+		public void Draw(SpriteBatch DrawBatch) {
+			foreach (Particle2D CurrParticle in cParticleList) {
+				if (ShaderEffect != null) {
+					//ShaderEffect.Parameters["TintColor"].SetValue(CurrParticle.Tint.ToVector4());
+					ShaderEffect.Techniques[0].Passes[0].Apply();
+				}
+				CurrParticle.Draw(DrawBatch);
+			}
 		}
 	}
 
@@ -202,7 +220,7 @@ namespace MDLN.MGTools {
 		/// </summary>
 		public int Width;
 		/// <summary>
-		/// Current rotation of the particle
+		/// Current rotation in radians of the particle
 		/// </summary>
 		public float Rotation;
 		/// <summary>
@@ -210,15 +228,15 @@ namespace MDLN.MGTools {
 		/// </summary>
 		public Texture2D Image;
 		/// <summary>
-		/// The speed of the particle in the X direction
+		/// The speed of the particle in the X direction each frame
 		/// </summary>
 		public float SpeedX;
 		/// <summary>
-		/// Speed of the particle  alont the Y axis
+		/// Speed of the particle  alont the Y axis each frame
 		/// </summary>
 		public float SpeedY;
 		/// <summary>
-		/// Speed at which the particle is rotating
+		/// Speed at which the particle is rotating in radians each frame
 		/// </summary>
 		public float SpeedRotate;
 		/// <summary>
@@ -229,8 +247,24 @@ namespace MDLN.MGTools {
 		/// True to have the particle fade over time, false to not fade
 		/// </summary>
 		public bool AlphaFade;
-
+		/// <summary>
+		/// Total distance the particle will travel across its life
+		/// This does not factor in the SpeedX and SpeedY variables
+		/// </summary>
+		public Vector2 TotalDistance;
+		/// <summary>
+		/// Total distance the particle will rotate across its life
+		/// This does not factor in the SpeedRotate variable
+		/// </summary>
+		public float TotalRotate;
+		/// <summary>
+		/// Time that the particle was created determined by its first update
+		/// </summary>
 		private double cCreationTime;
+		/// <summary>
+		/// Time when the particle was last updated
+		/// </summary>
+		private double ctLastUpdate;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="MDLN.MGTools.Particle2D"/> class.
@@ -238,6 +272,7 @@ namespace MDLN.MGTools {
 		public Particle2D() {
 			TimeToLive = 0;
 			AlphaFade = false;
+			cCreationTime = -1;
 		}
 
 		/// <summary>
@@ -248,6 +283,7 @@ namespace MDLN.MGTools {
 			List<CollisionRegion> RegionList = new List<CollisionRegion>();
 			CollisionRegion NewRegion = new CollisionRegion();
 
+			NewRegion.Type = CollideType.Circle;
 			NewRegion.Origin.X = TopLeft.X + (Width / 2);
 			NewRegion.Origin.Y = TopLeft.Y + (Height / 2);
 
@@ -285,8 +321,26 @@ namespace MDLN.MGTools {
 
 			foreach (CollisionRegion CurrRegion in TestRegions) {
 				foreach (CollisionRegion MyRegion in MyRegionsList) {
-					if (MGMath.TestCircleCollision(CurrRegion.Origin, CurrRegion.Radius, MyRegion.Origin, MyRegion.Radius) == true) {
-						return true;
+					if (MyRegion.Type == CollideType.Circle) {
+						if (CurrRegion.Type == CollideType.Circle) {
+							if (MGMath.TestCircleCollisions(CurrRegion.Origin, CurrRegion.Radius, MyRegion.Origin, MyRegion.Radius) == true) {
+								return true;
+							}
+						} else { //CurrRegion is a rectangle (MyRegion is Circle)
+							if (MGMath.TestCircleRectangleCollision(CurrRegion.Origin, CurrRegion.RectOffsets, MyRegion.Origin, MyRegion.Radius) == true) {
+								return true;
+							}
+						}
+					} else { //My Region is a rectangle
+						if (CurrRegion.Type == CollideType.Circle) {
+							if (MGMath.TestCircleRectangleCollision(MyRegion.Origin, MyRegion.RectOffsets, CurrRegion.Origin, CurrRegion.Radius) == true) {
+								return true;
+							}
+						} else { //CurrRegion is a rectangle (MyRegion is Rectangle)
+							if (MGMath.TestRectangleCollisions(CurrRegion.Origin, CurrRegion.RectOffsets, MyRegion.Origin, MyRegion.RectOffsets) == true) {
+								return true;
+							}
+						}
 					}
 				}
 			}
@@ -299,11 +353,18 @@ namespace MDLN.MGTools {
 		/// </summary>
 		/// <param name="CurrTime">Curr time.</param>
 		public virtual bool Update(GameTime CurrTime) {
+			double nLastUpdPct, nTotLifePct;
+
 			TopLeft.X += SpeedX;
 			TopLeft.Y -= SpeedY;
 
-			if (cCreationTime == 0) {
+			if (cCreationTime < 0) {
 				cCreationTime = CurrTime.TotalGameTime.TotalMilliseconds;
+				nLastUpdPct = 0;
+				nTotLifePct = 0;
+			} else {
+				nLastUpdPct = (CurrTime.TotalGameTime.TotalMilliseconds - ctLastUpdate) / TimeToLive;
+				nTotLifePct = (CurrTime.TotalGameTime.TotalMilliseconds - cCreationTime) / TimeToLive;
 			}
 
 			if ((TimeToLive > 0) && (CurrTime.TotalGameTime.TotalMilliseconds - cCreationTime >= TimeToLive)) {
@@ -312,18 +373,24 @@ namespace MDLN.MGTools {
 
 			Rotation += SpeedRotate;
 
+			TopLeft.X += (float)(TotalDistance.X * nLastUpdPct);
+			TopLeft.Y += (float)(TotalDistance.Y * nLastUpdPct);
+			Rotation += (float)(TotalRotate * nLastUpdPct);
+
 			//Make sure the rotation stays between 0 and 360 degrees in radians
 			if (Rotation <= 0) {
-				Rotation = 6.28318531f;
+				Rotation += 2 * (float)Math.PI;
 			}
 
-			if (Rotation > 6.28318531f) {
-				Rotation = 0;
+			if (Rotation > 2 * (float)Math.PI) {
+				Rotation -= 2 * (float)Math.PI; ;
 			}
 
 			if (AlphaFade == true) {
-				Tint.A = (byte)(255 - (((CurrTime.TotalGameTime.TotalMilliseconds - cCreationTime) / TimeToLive) * 255));
+				Tint.A = (byte)(255 - (nTotLifePct * 255));
 			}
+
+			ctLastUpdate = CurrTime.TotalGameTime.TotalMilliseconds;
 
 			return true;
 		}
@@ -354,6 +421,10 @@ namespace MDLN.MGTools {
 	/// </summary>
 	public struct CollisionRegion {
 		/// <summary>
+		/// Speicifes how to test this collision region
+		/// </summary>
+		public CollideType Type;
+		/// <summary>
 		/// The center point of the circle
 		/// </summary>
 		public Vector2 Origin;
@@ -361,6 +432,10 @@ namespace MDLN.MGTools {
 		/// The radius of the circle
 		/// </summary>
 		public float Radius;
+		/// <summary>
+		/// For the rectangular version of this region these are offsets to the boundaries
+		/// </summary>
+		public Rectangle RectOffsets;
 	}
 
 	/// <summary>
@@ -389,11 +464,25 @@ namespace MDLN.MGTools {
 	}
 
 	/// <summary>
+	/// Specifies how to test this collision region
+	/// </summary>
+	public enum CollideType {
+		/// <summary>
+		/// The region is a circle
+		/// </summary>
+		Circle,
+		/// <summary>
+		/// The region is a rectangle
+		/// </summary>
+		Rectangle
+	}
+
+	/// <summary>
 	/// Interface that offers common controls for any object that might be visible on the screen
 	/// </summary>
 	public interface IVisible {
 		/// <summary>
-		/// Retrieves teh coordinates of the center of the control
+		/// Retrieves the coordinates of the center of the control
 		/// </summary>
 		/// <returns>The center coordinates.</returns>
 		Vector2 GetCenterCoordinates();

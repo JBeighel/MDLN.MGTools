@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -29,12 +29,14 @@
       <HintPath>..\packages\MonoGame.Framework.WindowsGL.3.4.0.459\lib\net40\OpenTK.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MDLN.MGTools.Container.cs" />
+    <Compile Include="MDLN.MGTools.SpriteManager.cs" />
     <Compile Include="MDLN.MGTools.TextureFont.cs" />
     <Compile Include="MDLN.MGTools.AssemblyInfo.cs" />
     <Compile Include="MDLN.MGTools.Math.cs" />
@@ -43,5 +45,12 @@
     <Compile Include="MDLN.MGTools.ParticleEngine2D.cs" />
     <Compile Include="MDLN.MGTools.TextBox.cs" />
     <Compile Include="MDLN.MGTools.Keyboard.cs" />
+    <Compile Include="MDLN.MGTools.TileSetManager.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MDLN.Tools\MDLN.Tools.csproj">
+      <Project>{4d524474-1fff-448f-97ba-e58cca87592d}</Project>
+      <Name>MDLN.Tools</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

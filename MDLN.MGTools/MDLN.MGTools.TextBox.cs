@@ -37,6 +37,7 @@ namespace MDLN.MGTools {
 		/// <param name="CurrTime">Currend time information</param>
 		/// <param name="CurrKeyboard">Current state of the keyboard.</param>
 		/// <param name="CurrMouse">Current state of the mouse.</param>
+		/// <param name="ProcessMouseEvent">Set true to allow this object to process mouse events, false to ignore them</param>
 		protected override void UpdateContents(GameTime CurrTime, Microsoft.Xna.Framework.Input.KeyboardState CurrKeyboard, Microsoft.Xna.Framework.Input.MouseState CurrMouse, bool ProcessMouseEvent) {
 			if ((ProcessMouseEvent == true) && ((CurrMouse.LeftButton == ButtonState.Pressed) || (CurrMouse.LeftButton == ButtonState.Pressed))) { //Mouse button is pressed
 				if (ClientRegion.Contains(CurrMouse.Position) == false) {//Mouse is outside of the control, it has lost focus
@@ -90,44 +91,44 @@ namespace MDLN.MGTools {
 
 				switch (Alignment) {
 					case Justify.TopLeft:
-						CursorTop = Lines.Length * Font.CharacterHeight;
-						CursorLeft = Font.DetermineRenderWidth(Lines[Lines.Length - 1]);
+						CursorTop = (Lines.Length - 1) * FontSize;
+						CursorLeft = Font.DetermineRenderWidth(Lines[Lines.Length - 1], FontSize);
 						break;
 					case Justify.TopCenter:
-						CursorTop = Lines.Length * Font.CharacterHeight;
-						CursorLeft = (Width + Font.DetermineRenderWidth(Lines[Lines.Length - 1])) / 2;
+						CursorTop = (Lines.Length - 1) * FontSize;
+						CursorLeft = (Width + Font.DetermineRenderWidth(Lines[Lines.Length - 1], FontSize)) / 2;
 						break;
 					case Justify.TopRight:
-						CursorTop = Lines.Length * Font.CharacterHeight;
-						CursorLeft = Width;
+						CursorTop = (Lines.Length - 1) * FontSize;
+						CursorLeft = Width - FontSize;
 						break;
 					case Justify.MiddleLeft:
-						CursorTop = (Height + (Font.CharacterHeight * Lines.Length)) / 2 - Font.CharacterHeight;
-						CursorLeft = Font.DetermineRenderWidth(Lines[Lines.Length - 1]);
+						CursorTop = (Height + (FontSize * Lines.Length)) / 2 - FontSize;
+						CursorLeft = Font.DetermineRenderWidth(Lines[Lines.Length - 1], FontSize);
 						break;
 					case Justify.MiddleRight:
-						CursorTop = (Height + (Font.CharacterHeight * Lines.Length)) / 2 - Font.CharacterHeight;
-						CursorLeft = Width;
+						CursorTop = (Height + (FontSize * Lines.Length)) / 2 - FontSize;
+						CursorLeft = Width - FontSize;
 						break;
 					case Justify.BottomLeft:
-						CursorTop = Height - Font.CharacterHeight;
-						CursorLeft = Font.DetermineRenderWidth(Lines[Lines.Length - 1]);
+						CursorTop = Height - FontSize;
+						CursorLeft = Font.DetermineRenderWidth(Lines[Lines.Length - 1], FontSize);
 						break;
 					case Justify.BottomCenter:
-						CursorTop = Height - Font.CharacterHeight;
-						CursorLeft = (Width + Font.DetermineRenderWidth(Lines[Lines.Length - 1])) / 2;
+						CursorTop = Height - FontSize;
+						CursorLeft = (Width + Font.DetermineRenderWidth(Lines[Lines.Length - 1], FontSize)) / 2;
 						break;
 					case Justify.BottomRight:
-						CursorTop = Height - Font.CharacterHeight;
-						CursorLeft = Width;
+						CursorTop = Height - FontSize;
+						CursorLeft = Width - FontSize;
 						break;
 					default : //Middle Center
-						CursorTop = (Height + (Font.CharacterHeight * Lines.Length)) / 2 - Font.CharacterHeight;
-						CursorLeft = (Width + Font.DetermineRenderWidth(Lines[Lines.Length - 1])) / 2;
+						CursorTop = (Height + (FontSize * Lines.Length)) / 2 - FontSize;
+						CursorLeft = (Width + Font.DetermineRenderWidth(Lines[Lines.Length - 1], FontSize)) / 2;
 						break;
 				}
 
-				Font.WriteAsciiCharacter(cDrawBatch, new byte[] { 220 }, Font.CharacterHeight, CursorTop , CursorLeft, FontColor);
+				Font.WriteAsciiCharacter(cDrawBatch, new byte[] { 220 }, FontSize, CursorTop , CursorLeft, FontColor);
 			}
 
 			base.DrawContents(CurrTime);

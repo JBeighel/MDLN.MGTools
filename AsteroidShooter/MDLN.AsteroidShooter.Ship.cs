@@ -40,7 +40,8 @@ namespace MDLN.AsteroidShooter
 			ImageInitialAngle = 0;
 
 			cCollisionList = new List<CollisionRegion>();
-			CollideRegion.Origin.X = Left + cDrawRegion.X + (DrawSize / 2);
+			CollideRegion.Type = CollideType.Circle;
+            CollideRegion.Origin.X = Left + cDrawRegion.X + (DrawSize / 2);
 			CollideRegion.Origin.Y = Top + cDrawRegion.Y + (DrawSize / 2);;
 			CollideRegion.Radius = (DrawSize / 2) * 0.9f;
 
@@ -140,7 +141,7 @@ namespace MDLN.AsteroidShooter
 		public bool TestCollision(IEnumerable<CollisionRegion> TestRegions) {
 			foreach (CollisionRegion CurrRegion in TestRegions) {
 				foreach (CollisionRegion MyRegion in cCollisionList) {
-					if (MGMath.TestCircleCollision(CurrRegion.Origin, CurrRegion.Radius, MyRegion.Origin, MyRegion.Radius) == true) {
+					if (MGMath.TestCircleCollisions(CurrRegion.Origin, CurrRegion.Radius, MyRegion.Origin, MyRegion.Radius) == true) {
 						return true;
 					}
 				}
@@ -210,6 +211,9 @@ namespace MDLN.AsteroidShooter
 				ShipCenter.X = Width / 2;
 
 				cRotation = MGMath.GetAngleFromPoints(ShipCenter, CurrMouse.Position.ToVector2(), true) + ImageInitialAngle;
+				if (cRotation != ImageInitialAngle) { //Ship rotation has changed
+					HasChanged = true;
+				}
 
 				if (CurrKeys.IsKeyDown(Keys.W) == true) {
 					cSpeedY -= SPEEDSTEP;

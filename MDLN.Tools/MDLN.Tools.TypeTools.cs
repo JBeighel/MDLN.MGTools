@@ -8,7 +8,7 @@ namespace MDLN.Tools {
 	/// <summary>
 	/// Collection of tools to mainupate data types, performing conversions from one format to another
 	/// </summary>
-	public static class Tools {
+	public static class TypeTools {
 		/// <summary>
 		/// Converts an array of byte values into a hexadecimal string.
 		/// </summary>
@@ -331,6 +331,40 @@ namespace MDLN.Tools {
 			}
 
 			return ByteList.ToArray();
+		}
+
+		/// <summary>
+		/// Convert a string of binary digits into an integer value.  This will remove all spaces and 'b' characters from
+		/// the string before pulling out hext values, sot hte format can be any of the following:
+		/// 0011000
+		/// 0111 0111
+		/// 01b 10b 11b
+		/// </summary>
+		/// <param name="BinaryString">The string to convert from text bits to an integer value.  Can not exceed 32 bits</param>
+		/// <returns>The integer value represented by the string's bits</returns>
+		public static UInt32 BinaryStringToUInt32(string BinaryString) {
+			UInt32 Value = 0;
+			string CurrentBit;
+
+			//remove all extraneous characters
+			BinaryString = BinaryString.Replace(" ", "");
+			BinaryString = BinaryString.Replace("h", "");
+
+			while (BinaryString.CompareTo("") != 0) {
+				CurrentBit = BinaryString.Substring(0, 1); //Get the most significant bit
+				BinaryString = BinaryString.Substring(1); //Remove the most significant bit from the string
+
+				if (String.Compare(CurrentBit, "1") == 0) {
+					Value <<= 1;
+					Value += 1;
+				} else if (String.Compare(CurrentBit, "0") == 0) {
+					Value <<= 1;
+				} else {
+					throw new Exception("Encountered invalid binary character: " + CurrentBit);
+				}
+			}
+
+			return Value;
 		}
 
 		/// <summary>

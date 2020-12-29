@@ -33,7 +33,7 @@ namespace MDLN.AsteroidShooter {
 		private MouseState cPriorMouseState;
 		private Dictionary<Textures, Texture2D> cTextureDict;
 		private Random cRandom;
-		private uint cEnemyKills, cAliveSince, cSpawnNum;
+		private uint cEnemyKills, cAliveSince, cSpawnNum, cEnemyKillsMax;
 		private SpriteBatch cDrawBatch;
 		private Texture2D cSolidTexture;
 		private TextureFont cFont;
@@ -43,6 +43,10 @@ namespace MDLN.AsteroidShooter {
 		public AsteroidShooter() {
 			cGraphDevMgr = new GraphicsDeviceManager(this);
 			cGraphDevMgr.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
+
+			cGraphDevMgr.PreferredBackBufferWidth = 1024;//Set the window size
+			cGraphDevMgr.PreferredBackBufferHeight = 768;
+			cGraphDevMgr.ApplyChanges();
 
 			Content.RootDirectory = "Content";
 			IsMouseVisible = true;
@@ -76,7 +80,7 @@ namespace MDLN.AsteroidShooter {
 			cSolidTexture.SetData (new[] { Color.White });
 
 			foreach (Textures CurrTexture in Enum.GetValues(typeof(Textures))) {
-				cTextureDict.Add(CurrTexture, Content.Load<Texture2D>(Tools.Tools.GetEnumDescriptionAttribute(CurrTexture)));
+				cTextureDict.Add(CurrTexture, Content.Load<Texture2D>(Tools.EnumTools.GetEnumDescriptionAttribute(CurrTexture)));
 			}
 
 			cShader = Content.Load<Effect>("ShaderEffect");
@@ -109,7 +113,7 @@ namespace MDLN.AsteroidShooter {
 			cAsteroids.WrapScreenEdges = true;
 
 			cUFOs = new ParticleEngine2D(cGraphDevMgr.GraphicsDevice);
-			//cUFOs.ShaderEffect = cShipShader;
+			cUFOs.ShaderEffect = cShipShader;
 			cUFOs.WrapScreenEdges = true;
 
 			cSparkles = new ParticleEngine2D(cGraphDevMgr.GraphicsDevice);
@@ -119,16 +123,19 @@ namespace MDLN.AsteroidShooter {
 		protected override void Update(GameTime gameTime) {
 			KeyboardState CurrKeys = Keyboard.GetState();
 			MouseState CurrMouse = Mouse.GetState();
-			Vector2 BulletOrigin;
 			Particle2D BulletInfo, EnemyInfo;
+			List<int> ParticlesToRemove = new List<int>();
+			int Ctr, Cnt;
 
 			if (cAliveSince == 0) {
 				cAliveSince = (uint)gameTime.TotalGameTime.TotalSeconds;
 			}
 
 			if (cLastAsteroid < gameTime.TotalGameTime.TotalMilliseconds) { //Create new asteroid
-				if (cSpawnNum % 3 != 0) {
-					CreateNewAsteroid(100, new Vector2(-1, -1));
+				if ((cSpawnNum % 3 != 0) && (cEnemyKills >= cAsteroids.ParticleList.Count)) {
+					for (Ctr = 0; Ctr < 1 + (cEnemyKills / 20); Ctr++) {
+						CreateNewAsteroid(100, new Vector2(-1, -1));
+					}
 				} else {
 					Vector2 StartPos;
 
@@ -147,15 +154,16 @@ namespace MDLN.AsteroidShooter {
 			}
 
 			//Check for player input
-			if (((CurrKeys.IsKeyDown(Keys.Space) == true) || (CurrMouse.LeftButton == ButtonState.Pressed)) && (cLastShot < gameTime.TotalGameTime.TotalMilliseconds - 250)) {
-				//Calculate coordinates of ship tip relative to its center
-				BulletOrigin = MDLN.MGTools.MGMath.CalculateXYMagnitude(-1 * cPlayerShip.cRotation, cPlayerShip.Width / 4);
+			Ctr = (int)(500 - cEnemyKillsMax); //Calculate the minimum time between shots
+			if (Ctr > 400) {
+				Ctr = 400;
+			} else if (Ctr < 100) {
+				Ctr = 50;
+			}
 
-				//Adjust it so that it's relative to the top left screen corner
-				BulletOrigin.Y += cPlayerShip.Top + (cPlayerShip.Height / 2);
-				BulletOrigin.X += cPlayerShip.Left + (cPlayerShip.Height / 2);
+			if (((CurrKeys.IsKeyDown(Keys.Space) == true) || (CurrMouse.LeftButton == ButtonState.Pressed)) && (cLastShot < gameTime.TotalGameTime.TotalMilliseconds - Ctr)) {
+				PlayerFireBullet();
 
-				cPlayerBullets.AddParticle(cTextureDict[Textures.Bullet], BulletOrigin.Y - 10, BulletOrigin.X - 10, 20, 20, cPlayerShip.cRotation, 15, new Color(75, 75, 255, 255));
 				cLastShot = gameTime.TotalGameTime.TotalMilliseconds;
 			}
 
@@ -173,11 +181,11 @@ namespace MDLN.AsteroidShooter {
 
 			//Collision detection
 			cPlayerShip.ImageTint = Color.White;
-			for (int Cnt = 0; Cnt < cAsteroids.ParticleList.Count; Cnt++) {
+			for (Cnt = 0; Cnt < cAsteroids.ParticleList.Count; Cnt++) {
 				EnemyInfo = cAsteroids.ParticleList[Cnt];
 
 				//Are bullts hitting the asteroid?
-				for (int Ctr = 0; Ctr < cPlayerBullets.ParticleList.Count; Ctr++) {
+				for (Ctr = 0; Ctr < cPlayerBullets.ParticleList.Count; Ctr++) {
 					BulletInfo = cPlayerBullets.ParticleList[Ctr];
 
 					if (BulletInfo.TestCollision(EnemyInfo.GetCollisionRegions()) == true) {
@@ -195,8 +203,8 @@ namespace MDLN.AsteroidShooter {
 						}
 
 						//Destroy shot and large asteroid
+						ParticlesToRemove.Add(Cnt);
 						cPlayerBullets.ParticleList.RemoveAt(Ctr);
-						cAsteroids.ParticleList.RemoveAt(Cnt);
 						cEnemyKills++;
 
 						break; //Exit inner loop so each bullet ony gets 1 asteroid
@@ -207,28 +215,42 @@ namespace MDLN.AsteroidShooter {
 				if (EnemyInfo.TestCollision(cPlayerShip) == true) {
 					cPlayerShip.ImageTint = Color.Red;
 
-					CreateParticleBurst(new Vector2(cPlayerShip.Left + (cPlayerShip.Width / 2), cPlayerShip.Top + (cPlayerShip.Height / 2)), 15);
+					CreateParticleBurst(new Vector2(EnemyInfo.TopLeft.X + (EnemyInfo.Width / 2), EnemyInfo.TopLeft.Y + (EnemyInfo.Height / 2)), 25 * EnemyInfo.Height / 6, EnemyInfo.Height / 3, Color.SaddleBrown, cTextureDict[Textures.Dust]);
 
-					if ((gameTime.TotalGameTime.TotalSeconds - cAliveSince >= 1) && (cAliveSince != 0)) {
-						cDevConsole.AddText(String.Format("Survived {0:0.0} seconds and shot {1} enemies.", gameTime.TotalGameTime.TotalSeconds - cAliveSince, cEnemyKills));
+					//Spawn little asteroids
+					if (EnemyInfo.Height > 50) {
+						Vector2 TopLeft;
+
+						TopLeft.X = EnemyInfo.TopLeft.X + (EnemyInfo.Width / 2) - (EnemyInfo.Width * 0.35f);
+						TopLeft.Y = EnemyInfo.TopLeft.Y + (EnemyInfo.Height / 2) - (EnemyInfo.Height * 0.35f);
+
+						CreateNewAsteroid((int)(EnemyInfo.Width * 0.7f), TopLeft);
+						CreateNewAsteroid((int)(EnemyInfo.Width * 0.7f), TopLeft);
 					}
 
-					cEnemyKills = 0;
-					cAliveSince = 0;
+					//Destroy asteroid
+					ParticlesToRemove.Add(Cnt);
+
+					PlayerHit(gameTime);
 				}
 			}
 
-			for (int Cnt = 0; Cnt < cUFOs.ParticleList.Count; Cnt++) {
+			for (Cnt = ParticlesToRemove.Count - 1; Cnt >= 0; Cnt--) {
+				cAsteroids.ParticleList.RemoveAt(ParticlesToRemove[Cnt]);
+			}
+			ParticlesToRemove.Clear();
+
+			for (Cnt = 0; Cnt < cUFOs.ParticleList.Count; Cnt++) {
 				EnemyInfo = cUFOs.ParticleList[Cnt];
 
 				//Are bullts hitting the UFO?
-				for (int Ctr = 0; Ctr < cPlayerBullets.ParticleList.Count; Ctr++) {
+				for (Ctr = 0; Ctr < cPlayerBullets.ParticleList.Count; Ctr++) {
 					BulletInfo = cPlayerBullets.ParticleList[Ctr];
 
 					if (BulletInfo.TestCollision(EnemyInfo.GetCollisionRegions()) == true) {
 						//Destroy shot and UFO
 						cPlayerBullets.ParticleList.RemoveAt(Ctr);
-						cUFOs.ParticleList.RemoveAt(Cnt);
+						ParticlesToRemove.Add(Cnt);
 						cEnemyKills++;
 
 						CreateParticleBurst(new Vector2(EnemyInfo.TopLeft.X + (EnemyInfo.Width / 2), EnemyInfo.TopLeft.Y + (EnemyInfo.Height / 2)), 200, Color.OrangeRed);
@@ -241,32 +263,22 @@ namespace MDLN.AsteroidShooter {
 				if (EnemyInfo.TestCollision(cPlayerShip) == true) {
 					cPlayerShip.ImageTint = Color.Red;
 
-					CreateParticleBurst(new Vector2(cPlayerShip.Left + (cPlayerShip.Width / 2), cPlayerShip.Top + (cPlayerShip.Height / 2)), 15);
-
-					if ((gameTime.TotalGameTime.TotalSeconds - cAliveSince >= 1) && (cAliveSince != 0)) {
-						cDevConsole.AddText(String.Format("Survived {0:0.0} seconds and shot {1} enemies.", gameTime.TotalGameTime.TotalSeconds - cAliveSince, cEnemyKills));
-					}
-
-					cEnemyKills = 0;
-					cAliveSince = 0;
+					PlayerHit(gameTime);
 				}
 			}
 
-			for (int Cnt = 0; Cnt < cEnemyBullets.ParticleList.Count; Cnt++) {
+			for (Cnt = ParticlesToRemove.Count - 1; Cnt >= 0; Cnt--) {
+				cUFOs.ParticleList.RemoveAt(ParticlesToRemove[Cnt]);
+			}
+
+			for (Cnt = 0; Cnt < cEnemyBullets.ParticleList.Count; Cnt++) {
 				BulletInfo = cEnemyBullets.ParticleList[Cnt];
 
 				//Is the bullet hitting the player?
 				if (BulletInfo.TestCollision(cPlayerShip) == true) {
 					cEnemyBullets.ParticleList.RemoveAt(Cnt);
-					CreateParticleBurst(new Vector2(cPlayerShip.Left + (cPlayerShip.Width / 2), cPlayerShip.Top + (cPlayerShip.Height / 2)), 50);
-
-					cPlayerShip.ImageTint = Color.Red;
-					if ((gameTime.TotalGameTime.TotalSeconds - cAliveSince >= 1) && (cAliveSince != 0)) {
-						cDevConsole.AddText(String.Format("Survived {0:0.0} seconds and shot {1} enemies.", gameTime.TotalGameTime.TotalSeconds - cAliveSince, cEnemyKills));
-					}
-
-					cEnemyKills = 0;
-					cAliveSince = 0;
+					
+					PlayerHit(gameTime);
 				}
 			}
 
@@ -313,7 +325,7 @@ namespace MDLN.AsteroidShooter {
 
 			if (cShowStats == true) {
 				cDrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
-				cFont.WriteText(cDrawBatch, string.Format("Asteroids={0} UFOs={1} Bullets={2} Sparkles={3} Kills={4} Alive={5:0.00}s", cAsteroids.ParticleList.Count, cUFOs.ParticleList.Count, cPlayerBullets.ParticleList.Count + cEnemyBullets.ParticleList.Count, cSparkles.ParticleList.Count, cEnemyKills, gameTime.TotalGameTime.TotalSeconds - cAliveSince), 10, cGraphDevMgr.GraphicsDevice.Viewport.Height - cFont.CharacterHeight, 10, Color.Azure);
+				cFont.WriteText(cDrawBatch, string.Format("Asteroids={0} UFOs={1} Bullets={2} Sparkles={3} Kills={4} Max={5} Alive={6:0.00}s", cAsteroids.ParticleList.Count, cUFOs.ParticleList.Count, cPlayerBullets.ParticleList.Count + cEnemyBullets.ParticleList.Count, cSparkles.ParticleList.Count, cEnemyKills, cEnemyKillsMax, gameTime.TotalGameTime.TotalSeconds - cAliveSince), 10, cGraphDevMgr.GraphicsDevice.Viewport.Height - cFont.CharacterHeight, 10, Color.Azure);
 				cDrawBatch.End();
 			}
 
@@ -539,6 +551,70 @@ namespace MDLN.AsteroidShooter {
 
 				cSparkles.AddParticle(NewSparkle);
 			}
+		}
+
+		private void PlayerFireBullet() {
+			Vector2 BulletOrigin, BulletOffset;
+			int Ctr;
+			Color BulletColor = new Color(75, 75, 255, 255);
+
+			if (cEnemyKills >= 50) { //Spread shot
+				cPlayerBullets.AddParticle(cTextureDict[Textures.Bullet], cPlayerShip.Top + (cPlayerShip.Height / 2) - 10, cPlayerShip.Left + (cPlayerShip.Height / 2) - 10, 20, 20, cPlayerShip.cRotation - 0.628f, 10, BulletColor);
+				cPlayerBullets.AddParticle(cTextureDict[Textures.Bullet], cPlayerShip.Top + (cPlayerShip.Height / 2) - 10, cPlayerShip.Left + (cPlayerShip.Height / 2) - 10, 20, 20, cPlayerShip.cRotation - 0.314f, 10, BulletColor);
+				cPlayerBullets.AddParticle(cTextureDict[Textures.Bullet], cPlayerShip.Top + (cPlayerShip.Height / 2) - 10, cPlayerShip.Left + (cPlayerShip.Height / 2) - 10, 20, 20, cPlayerShip.cRotation, 10, BulletColor);
+				cPlayerBullets.AddParticle(cTextureDict[Textures.Bullet], cPlayerShip.Top + (cPlayerShip.Height / 2) - 10, cPlayerShip.Left + (cPlayerShip.Height / 2) - 10, 20, 20, cPlayerShip.cRotation + 0.314f, 10, BulletColor);
+				cPlayerBullets.AddParticle(cTextureDict[Textures.Bullet], cPlayerShip.Top + (cPlayerShip.Height / 2) - 10, cPlayerShip.Left + (cPlayerShip.Height / 2) - 10, 20, 20, cPlayerShip.cRotation + 0.628f, 10, BulletColor);
+			} else if (cEnemyKills >= 30) { //Multi-shot
+				BulletOrigin = MGMath.CalculateXYMagnitude(-1 * cPlayerShip.cRotation, cPlayerShip.Width / 4);
+				BulletOffset = MGMath.CalculateXYMagnitude(-1 * cPlayerShip.cRotation + 1.570796f, cPlayerShip.Width / 5);
+
+				//Adjust it so that it's relative to the top left screen corner
+				BulletOrigin.Y += cPlayerShip.Top + (cPlayerShip.Height / 2);
+				BulletOrigin.X += cPlayerShip.Left + (cPlayerShip.Height / 2);
+
+				cPlayerBullets.AddParticle(cTextureDict[Textures.Bullet], BulletOrigin.Y + (BulletOffset.Y * 2) - 10, BulletOrigin.X + (BulletOffset.X * 2) - 10, 20, 20, cPlayerShip.cRotation, 15, BulletColor);
+				cPlayerBullets.AddParticle(cTextureDict[Textures.Bullet], BulletOrigin.Y + BulletOffset.Y - 10, BulletOrigin.X + BulletOffset.X - 10, 20, 20, cPlayerShip.cRotation, 15, BulletColor);
+				cPlayerBullets.AddParticle(cTextureDict[Textures.Bullet], BulletOrigin.Y - 10, BulletOrigin.X - 10, 20, 20, cPlayerShip.cRotation, 15, BulletColor);
+				cPlayerBullets.AddParticle(cTextureDict[Textures.Bullet], BulletOrigin.Y - BulletOffset.Y - 10, BulletOrigin.X - BulletOffset.X - 10, 20, 20, cPlayerShip.cRotation, 15, BulletColor);
+				cPlayerBullets.AddParticle(cTextureDict[Textures.Bullet], BulletOrigin.Y - (BulletOffset.Y * 2) - 10, BulletOrigin.X - (BulletOffset.X * 2) - 10, 20, 20, cPlayerShip.cRotation, 15, BulletColor);
+			} else if (cEnemyKills >= 10) {
+				BulletOrigin = MGMath.CalculateXYMagnitude(-1 * cPlayerShip.cRotation, cPlayerShip.Width / 4);
+				BulletOffset = MGMath.CalculateXYMagnitude(-1 * cPlayerShip.cRotation + 1.570796f, cPlayerShip.Width / 5);
+
+				//Adjust it so that it's relative to the top left screen corner
+				BulletOrigin.Y += cPlayerShip.Top + (cPlayerShip.Height / 2);
+				BulletOrigin.X += cPlayerShip.Left + (cPlayerShip.Height / 2);
+				cPlayerBullets.AddParticle(cTextureDict[Textures.Bullet], BulletOrigin.Y + BulletOffset.Y - 10, BulletOrigin.X + BulletOffset.X - 10, 20, 20, cPlayerShip.cRotation, 15, BulletColor);
+				cPlayerBullets.AddParticle(cTextureDict[Textures.Bullet], BulletOrigin.Y - 10, BulletOrigin.X - 10, 20, 20, cPlayerShip.cRotation, 15, BulletColor);
+				cPlayerBullets.AddParticle(cTextureDict[Textures.Bullet], BulletOrigin.Y - BulletOffset.Y - 10, BulletOrigin.X - BulletOffset.X - 10, 20, 20, cPlayerShip.cRotation, 15, BulletColor);
+			} else { //Single shot
+				//Calculate coordinates of ship tip relative to its center
+				BulletOrigin = MDLN.MGTools.MGMath.CalculateXYMagnitude(-1 * cPlayerShip.cRotation, cPlayerShip.Width / 4);
+
+				//Adjust it so that it's relative to the top left screen corner
+				BulletOrigin.Y += cPlayerShip.Top + (cPlayerShip.Height / 2);
+				BulletOrigin.X += cPlayerShip.Left + (cPlayerShip.Height / 2);
+
+				for (Ctr = 0; Ctr <= cEnemyKillsMax; Ctr += 100) {
+					cPlayerBullets.AddParticle(cTextureDict[Textures.Bullet], BulletOrigin.Y - 10, BulletOrigin.X - 10, 20, 20, cPlayerShip.cRotation, 15, BulletColor);
+				}
+			}
+		}
+
+		private void PlayerHit(GameTime gameTime) {
+			CreateParticleBurst(new Vector2(cPlayerShip.Left + (cPlayerShip.Width / 2), cPlayerShip.Top + (cPlayerShip.Height / 2)), 25);
+
+			cPlayerShip.ImageTint = Color.Red;
+			if ((gameTime.TotalGameTime.TotalSeconds - cAliveSince >= 1) && (cAliveSince != 0)) {
+				cDevConsole.AddText(String.Format("Survived {0:0.0} seconds and shot {1} enemies.", gameTime.TotalGameTime.TotalSeconds - cAliveSince, cEnemyKills));
+			}
+
+			if (cEnemyKills > cEnemyKillsMax) {
+				cEnemyKillsMax = cEnemyKills;
+			}
+
+			cEnemyKills = 0;
+			cAliveSince = 0;
 		}
 
 		protected enum Textures {

@@ -6,6 +6,8 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Windows.Input;
 
+using System.IO;
+
 namespace MDLN.MGTools {
 	/// <summary>
 	/// Class that acts as a visual container for content drawn in Monogame
@@ -88,6 +90,11 @@ namespace MDLN.MGTools {
 			cOrigin.Y = cFullDrawRegion.Y;
 
 			cAnimationTime = 250;
+
+			if (cBackTexture == null) { //No background texture was specified, use transparent
+				cBackTexture = new Texture2D(cGraphicsDevice, 1, 1);
+				cBackTexture.SetData(new[] { Color.Transparent });
+			}
 		}
 
 		/// <summary>
@@ -542,10 +549,11 @@ namespace MDLN.MGTools {
 				RenderTargets = cGraphicsDevice.GetRenderTargets ();
 
 				//Set to render to buffer
-				cGraphicsDevice.SetRenderTarget (cRenderToBuffer);
+				cGraphicsDevice.SetRenderTarget(cRenderToBuffer);
 
 				//Do drawing
-				cGraphicsDevice.Clear (new Color (255, 255, 255, 255)); //Start fully transparent 
+				cGraphicsDevice.Clear (new Color (0, 0, 0, 0)); //Start fully transparent 
+
 				cDrawBatch.Begin (SpriteSortMode.Deferred, BlendState.NonPremultiplied);
 				cDrawBatch.Draw (cBackTexture, cGraphicsDevice.Viewport.Bounds, Color.White);
 
@@ -565,6 +573,18 @@ namespace MDLN.MGTools {
 		}
 
 		/// <summary>
+		/// Saves the appearance of this container to a PNG file
+		/// </summary>
+		/// <param name="PNGFileName">Path and file name of the PNG image file to write to</param>
+		public void SaveAsPNG(string PNGFileName) {
+			Stream ImageFile = File.Create(PNGFileName);
+
+			cRenderToBuffer.SaveAsPng(ImageFile, cRenderToBuffer.Width, cRenderToBuffer.Height);
+			ImageFile.Close();
+			ImageFile.Dispose();
+		}
+
+		/// <summary>
 		/// This function should be overridden with code to render the contents of this container.
 		/// It will be called during the update routine.
 		/// </summary>
@@ -579,6 +599,7 @@ namespace MDLN.MGTools {
 		/// <param name="CurrTime">Currend time information</param>
 		/// <param name="CurrKeyboard">Current state of the keyboard.</param>
 		/// <param name="CurrMouse">Current state of the mouse.</param>
+		/// <param name="ProcessMouseEvent">Set true to allow this containing to process mouse events, false to ignore them</param>
 		protected virtual void UpdateContents(GameTime CurrTime, KeyboardState CurrKeyboard, MouseState CurrMouse, bool ProcessMouseEvent) { }
 
 		/// <summary>

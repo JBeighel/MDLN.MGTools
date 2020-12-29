@@ -12,6 +12,8 @@ using System.IO;
 
 namespace ParticleTest {
 	class ParticleTester : Game {
+		readonly Color LBLTEXTCOLOR = Color.White;
+
 		/// <summary>
 		/// Subdirectory that will contain all external content
 		/// </summary>
@@ -30,8 +32,8 @@ namespace ParticleTest {
 		private GameConsole cDevConsole;
 		private ParticleEngine2D cSparkles;
 		private MDLN.MGTools.Container cSettingsCont;
-		private MDLN.MGTools.TextBox cNumParticlesTxt;
-		private Button cAddParitclesBtn, cNumParticlesLbl, cShowingLbl;
+		private MDLN.MGTools.TextBox cNumParticlesTxt, cHeightTxt, cWidthTxt;
+		private Button cAddParitclesBtn, cNumParticlesLbl, cShowingLbl, cHeightLbl, cWidthLbl;
 		private Dictionary<TextureFiles, Texture2D> cTextureDict;
 		private Random cRand;
 
@@ -113,10 +115,18 @@ namespace ParticleTest {
 		private void AddParticlesClickHandler(object Sender, MouseButton eButton) {
 			Particle2D NewParticle;
 			TextureFiles eTexture = TextureFiles.dirt_01;
-			int nCtr, nParticleCnt;
+			int nCtr, nParticleCnt, nHeight, nWidth;
 
 			if (Int32.TryParse(cNumParticlesTxt.Text, out nParticleCnt) == false) {
 				nParticleCnt = 1;
+			}
+
+			if (Int32.TryParse(cHeightTxt.Text, out nHeight) == false) {
+				nHeight = cTextureDict[eTexture].Height / 2;
+			}
+
+			if (Int32.TryParse(cWidthTxt.Text, out nWidth) == false) {
+				nWidth = cTextureDict[eTexture].Width / 2;
 			}
 
 			if (eButton == MouseButton.Left) {
@@ -127,8 +137,8 @@ namespace ParticleTest {
 					NewParticle.Image = cTextureDict[eTexture];
 
 					//Set the dimensions of the image on screen
-					NewParticle.Height = cTextureDict[eTexture].Height / 2;
-					NewParticle.Width = cTextureDict[eTexture].Width / 2;
+					NewParticle.Height = nHeight;
+					NewParticle.Width = nWidth;
 					//Set the position of the image
 					NewParticle.TopLeft.X = (GraphicsDevice.Viewport.Width / 2) - (NewParticle.Width / 2);
 					NewParticle.TopLeft.Y = (GraphicsDevice.Viewport.Height / 2) - (NewParticle.Height / 2);
@@ -210,7 +220,7 @@ namespace ParticleTest {
 			cShowingLbl.Visible = true;
 			cShowingLbl.Font = Font;
 			cShowingLbl.BackgroundColor = Color.Transparent;
-			cShowingLbl.FontColor = Color.White;
+			cShowingLbl.FontColor = LBLTEXTCOLOR;
 
 			cAddParitclesBtn = new Button(GraphicsDevice, null, 40, 10, 20, 280);
 			cAddParitclesBtn.Text = "Add Particles";
@@ -225,7 +235,7 @@ namespace ParticleTest {
 			cNumParticlesLbl.Visible = true;
 			cNumParticlesLbl.Font = Font;
 			cNumParticlesLbl.BackgroundColor = Color.Transparent;
-			cNumParticlesLbl.FontColor = Color.Black;
+			cNumParticlesLbl.FontColor = LBLTEXTCOLOR;
 
 			cNumParticlesTxt = new TextBox(GraphicsDevice, null, 70, 125, 20, 165);
 			cNumParticlesTxt.Text = "1";
@@ -234,6 +244,36 @@ namespace ParticleTest {
 			cNumParticlesTxt.BackgroundColor = Color.Black;
 			cNumParticlesTxt.FontColor = Color.White;
 			cNumParticlesTxt.Alignment = Justify.MiddleCenter;
+
+			cHeightLbl = new Button(GraphicsDevice, null, 100, 10, 20, 105);
+			cHeightLbl.Text = "Height";
+			cHeightLbl.Visible = true;
+			cHeightLbl.Font = Font;
+			cHeightLbl.BackgroundColor = Color.Transparent;
+			cHeightLbl.FontColor = LBLTEXTCOLOR;
+
+			cHeightTxt = new TextBox(GraphicsDevice, null, 100, 125, 20, 165);
+			cHeightTxt.Text = "64";
+			cHeightTxt.Visible = true;
+			cHeightTxt.Font = Font;
+			cHeightTxt.BackgroundColor = Color.Black;
+			cHeightTxt.FontColor = Color.White;
+			cHeightTxt.Alignment = Justify.MiddleCenter;
+
+			cWidthLbl = new Button(GraphicsDevice, null, 130, 10, 20, 105);
+			cWidthLbl.Text = "Width";
+			cWidthLbl.Visible = true;
+			cWidthLbl.Font = Font;
+			cWidthLbl.BackgroundColor = Color.Transparent;
+			cWidthLbl.FontColor = LBLTEXTCOLOR;
+
+			cWidthTxt = new TextBox(GraphicsDevice, null, 130, 125, 20, 165);
+			cWidthTxt.Text = "64";
+			cWidthTxt.Visible = true;
+			cWidthTxt.Font = Font;
+			cWidthTxt.BackgroundColor = Color.Black;
+			cWidthTxt.FontColor = Color.White;
+			cWidthTxt.Alignment = Justify.MiddleCenter;
 
 			foreach (TextureFiles CurrTexture in Enum.GetValues(typeof(TextureFiles))) {
 				strFileName = INTERFACECONTENTDIR + "\\" + EnumTools.GetEnumDescriptionAttribute(CurrTexture);
@@ -262,6 +302,10 @@ namespace ParticleTest {
 			cAddParitclesBtn.Update(gameTime);
 			cNumParticlesLbl.Update(gameTime);
 			cNumParticlesTxt.Update(gameTime);
+			cHeightLbl.Update(gameTime);
+			cHeightTxt.Update(gameTime);
+			cWidthLbl.Update(gameTime);
+			cWidthTxt.Update(gameTime);
 
 			//Use monogame update
 			base.Update(gameTime);
@@ -275,8 +319,6 @@ namespace ParticleTest {
 		protected override void Draw(GameTime gameTime) {
 			cGraphDevMgr.GraphicsDevice.Clear(Color.Black);
 
-			cSparkles.Draw();
-
 			cDrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
 
 			cShowingLbl.Draw(cDrawBatch);
@@ -284,6 +326,12 @@ namespace ParticleTest {
 			cAddParitclesBtn.Draw(cDrawBatch);
 			cNumParticlesLbl.Draw(cDrawBatch);
 			cNumParticlesTxt.Draw(cDrawBatch);
+			cHeightLbl.Draw(cDrawBatch);
+			cHeightTxt.Draw(cDrawBatch);
+			cWidthLbl.Draw(cDrawBatch);
+			cWidthTxt.Draw(cDrawBatch);
+
+			cSparkles.Draw(cDrawBatch);
 
 			//Always draw console last
 			cDevConsole.Draw(cDrawBatch);

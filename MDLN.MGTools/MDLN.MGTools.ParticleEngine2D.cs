@@ -184,6 +184,19 @@ namespace MDLN.MGTools {
 
 			cDrawBatch.End();
 		}
+
+		/// <summary>
+		/// Draw all of the particles to current render device using an externally defined sprite batch
+		/// </summary>
+		public void Draw(SpriteBatch DrawBatch) {
+			foreach (Particle2D CurrParticle in cParticleList) {
+				if (ShaderEffect != null) {
+					//ShaderEffect.Parameters["TintColor"].SetValue(CurrParticle.Tint.ToVector4());
+					ShaderEffect.Techniques[0].Passes[0].Apply();
+				}
+				CurrParticle.Draw(DrawBatch);
+			}
+		}
 	}
 
 	/// <summary>

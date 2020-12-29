@@ -128,7 +128,7 @@ namespace MDLN.MGTools {
 		/// <returns>The width of the text in pixels if it were displayed</returns>
 		/// <param name="Text">The text to measure</param>
 		public int DetermineRenderWidth(string Text) {
-			return DetermineRenderWidth(Text, cTextureColWidth);
+			return DetermineRenderWidth(Text, cTextureRowHeight);
 		}
 
 		/// <summary>

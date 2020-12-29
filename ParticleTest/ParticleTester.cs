@@ -30,7 +30,8 @@ namespace ParticleTest {
 		private GameConsole cDevConsole;
 		private ParticleEngine2D cSparkles;
 		private MDLN.MGTools.Container cSettingsCont;
-		Button cAddParitclesBtn;
+		private MDLN.MGTools.TextBox cNumParticlesTxt;
+		private Button cAddParitclesBtn, cNumParticlesLbl, cShowingLbl;
 		private Dictionary<TextureFiles, Texture2D> cTextureDict;
 		private Random cRand;
 
@@ -112,31 +113,38 @@ namespace ParticleTest {
 		private void AddParticlesClickHandler(object Sender, MouseButton eButton) {
 			Particle2D NewParticle;
 			TextureFiles eTexture = TextureFiles.dirt_01;
+			int nCtr, nParticleCnt;
+
+			if (Int32.TryParse(cNumParticlesTxt.Text, out nParticleCnt) == false) {
+				nParticleCnt = 1;
+			}
 
 			if (eButton == MouseButton.Left) {
-				NewParticle = new Particle2D();
-				//Particle images should be grayscale, allowing this tint value to color them
-				NewParticle.Tint = new Color(cRand.Next(0, 255), cRand.Next(0, 255), cRand.Next(0, 255));
-				NewParticle.Image = cTextureDict[eTexture];
+				for (nCtr = 0; nCtr < nParticleCnt; nCtr++) {
+					NewParticle = new Particle2D();
+					//Particle images should be grayscale, allowing this tint value to color them
+					NewParticle.Tint = new Color(cRand.Next(0, 255), cRand.Next(0, 255), cRand.Next(0, 255));
+					NewParticle.Image = cTextureDict[eTexture];
 
-				//Set the dimensions of the image on screen
-				NewParticle.Height = cTextureDict[eTexture].Height / 2;
-				NewParticle.Width = cTextureDict[eTexture].Width / 2;
-				//Set the position of the image
-				NewParticle.TopLeft.X = (GraphicsDevice.Viewport.Width / 2) - (NewParticle.Width / 2);
-				NewParticle.TopLeft.Y = (GraphicsDevice.Viewport.Height / 2) - (NewParticle.Height / 2);
-				NewParticle.Rotation = (float)((cRand.Next(0, 360) * (2 * Math.PI)) / 360);
+					//Set the dimensions of the image on screen
+					NewParticle.Height = cTextureDict[eTexture].Height / 2;
+					NewParticle.Width = cTextureDict[eTexture].Width / 2;
+					//Set the position of the image
+					NewParticle.TopLeft.X = (GraphicsDevice.Viewport.Width / 2) - (NewParticle.Width / 2);
+					NewParticle.TopLeft.Y = (GraphicsDevice.Viewport.Height / 2) - (NewParticle.Height / 2);
+					NewParticle.Rotation = (float)((cRand.Next(0, 360) * (2 * Math.PI)) / 360);
 
-				//Set the total movement the particle will travel
-				NewParticle.TotalDistance.X = cRand.Next(GraphicsDevice.Viewport.Width / -2, GraphicsDevice.Viewport.Width / 2);
-				NewParticle.TotalDistance.Y = cRand.Next(GraphicsDevice.Viewport.Height / -2, GraphicsDevice.Viewport.Height / 2);
-				NewParticle.TotalRotate = (float)(cRand.Next(-5, 5) * 2 * Math.PI);
+					//Set the total movement the particle will travel
+					NewParticle.TotalDistance.X = cRand.Next(GraphicsDevice.Viewport.Width / -2, GraphicsDevice.Viewport.Width / 2);
+					NewParticle.TotalDistance.Y = cRand.Next(GraphicsDevice.Viewport.Height / -2, GraphicsDevice.Viewport.Height / 2);
+					NewParticle.TotalRotate = (float)(cRand.Next(-5, 5) * 2 * Math.PI);
 
-				//Set how long the particle will live in milliseconds
-				NewParticle.TimeToLive = cRand.Next(1000, 10000);
-				NewParticle.AlphaFade = true;
+					//Set how long the particle will live in milliseconds
+					NewParticle.TimeToLive = cRand.Next(1000, 10000);
+					NewParticle.AlphaFade = true;
 
-				cSparkles.AddParticle(NewParticle);
+					cSparkles.AddParticle(NewParticle);
+				}
 			}
 
 			return;
@@ -197,13 +205,35 @@ namespace ParticleTest {
 			cSettingsCont.Top = 0;
 			cSettingsCont.Left = 0;
 
-			cAddParitclesBtn = new Button(GraphicsDevice, null, 10, 10, 20, 280);
+			cShowingLbl = new Button(GraphicsDevice, null, 10, 10, 20, 280);
+			cShowingLbl.Text = "";
+			cShowingLbl.Visible = true;
+			cShowingLbl.Font = Font;
+			cShowingLbl.BackgroundColor = Color.Transparent;
+			cShowingLbl.FontColor = Color.White;
+
+			cAddParitclesBtn = new Button(GraphicsDevice, null, 40, 10, 20, 280);
 			cAddParitclesBtn.Text = "Add Particles";
 			cAddParitclesBtn.Visible = true;
 			cAddParitclesBtn.Font = Font;
 			cAddParitclesBtn.BackgroundColor = Color.LightGray;
 			cAddParitclesBtn.FontColor = Color.Black;
 			cAddParitclesBtn.Click += AddParticlesClickHandler;
+
+			cNumParticlesLbl = new Button(GraphicsDevice, null, 70, 10, 20, 105);
+			cNumParticlesLbl.Text = "Add Amount";
+			cNumParticlesLbl.Visible = true;
+			cNumParticlesLbl.Font = Font;
+			cNumParticlesLbl.BackgroundColor = Color.Transparent;
+			cNumParticlesLbl.FontColor = Color.Black;
+
+			cNumParticlesTxt = new TextBox(GraphicsDevice, null, 70, 125, 20, 165);
+			cNumParticlesTxt.Text = "1";
+			cNumParticlesTxt.Visible = true;
+			cNumParticlesTxt.Font = Font;
+			cNumParticlesTxt.BackgroundColor = Color.Black;
+			cNumParticlesTxt.FontColor = Color.White;
+			cNumParticlesTxt.Alignment = Justify.MiddleCenter;
 
 			foreach (TextureFiles CurrTexture in Enum.GetValues(typeof(TextureFiles))) {
 				strFileName = INTERFACECONTENTDIR + "\\" + EnumTools.GetEnumDescriptionAttribute(CurrTexture);
@@ -225,8 +255,13 @@ namespace ParticleTest {
 		protected override void Update(GameTime gameTime) {
 			cDevConsole.Update(gameTime);
 			cSparkles.Update(gameTime);
+
+			cShowingLbl.Text = String.Format("Showing {0} Particles", cSparkles.ParticleList.Count);
+			cShowingLbl.Update(gameTime);
 			cSettingsCont.Update(gameTime);
 			cAddParitclesBtn.Update(gameTime);
+			cNumParticlesLbl.Update(gameTime);
+			cNumParticlesTxt.Update(gameTime);
 
 			//Use monogame update
 			base.Update(gameTime);
@@ -244,8 +279,11 @@ namespace ParticleTest {
 
 			cDrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
 
+			cShowingLbl.Draw(cDrawBatch);
 			cSettingsCont.Draw(cDrawBatch);
 			cAddParitclesBtn.Draw(cDrawBatch);
+			cNumParticlesLbl.Draw(cDrawBatch);
+			cNumParticlesTxt.Draw(cDrawBatch);
 
 			//Always draw console last
 			cDevConsole.Draw(cDrawBatch);

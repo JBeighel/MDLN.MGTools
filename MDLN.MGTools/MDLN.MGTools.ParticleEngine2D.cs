@@ -163,7 +163,7 @@ namespace MDLN.MGTools {
 				cParticleList[Ctr] = CurrBullet; //Place the changed values into the list
 			}
 
-			for (Ctr = IndexesToRemove.Count - 1; Ctr > 0; Ctr--) {
+			for (Ctr = IndexesToRemove.Count - 1; Ctr >= 0; Ctr--) {
 				cParticleList.RemoveAt(Ctr);
 			}
 		}

@@ -120,6 +120,7 @@ namespace MDLN.MGTools {
 			set {
 				cBackTexture = new Texture2D(cGraphicsDevice, 1, 1);
 				cBackTexture.SetData (new[] { value });
+				cHasChanges = true;
 			}
 		}
 

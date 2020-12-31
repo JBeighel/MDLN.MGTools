@@ -371,9 +371,12 @@ namespace MDLN.MGTools {
 				cCreationTime = CurrTime.TotalGameTime.TotalMilliseconds;
 				nLastUpdPct = 0;
 				nTotLifePct = 0;
-			} else {
+			} else if (TimeToLive > 0) {
 				nLastUpdPct = (CurrTime.TotalGameTime.TotalMilliseconds - ctLastUpdate) / TimeToLive;
 				nTotLifePct = (CurrTime.TotalGameTime.TotalMilliseconds - cCreationTime) / TimeToLive;
+			} else {
+				nLastUpdPct = 0;
+				nTotLifePct = 0;
 			}
 
 			if (tCreateDelay > 0) { //Particle is still being delayed

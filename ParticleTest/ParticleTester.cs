@@ -34,9 +34,10 @@ namespace ParticleTest {
 		private MDLN.MGTools.Container cSettingsCont;
 		private MDLN.MGTools.TextBox cNumParticlesTxt, cHeightMinTxt, cHeightMaxTxt, cWidthMinTxt, cWidthMaxTxt;
 		private MDLN.MGTools.TextBox cRedMinTxt, cRedMaxTxt, cGreenMinTxt, cGreenMaxTxt, cBlueMinTxt, cBlueMaxTxt;
-		private MDLN.MGTools.TextBox cLifeMinTxt, cLifeMaxTxt, cDelayMinTxt, cDelayMaxTxt, cXDistMinTxt, cXDistMaxTxt, cYDistMinTxt, cYDistMaxTxt;
+		private MDLN.MGTools.TextBox cLifeMinTxt, cLifeMaxTxt, cDelayMinTxt, cDelayMaxTxt, cXDistMinTxt, cXDistMaxTxt;
+		private MDLN.MGTools.TextBox cYDistMinTxt, cYDistMaxTxt, cRotateMinTxt, cRotateMaxTxt;
 		private Button cAddParitclesBtn, cRotateAfterBtn, cAlphaFadeBtn; 
-		private Button cNumParticlesLbl, cShowingLbl, cHeightLbl, cWidthLbl, cRedLbl, cGreenLbl, cBlueLbl, cLifeLbl, cDelayLbl, cXDistLbl, cYDistLbl;
+		private Button cNumParticlesLbl, cShowingLbl, cHeightLbl, cWidthLbl, cRedLbl, cGreenLbl, cBlueLbl, cLifeLbl, cDelayLbl, cXDistLbl, cYDistLbl, cRotateLbl;
 		private bool cbRotateAfter, cbAlphaFade;
 
 		private Dictionary<TextureFiles, Texture2D> cTextureDict;
@@ -123,7 +124,7 @@ namespace ParticleTest {
 			Particle2D NewParticle;
 			TextureFiles eTexture = TextureFiles.dirt_01;
 			int nCtr, nParticleCnt;
-			Vector2 nHeight, nWidth, nRed, nGreen, nBlue, nLife, nDelay, nXDist, nYDist;
+			Vector2 nHeight, nWidth, nRed, nGreen, nBlue, nLife, nDelay, nXDist, nYDist, nRotate;
 
 			if (Int32.TryParse(cNumParticlesTxt.Text, out nParticleCnt) == false) {
 				nParticleCnt = 1;
@@ -201,6 +202,14 @@ namespace ParticleTest {
 				nYDist.Y = nYDist.X;
 			}
 
+			if (float.TryParse(cRotateMinTxt.Text, out nRotate.X) == false) {
+				nRotate.X = GraphicsDevice.Viewport.Height / -2;
+			}
+
+			if ((float.TryParse(cRotateMaxTxt.Text, out nRotate.Y) == false) || (nRotate.X > nRotate.Y)) {
+				nRotate.Y = nRotate.X;
+			}
+
 			if (eButton == MouseButton.Left) {
 				for (nCtr = 0; nCtr < nParticleCnt; nCtr++) {
 					NewParticle = new Particle2D();
@@ -219,7 +228,7 @@ namespace ParticleTest {
 					//Set the total movement the particle will travel
 					NewParticle.TotalDistance.X = cRand.Next((int)nXDist.X, (int)nXDist.Y);
 					NewParticle.TotalDistance.Y = cRand.Next((int)nYDist.X, (int)nYDist.Y);
-					NewParticle.TotalRotate = (float)(cRand.Next(-5, 5) * 2 * Math.PI);
+					NewParticle.TotalRotate = (float)(cRand.Next((int)nRotate.X, (int)nRotate.Y) * 2 * Math.PI);
 
 					//Set how long the particle will live in milliseconds
 					NewParticle.TimeToLive = cRand.Next((int)nLife.X, (int)nLife.Y);
@@ -552,7 +561,30 @@ namespace ParticleTest {
 			cYDistMaxTxt.FontColor = Color.White;
 			cYDistMaxTxt.Alignment = Justify.MiddleCenter;
 
-			cRotateAfterBtn = new Button(GraphicsDevice, null, 370, 10, 20, 280);
+			cRotateLbl = new Button(GraphicsDevice, null, 370, 10, 20, 90);
+			cRotateLbl.Text = "Rotations";
+			cRotateLbl.Visible = true;
+			cRotateLbl.Font = Font;
+			cRotateLbl.BackgroundColor = Color.Transparent;
+			cRotateLbl.FontColor = LBLTEXTCOLOR;
+
+			cRotateMinTxt = new TextBox(GraphicsDevice, null, 370, 100, 20, 90);
+			cRotateMinTxt.Text = "-5";
+			cRotateMinTxt.Visible = true;
+			cRotateMinTxt.Font = Font;
+			cRotateMinTxt.BackgroundColor = Color.Black;
+			cRotateMinTxt.FontColor = Color.White;
+			cRotateMinTxt.Alignment = Justify.MiddleCenter;
+
+			cRotateMaxTxt = new TextBox(GraphicsDevice, null, 370, 200, 20, 90);
+			cRotateMaxTxt.Text = "5";
+			cRotateMaxTxt.Visible = true;
+			cRotateMaxTxt.Font = Font;
+			cRotateMaxTxt.BackgroundColor = Color.Black;
+			cRotateMaxTxt.FontColor = Color.White;
+			cRotateMaxTxt.Alignment = Justify.MiddleCenter;
+
+			cRotateAfterBtn = new Button(GraphicsDevice, null, 400, 10, 20, 280);
 			cRotateAfterBtn.Text = "Spiral Path";
 			cRotateAfterBtn.Visible = true;
 			cRotateAfterBtn.Font = Font;
@@ -560,7 +592,7 @@ namespace ParticleTest {
 			cRotateAfterBtn.FontColor = Color.Black;
 			cRotateAfterBtn.Click += RotateAfterClickHandler;
 
-			cAlphaFadeBtn = new Button(GraphicsDevice, null, 400, 10, 20, 280);
+			cAlphaFadeBtn = new Button(GraphicsDevice, null, 430, 10, 20, 280);
 			cAlphaFadeBtn.Text = "Alpha Fade";
 			cAlphaFadeBtn.Visible = true;
 			cAlphaFadeBtn.Font = Font;
@@ -622,6 +654,9 @@ namespace ParticleTest {
 			cYDistLbl.Update(gameTime);
 			cYDistMinTxt.Update(gameTime);
 			cYDistMaxTxt.Update(gameTime);
+			cRotateLbl.Update(gameTime);
+			cRotateMinTxt.Update(gameTime);
+			cRotateMaxTxt.Update(gameTime);
 			cRotateAfterBtn.Update(gameTime);
 			cAlphaFadeBtn.Update(gameTime);
 
@@ -671,6 +706,9 @@ namespace ParticleTest {
 			cYDistLbl.Draw(cDrawBatch);
 			cYDistMinTxt.Draw(cDrawBatch);
 			cYDistMaxTxt.Draw(cDrawBatch);
+			cRotateLbl.Draw(cDrawBatch);
+			cRotateMinTxt.Draw(cDrawBatch);
+			cRotateMaxTxt.Draw(cDrawBatch);
 			cRotateAfterBtn.Draw(cDrawBatch);
 			cAlphaFadeBtn.Draw(cDrawBatch);
 

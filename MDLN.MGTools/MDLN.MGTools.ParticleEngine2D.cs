@@ -437,8 +437,8 @@ namespace MDLN.MGTools {
 
 			if (bSpiralPath == true) {
 				nLifePct = (ctLastUpdate - cCreationTime) / TimeToLive;
-				Origin.X += (float)(nLifePct * TotalDistance.X);
-				Origin.Y += (float)(nLifePct * TotalDistance.Y);
+				Origin.X += (float)(nLifePct * TotalDistance.X * Image.Bounds.Width / DrawRegion.Width / 8);
+				Origin.Y += (float)(nLifePct * TotalDistance.Y * Image.Bounds.Height / DrawRegion.Height /8);
 			}
 
 			DrawBatch.Draw(Image, DrawRegion, Image.Bounds, Tint, Rotation, Origin, SpriteEffects.None, 0);

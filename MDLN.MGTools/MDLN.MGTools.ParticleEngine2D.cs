@@ -244,9 +244,18 @@ namespace MDLN.MGTools {
 		/// </summary>
 		public double TimeToLive;
 		/// <summary>
+		/// Number of milliseconds to delay the creation of this parrticle
+		/// </summary>
+		public double tCreateDelay;
+		/// <summary>
 		/// True to have the particle fade over time, false to not fade
 		/// </summary>
 		public bool AlphaFade;
+		/// <summary>
+		/// Set true to have the rotation occur after moving, meaning it will follow a curved path
+		/// False will rotate the image as it moves
+		/// </summary>
+		public bool bSpiralPath;
 		/// <summary>
 		/// Total distance the particle will travel across its life
 		/// This does not factor in the SpeedX and SpeedY variables
@@ -362,9 +371,22 @@ namespace MDLN.MGTools {
 				cCreationTime = CurrTime.TotalGameTime.TotalMilliseconds;
 				nLastUpdPct = 0;
 				nTotLifePct = 0;
-			} else {
+			} else if (TimeToLive > 0) {
 				nLastUpdPct = (CurrTime.TotalGameTime.TotalMilliseconds - ctLastUpdate) / TimeToLive;
 				nTotLifePct = (CurrTime.TotalGameTime.TotalMilliseconds - cCreationTime) / TimeToLive;
+			} else {
+				nLastUpdPct = 0;
+				nTotLifePct = 0;
+			}
+
+			if (tCreateDelay > 0) { //Particle is still being delayed
+				if (tCreateDelay <= CurrTime.TotalGameTime.TotalMilliseconds - cCreationTime) { //Delay is over, update creation time to allow animation to begin
+					tCreateDelay = 0;
+					cCreationTime = CurrTime.TotalGameTime.TotalMilliseconds;
+					ctLastUpdate = cCreationTime;
+				}
+
+				return true;
 			}
 
 			if ((TimeToLive > 0) && (CurrTime.TotalGameTime.TotalMilliseconds - cCreationTime >= TimeToLive)) {
@@ -402,6 +424,11 @@ namespace MDLN.MGTools {
 		public virtual void Draw(SpriteBatch DrawBatch) {
 			Vector2 Origin;
 			Rectangle DrawRegion;
+			double nLifePct;
+
+			if (tCreateDelay > 0) { //Particle is still being delayed
+				return;
+			}
 
 			Origin.X = Image.Bounds.Width / 2;
 			Origin.Y = Image.Bounds.Height / 2;
@@ -411,7 +438,15 @@ namespace MDLN.MGTools {
 			DrawRegion.Width = Width;
 			DrawRegion.Height = Height;
 
+			if (bSpiralPath == true) {
+				nLifePct = (ctLastUpdate - cCreationTime) / TimeToLive;
+				Origin.X += (float)(nLifePct * TotalDistance.X * Image.Bounds.Width / DrawRegion.Width / 8);
+				Origin.Y += (float)(nLifePct * TotalDistance.Y * Image.Bounds.Height / DrawRegion.Height /8);
+			}
+
 			DrawBatch.Draw(Image, DrawRegion, Image.Bounds, Tint, Rotation, Origin, SpriteEffects.None, 0);
+
+			return;
 		}
 	}
 

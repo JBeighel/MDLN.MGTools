@@ -38,7 +38,7 @@ namespace MDLN.AsteroidShooter {
 		private Texture2D cSolidTexture;
 		private TextureFont cFont;
 		private bool cHeadlightMode, cShowStats;
-		private Effect cShader, cShipShader;
+		//private Effect cShader, cShipShader;
 
 		public AsteroidShooter() {
 			cGraphDevMgr = new GraphicsDeviceManager(this);
@@ -83,12 +83,12 @@ namespace MDLN.AsteroidShooter {
 				cTextureDict.Add(CurrTexture, Content.Load<Texture2D>(Tools.EnumTools.GetEnumDescriptionAttribute(CurrTexture)));
 			}
 
-			cShader = Content.Load<Effect>("ShaderEffect");
-			cShipShader = Content.Load<Effect>("BumpMap");
-			cShipShader.Parameters["NormalMap"].SetValue(cTextureDict[Textures.ShipNormal]);
+			//cShader = Content.Load<Effect>("ShaderEffect");
+			//cShipShader = Content.Load<Effect>("BumpMap");
+			//cShipShader.Parameters["NormalMap"].SetValue(cTextureDict[Textures.ShipNormal]);
 
 			cFont = new TextureFont(cTextureDict[Textures.Font]);
-			cDevConsole = new MDLN.MGTools.GameConsole(cGraphDevMgr.GraphicsDevice, Content, "Font.png", 0, 0, cGraphDevMgr.GraphicsDevice.Viewport.Bounds.Width, cGraphDevMgr.GraphicsDevice.Viewport.Bounds.Height / 2);
+			cDevConsole = new MDLN.MGTools.GameConsole(cGraphDevMgr.GraphicsDevice, Content, Content.RootDirectory + "\\Font.png", 0, 0, cGraphDevMgr.GraphicsDevice.Viewport.Bounds.Width, cGraphDevMgr.GraphicsDevice.Viewport.Bounds.Height / 2);
 			cDevConsole.CommandSent += CommandSentEventHandler;
 			cDevConsole.OpenEffect = DisplayEffect.SlideDown;
 			cDevConsole.CloseEffect = DisplayEffect.SlideUp;
@@ -104,7 +104,7 @@ namespace MDLN.AsteroidShooter {
 
 			cPlayerBullets = new ParticleEngine2D(cGraphDevMgr.GraphicsDevice);
 			cPlayerBullets.DrawBlendingMode = BlendState.Additive;
-			cPlayerBullets.ShaderEffect = cShader;
+			//cPlayerBullets.ShaderEffect = cShader;
 
 			cEnemyBullets = new ParticleEngine2D(cGraphDevMgr.GraphicsDevice);
 			cEnemyBullets.DrawBlendingMode = BlendState.Additive;
@@ -113,7 +113,7 @@ namespace MDLN.AsteroidShooter {
 			cAsteroids.WrapScreenEdges = true;
 
 			cUFOs = new ParticleEngine2D(cGraphDevMgr.GraphicsDevice);
-			cUFOs.ShaderEffect = cShipShader;
+			//cUFOs.ShaderEffect = cShipShader;
 			cUFOs.WrapScreenEdges = true;
 
 			cSparkles = new ParticleEngine2D(cGraphDevMgr.GraphicsDevice);
@@ -482,6 +482,7 @@ namespace MDLN.AsteroidShooter {
 			}
 
 			AstInfo.Image = cTextureDict[Textures.Asteroid];
+			AstInfo.TimeToLive = -1;
 
 			AstSpeed = MGMath.CalculateXYMagnitude((float)cRandom.NextDouble() * 6.28318531f, 2);
 			AstInfo.SpeedX = AstSpeed.X;

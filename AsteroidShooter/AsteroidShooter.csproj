@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -55,5 +55,16 @@
       <Project>{4D524474-1FFF-448F-97BA-E58CCA87592D}</Project>
       <Name>MDLN.Tools</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Content\Asteroid.png" />
+    <Content Include="Content\Bullet-Gray.png" />
+    <Content Include="Content\Dust.png" />
+    <Content Include="Content\Flashlight.png" />
+    <Content Include="Content\Font.png" />
+    <Content Include="Content\UFO-NormalMap.png" />
+    <Content Include="Content\UFO-Red.png" />
+    <Content Include="Content\UFO.png" />
   </ItemGroup>
 </Project>

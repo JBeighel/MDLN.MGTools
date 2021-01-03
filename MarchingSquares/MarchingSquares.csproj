@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -60,5 +60,10 @@
       <Project>{61F383D9-872B-4B2B-92CE-21D18A74EC13}</Project>
       <Name>MDLN.MGTools</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\Circle.png" />
+    <Content Include="Content\Font.png" />
+    <Content Include="Content\MarchingSquares.png" />
   </ItemGroup>
 </Project>

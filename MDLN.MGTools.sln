@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pong", "Pong\Pong.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParticleTest", "ParticleTest\ParticleTest.csproj", "{9C4659F4-EB78-4BD1-B6CA-5A079EE37520}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShapesCollisions", "ShapesCollisions\ShapesCollisions.csproj", "{302BA11B-F6C7-4ED2-B1EF-4C7AA1D01FA7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -85,6 +87,10 @@ Global
 		{9C4659F4-EB78-4BD1-B6CA-5A079EE37520}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9C4659F4-EB78-4BD1-B6CA-5A079EE37520}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9C4659F4-EB78-4BD1-B6CA-5A079EE37520}.Release|Any CPU.Build.0 = Release|Any CPU
+		{302BA11B-F6C7-4ED2-B1EF-4C7AA1D01FA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{302BA11B-F6C7-4ED2-B1EF-4C7AA1D01FA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{302BA11B-F6C7-4ED2-B1EF-4C7AA1D01FA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{302BA11B-F6C7-4ED2-B1EF-4C7AA1D01FA7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

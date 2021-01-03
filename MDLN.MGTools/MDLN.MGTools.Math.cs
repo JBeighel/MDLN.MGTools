@@ -195,6 +195,63 @@ namespace MDLN.MGTools {
 
 			return true;
 		}
+
+		/// <summary>
+		/// Determines if a point is inside or on the boundary of a circle
+		/// </summary>
+		/// <param name="Coord">X and Y coordinates of the point to test</param>
+		/// <param name="CircleOrigin">Center point of the circle</param>
+		/// <param name="CircleRadius">Radius of the circle</param>
+		/// <returns>True if the point is within the circle, false if it is not</returns>
+		public static bool IsPointInCircle(Point Coord, Vector2 CircleOrigin, float CircleRadius) {
+			Vector2 Pt;
+
+			CircleRadius *= CircleRadius;
+			Pt.X = Coord.X;
+			Pt.Y = Coord.Y;
+
+			float PtDist = SquaredDistanceBetweenPoints(Pt, CircleOrigin);
+
+			if (PtDist <= CircleRadius) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		/// <summary>
+		/// Determines if a point is inside or on the boundary of a circle
+		/// </summary>
+		/// <param name="Coord">X and Y coordinates of the point to test</param>
+		/// <param name="CircleOrigin">Center point of the circle</param>
+		/// <param name="CircleRadius">Radius of the circle</param>
+		/// <returns>True if the point is within the circle, false if it is not</returns>
+		public static bool IsPointInCircle(Vector2 Coord, Vector2 CircleOrigin, float CircleRadius) {
+			float PtDist = SquaredDistanceBetweenPoints(Coord, CircleOrigin);
+
+			CircleRadius *= CircleRadius;
+
+			if (PtDist <= CircleRadius) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		/// <summary>
+		/// Finds the center point of a line segment
+		/// </summary>
+		/// <param name="Pt1">X and Y coordinates of the first end point</param>
+		/// <param name="Pt2">X and Y coordinates of the second end point</param>
+		/// <returns>X and Y coordinates of the center point</returns>
+		public static Vector2 FindLineMidPoint(Vector2 Pt1, Vector2 Pt2) {
+			Vector2 Mid;
+
+			Mid.X = (Pt1.X + Pt2.X) / 2;
+			Mid.Y = (Pt1.Y + Pt2.Y) / 2;
+
+			return Mid;
+		}
 	}
 }
 

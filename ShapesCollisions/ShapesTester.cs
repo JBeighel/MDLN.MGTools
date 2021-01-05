@@ -144,10 +144,6 @@ namespace ShapesCollisions
 			Vert.Y = 200;
 			cPolyList[0].AddVertex(Vert);
 
-			Vert.X = 100;
-			Vert.Y = 200;
-			cPolyList[0].AddVertex(Vert);
-
 			cPolyList.Add(new Polygon(cGraphDevMgr.GraphicsDevice));
 			cPolyList[1].BackgroundColor = Color.Green;
 
@@ -166,6 +162,29 @@ namespace ShapesCollisions
 			Vert.X = 300;
 			Vert.Y = 200;
 			cPolyList[1].AddVertex(Vert);
+
+			cPolyList.Add(new Polygon(cGraphDevMgr.GraphicsDevice));
+			cPolyList[2].BackgroundColor = Color.Gray;
+
+			Vert.X = 400;
+			Vert.Y = 300;
+			cPolyList[2].AddVertex(Vert);
+
+			Vert.X = 400;
+			Vert.Y = 200;
+			cPolyList[2].AddVertex(Vert);
+
+			Vert.X = 450;
+			Vert.Y = 150;
+			cPolyList[2].AddVertex(Vert);
+
+			Vert.X = 500;
+			Vert.Y = 200;
+			cPolyList[2].AddVertex(Vert);
+
+			Vert.X = 500;
+			Vert.Y = 300;
+			cPolyList[2].AddVertex(Vert);
 
 			return;
 		}

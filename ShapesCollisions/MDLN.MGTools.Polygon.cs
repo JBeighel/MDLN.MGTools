@@ -174,7 +174,7 @@ namespace MDLN.MGTools {
 
 		public bool Draw(SpriteBatch DrawBatch) {
 			Rectangle LineRect;
-			int nCtr, nPrevVert;
+			int nCtr, nPrevVert, nSurfNum;
 			Vector2 LineFromOrigin, RotOrigin;
 			Vector LineSeg = new Vector();
 			RasterizerState PriorRaster, NewRaster;
@@ -206,25 +206,36 @@ namespace MDLN.MGTools {
 				DrawBatch.Draw(cTexture, LineRect, cTexture.Bounds, Color.White, (float)(LineSeg.Polar.Angle * Math.PI / 180), RotOrigin, SpriteEffects.None, 0);
 			}
 
-			//Draw the triangle fill
-			VertexPositionColor[] aVertexes = new VertexPositionColor[cCollisionList.Vertexes.Count + 1];
+			//Draw the triangle fill (triangles needed is Vertexes -2, then 3 vertexes per triangle)
+			VertexPositionColor[] aVertexes = new VertexPositionColor[(cCollisionList.Vertexes.Count - 2) * 3];
 
-			for (nCtr = 0; nCtr < cCollisionList.Vertexes.Count; nCtr++) {
-				aVertexes[nCtr] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[nCtr].X, cCollisionList.Vertexes[nCtr].Y, 0), Color.White);
+			for (nCtr = 2; nCtr < cCollisionList.Vertexes.Count; nCtr++) {
+				nSurfNum = (nCtr - 2) * 3; //Which surface/triangle are we filling in
+
+				//Every triangle gets 3 vertexes in the list, none are shared in a TriangleList
+				//Always use index zero as a common point
+				aVertexes[nSurfNum] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[0].X, cCollisionList.Vertexes[0].Y, 0), Color.White);
+
+				//The other vertexes are pairs of the remaining vertexes
+				aVertexes[nSurfNum + 1] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[nCtr - 1].X, cCollisionList.Vertexes[nCtr - 1].Y, 0), Color.White);
+				aVertexes[nSurfNum + 2] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[nCtr].X, cCollisionList.Vertexes[nCtr].Y, 0), Color.White);
 			}
-			aVertexes[cCollisionList.Vertexes.Count] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[0].X, cCollisionList.Vertexes[0].Y, 0), Color.White);
 
+			//Save off the current rasterizer, then make sure all primitives are drawn
 			PriorRaster = cGraphDev.RasterizerState;
 			NewRaster = new RasterizerState();
 			NewRaster.CullMode = CullMode.None;
 			cGraphDev.RasterizerState = NewRaster;
 
+			//Make sure all passes of the effects/shader are being used
 			foreach (EffectPass CurrShadderPass in cBasicShader.CurrentTechnique.Passes) {
 				// This is the all-important line that sets the effect, and all of its settings, on the graphics device
 				CurrShadderPass.Apply();
-				cGraphDev.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.TriangleStrip, aVertexes, 0, aVertexes.Length - 2);
+
+				cGraphDev.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.TriangleList, aVertexes, 0, aVertexes.Length / 3);
 			}
 
+			//Restore the rasterizer
 			cGraphDev.RasterizerState = PriorRaster;
 
 			return true;

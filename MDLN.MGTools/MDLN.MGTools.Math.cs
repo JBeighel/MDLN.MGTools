@@ -287,7 +287,7 @@ namespace MDLN.MGTools {
 		/// <param name="Vert3">Third vertex of the triangle</param>
 		/// <returns>True if the point is inside the triangle, false otherwise</returns>
 		public static bool PointInTriangle(Vector2 Pt, Vector2 Vert1, Vector2 Vert2, Vector2 Vert3) {
-			float nDet1, nDet2;
+			float nDet1, nDet2, nDet3;
 
 			nDet1 = GetTriangleDeterminant(Pt, Vert2, Vert3);
 
@@ -298,9 +298,10 @@ namespace MDLN.MGTools {
 				return false;
 			}
 
+			nDet1 += nDet2; //In case 1 or 2 is zero make sure the sign isn't lost
 			//The signs of the first 2 determinants match, so we only need to check against 1 of them
-			nDet1 = GetTriangleDeterminant(Vert1, Vert2, Pt);
-			if (((nDet1 < 0) && (nDet2 > 0)) || ((nDet1 > 0) && (nDet2 < 0))) {
+			nDet3 = GetTriangleDeterminant(Vert1, Vert2, Pt);
+			if (((nDet1 < 0) && (nDet3 > 0)) || ((nDet1 > 0) && (nDet3 < 0))) {
 				//Mismatched signs mean point is outside the triangle
 				return false;
 			}

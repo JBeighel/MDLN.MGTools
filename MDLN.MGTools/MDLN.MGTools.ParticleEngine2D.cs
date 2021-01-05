@@ -471,6 +471,10 @@ namespace MDLN.MGTools {
 		/// For the rectangular version of this region these are offsets to the boundaries
 		/// </summary>
 		public Rectangle RectOffsets;
+		/// <summary>
+		/// List of vertexes defining a polygon shape
+		/// </summary>
+		public List<Vector2> Vertexes;
 	}
 
 	/// <summary>
@@ -509,7 +513,11 @@ namespace MDLN.MGTools {
 		/// <summary>
 		/// The region is a rectangle
 		/// </summary>
-		Rectangle
+		Rectangle,
+		/// <summary>
+		/// The region is a convex polygon made from 2D Vertexes
+		/// </summary>
+		ConvexPolygon,
 	}
 
 	/// <summary>

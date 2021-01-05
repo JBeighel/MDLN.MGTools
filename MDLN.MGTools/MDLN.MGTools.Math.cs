@@ -1,4 +1,7 @@
-﻿using Microsoft.Xna.Framework;using System;
+﻿using System;
+using System.Collections.Generic;
+
+using Microsoft.Xna.Framework;
 
 namespace MDLN.MGTools {
 	/// <summary>
@@ -194,6 +197,147 @@ namespace MDLN.MGTools {
 			}
 
 			return true;
+		}
+
+		/// <summary>
+		/// Determines if a point is inside or on the boundary of a circle
+		/// </summary>
+		/// <param name="Coord">X and Y coordinates of the point to test</param>
+		/// <param name="CircleOrigin">Center point of the circle</param>
+		/// <param name="CircleRadius">Radius of the circle</param>
+		/// <returns>True if the point is within the circle, false if it is not</returns>
+		public static bool IsPointInCircle(Point Coord, Vector2 CircleOrigin, float CircleRadius) {
+			Vector2 Pt;
+
+			CircleRadius *= CircleRadius;
+			Pt.X = Coord.X;
+			Pt.Y = Coord.Y;
+
+			float PtDist = SquaredDistanceBetweenPoints(Pt, CircleOrigin);
+
+			if (PtDist <= CircleRadius) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		/// <summary>
+		/// Determines if a point is inside or on the boundary of a circle
+		/// </summary>
+		/// <param name="Coord">X and Y coordinates of the point to test</param>
+		/// <param name="CircleOrigin">Center point of the circle</param>
+		/// <param name="CircleRadius">Radius of the circle</param>
+		/// <returns>True if the point is within the circle, false if it is not</returns>
+		public static bool IsPointInCircle(Vector2 Coord, Vector2 CircleOrigin, float CircleRadius) {
+			float PtDist = SquaredDistanceBetweenPoints(Coord, CircleOrigin);
+
+			CircleRadius *= CircleRadius;
+
+			if (PtDist <= CircleRadius) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		/// <summary>
+		/// Finds the center point of a line segment
+		/// </summary>
+		/// <param name="Pt1">X and Y coordinates of the first end point</param>
+		/// <param name="Pt2">X and Y coordinates of the second end point</param>
+		/// <returns>X and Y coordinates of the center point</returns>
+		public static Vector2 FindLineMidPoint(Vector2 Pt1, Vector2 Pt2) {
+			Vector2 Mid;
+
+			Mid.X = (Pt1.X + Pt2.X) / 2;
+			Mid.Y = (Pt1.Y + Pt2.Y) / 2;
+
+			return Mid;
+		}
+
+		/// <summary>
+		/// The determinant of a triangle is equal to 2 * its area, its this matrix math
+		///              | X1, Y1, 1 |
+		/// Area = 1/2 * | X2, Y2, 1 |
+		///              | X3, Y3, 1 |
+		/// The result of this may be negative depending on the order of the points, an 
+		/// absolute value will give the area.  Counter-clockwise for positive and clockwise
+		/// giving negative determinants.
+		/// 
+		/// If a point is inside the triangle then its determinant with any combination of
+		/// two vertexes should all result in determinants with the same sign.  We can use the
+		/// sign of the determinant to tell if a point is inside or outside of a triangle, or
+		/// get its area.
+		/// </summary>
+		/// <param name="Pt1">First vertex</param>
+		/// <param name="Pt2">Second vertex</param>
+		/// <param name="Pt3">Third vertex</param>
+		/// <returns>Determinant of the tringle whose vertexes are the given points</returns>
+		public static float GetTriangleDeterminant(Vector2 Pt1, Vector2 Pt2, Vector2 Pt3) {
+			return (Pt1.X - Pt3.X) * (Pt2.Y - Pt3.Y) - (Pt2.X - Pt3.X) * (Pt1.Y - Pt3.Y);
+		}
+
+		/// <summary>
+		/// Checks if a point is inside of a specified triangle
+		/// </summary>
+		/// <param name="Pt">Point to test</param>
+		/// <param name="Vert1">First vertex of the triangle</param>
+		/// <param name="Vert2">Second vertex of the triangle</param>
+		/// <param name="Vert3">Third vertex of the triangle</param>
+		/// <returns>True if the point is inside the triangle, false otherwise</returns>
+		public static bool PointInTriangle(Vector2 Pt, Vector2 Vert1, Vector2 Vert2, Vector2 Vert3) {
+			float nDet1, nDet2, nDet3;
+
+			nDet1 = GetTriangleDeterminant(Pt, Vert2, Vert3);
+
+			nDet2 = GetTriangleDeterminant(Vert1, Pt, Vert3);
+			
+			if (((nDet1 < 0) && (nDet2 > 0)) || ((nDet1 > 0) && (nDet2 < 0))) {
+				//Mismatched signs mean point is outside the triangle
+				return false;
+			}
+
+			nDet1 += nDet2; //In case 1 or 2 is zero make sure the sign isn't lost
+			//The signs of the first 2 determinants match, so we only need to check against 1 of them
+			nDet3 = GetTriangleDeterminant(Vert1, Vert2, Pt);
+			if (((nDet1 < 0) && (nDet3 > 0)) || ((nDet1 > 0) && (nDet3 < 0))) {
+				//Mismatched signs mean point is outside the triangle
+				return false;
+			}
+
+			return true;
+		}
+
+		/// <summary>
+		/// Checks if a given point is inside of a convex polygon
+		/// </summary>
+		/// <param name="Pt">Point to test</param>
+		/// <param name="aPolygonVertexes">List of all vertexes of the convex polygon</param>
+		/// <returns>True if the point is inside the polygon, false otherwise</returns>
+		public static bool PointInConvexPolygon(Vector2 Pt, IEnumerable<Vector2> aPolygonVertexes) {
+			List<Vector2> aVerts = new List<Vector2>(aPolygonVertexes);
+			Vector2 CmnVert = aVerts[0];
+			int nCtr;
+			bool bInTriangle;
+
+			if (aVerts.Count < 3) { //Not really a polygon
+				return false;
+			}
+
+			//Check our point against a triangle made by a common point and every other 
+			//pair of points in the polygon.  These combinations only work of the polygon
+			//is entirely convex.
+			for (nCtr = 2; nCtr < aVerts.Count; nCtr++) {
+				bInTriangle = PointInTriangle(Pt, CmnVert, aVerts[nCtr - 1], aVerts[nCtr]);
+
+				if (bInTriangle == true) { //If its in any of the triangles, its in the polygon
+					return true;
+				}
+			}
+
+			//The point wasn't in any of the triangles, outside the polygon
+			return false;
 		}
 	}
 }

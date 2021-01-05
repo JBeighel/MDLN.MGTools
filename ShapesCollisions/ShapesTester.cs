@@ -168,10 +168,11 @@ namespace ShapesCollisions
 		/// </summary>
 		/// <param name="gameTime">Current time information of the application</param>
 		protected override void Update(GameTime gameTime) {
-			int nVertCtr, nPolyCtr;
+			int nVertCtr, nPolyCtr, nTestCtr;
 			List<Vector2> VertList = new List<Vector2>();
 			MouseState CurrMouse = Mouse.GetState();
 			Vector2 MousePt;
+			Color NewColor;
 
 			MousePt.X = CurrMouse.X;
 			MousePt.Y = CurrMouse.Y;
@@ -205,6 +206,28 @@ namespace ShapesCollisions
 
 			cPriorMouse = CurrMouse;
 
+			//Check if the polygons are colliding and make them red
+			for (nPolyCtr = 0; nPolyCtr < cPolyList.Count; nPolyCtr++) {
+				//Reset the background color
+				NewColor = cPolyList[nPolyCtr].BackgroundColor;
+				NewColor.R = 0;
+
+				cPolyList[nPolyCtr].BackgroundColor = NewColor;
+
+				for (nTestCtr = 0; nTestCtr < cPolyList.Count; nTestCtr++) {
+					if (nPolyCtr == nTestCtr) { //Can't collide with itself
+						continue;
+					}
+
+					if (cPolyList[nPolyCtr].TestCollision(cPolyList[nTestCtr]) == true) {
+						NewColor = cPolyList[nPolyCtr].BackgroundColor;
+						NewColor.R = 255;
+
+						cPolyList[nPolyCtr].BackgroundColor = NewColor;
+					}
+				}
+			}
+			
 			cDevConsole.Update(gameTime);
 
 			//Use monogame update

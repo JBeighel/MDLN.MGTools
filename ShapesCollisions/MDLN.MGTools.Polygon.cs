@@ -51,11 +51,78 @@ namespace MDLN.MGTools {
 			return new CollisionRegion[1] { cCollisionList };
 		}
 		public bool TestCollision(IEnumerable<CollisionRegion> TestRegions) {
+			foreach (CollisionRegion CurrReg in TestRegions) {
+				switch (CurrReg.Type) {
+				case CollideType.ConvexPolygon:
+					//See if this polygon is hitting the other one
+					foreach (Vector2 Vertex in cCollisionList.Vertexes) {
+						if (MGMath.PointInConvexPolygon(Vertex, CurrReg.Vertexes) == true) {
+							return true;
+						}
+					}
+
+					//See if the other polygon is inside this one
+					foreach (Vector2 Vertex in CurrReg.Vertexes) {
+						if (MGMath.PointInConvexPolygon(Vertex, cCollisionList.Vertexes) == true) {
+							return true;
+						}
+					}
+
+					return false;
+				case CollideType.Rectangle:
+					Point Coord;
+					Vector2 Corner;
+
+					//See if this polygon is hitting the rectangle
+					foreach (Vector2 Vertex in cCollisionList.Vertexes) {
+						Coord.X = (int)Vertex.X;
+						Coord.Y = (int)Vertex.Y;
+						if (MGMath.IsPointInRect(Coord, CurrReg.RectOffsets) == true) {
+							return true;
+						}
+					}
+
+					Corner.X = CurrReg.RectOffsets.X;
+					Corner.Y = CurrReg.RectOffsets.Y;
+					if (MGMath.PointInConvexPolygon(Corner, cCollisionList.Vertexes) == true) {
+						return true;
+					}
+
+					Corner.X = CurrReg.RectOffsets.X + CurrReg.RectOffsets.Width;
+					Corner.Y = CurrReg.RectOffsets.Y;
+					if (MGMath.PointInConvexPolygon(Corner, cCollisionList.Vertexes) == true) {
+						return true;
+					}
+
+					Corner.X = CurrReg.RectOffsets.X;
+					Corner.Y = CurrReg.RectOffsets.Y + CurrReg.RectOffsets.Height;
+					if (MGMath.PointInConvexPolygon(Corner, cCollisionList.Vertexes) == true) {
+						return true;
+					}
+
+					Corner.X = CurrReg.RectOffsets.X + CurrReg.RectOffsets.Width;
+					Corner.Y = CurrReg.RectOffsets.Y + CurrReg.RectOffsets.Height;
+					if (MGMath.PointInConvexPolygon(Corner, cCollisionList.Vertexes) == true) {
+						return true;
+					}
+
+					return false;
+				case CollideType.Circle:
+					//Need to work out this math.  
+					//If any vertex of the polygon is closer to the circle center than the radius, collides
+					//If a line from the center perpendicular to a side of the polygon hits the side and 
+					//is shorter than the radius of the circle, collide
+					return false;
+				default:
+					return false;
+				}
+			}
+
 			return false;
 		}
 
 		public bool TestCollision(ICollidable TestObj) {
-			return false;
+			return TestCollision(TestObj.GetCollisionRegions());
 		}
 
 		public bool AddVertex(Vector2 NewVert) {

@@ -35,8 +35,8 @@ namespace ShapesCollisions
 		private Texture2D cCircleTexture;
 		private MouseState cPriorMouse;
 
-		private Polygon cMousePoly;
-		private List<Polygon> cPolyList;
+		private ConvexPolygon cMousePoly;
+		private List<ConvexPolygon> cPolyList;
 		private int cMouseVertIdx;
 
 		public ShapesTester() {
@@ -128,8 +128,8 @@ namespace ShapesCollisions
 				return;
 			}
 
-			cPolyList = new List<Polygon>();
-			cPolyList.Add(new Polygon(cGraphDevMgr.GraphicsDevice));
+			cPolyList = new List<ConvexPolygon>();
+			cPolyList.Add(new ConvexPolygon(cGraphDevMgr.GraphicsDevice));
 			cPolyList[0].LineColor = Color.Blue;
 
 			Vert.X = 100;
@@ -144,7 +144,7 @@ namespace ShapesCollisions
 			Vert.Y = 200;
 			cPolyList[0].AddVertex(Vert);
 
-			cPolyList.Add(new Polygon(cGraphDevMgr.GraphicsDevice));
+			cPolyList.Add(new ConvexPolygon(cGraphDevMgr.GraphicsDevice));
 			cPolyList[1].LineColor = Color.Green;
 
 			Vert.X = 300;
@@ -163,7 +163,7 @@ namespace ShapesCollisions
 			Vert.Y = 200;
 			cPolyList[1].AddVertex(Vert);
 
-			cPolyList.Add(new Polygon(cGraphDevMgr.GraphicsDevice));
+			cPolyList.Add(new ConvexPolygon(cGraphDevMgr.GraphicsDevice));
 			cPolyList[2].LineColor = Color.Gray;
 
 			Vert.X = 400;

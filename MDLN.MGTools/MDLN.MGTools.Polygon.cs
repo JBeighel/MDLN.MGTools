@@ -8,20 +8,36 @@ using System;
 using System.Collections.Generic;
 
 namespace MDLN.MGTools {
-	public class Polygon : ICollidable
+	/// <summary>
+	/// Class to manage and draw a 2D polygon shape using the provided GraphicsDevice
+	/// </summary>
+	public class ConvexPolygon : ICollidable
 	{
 		private CollisionRegion cCollisionList;
 		private Color cLineClr;
 		private Color cFillClr;
 		private Texture2D cLineTexture;
-		private Texture2D cFillTexture;
 		private GraphicsDevice cGraphDev;
 		private BasicEffect cBasicShader;
 
+		/// <summary>
+		/// Set true to draw perimeter lines around the shape
+		/// </summary>
 		public bool DrawOutline;
+
+		/// <summary>
+		/// Set true to fill the shape with a solid color
+		/// </summary>
 		public bool FillShape;
+
+		/// <summary>
+		/// Specify a line width in pixels for the perimeter line
+		/// </summary>
 		public int LineWidth;
 
+		/// <summary>
+		/// Used to set/get the color to fill the shape with
+		/// </summary>
 		public Color FillColor {
 			get {
 				return cFillClr;
@@ -30,13 +46,12 @@ namespace MDLN.MGTools {
 			set {
 				//Save the color
 				cFillClr = value;
-
-				//Set it as the texture
-				cFillTexture = new Texture2D(cGraphDev, 1, 1);
-				cFillTexture.SetData(new[] { value });
 			}
 		}
 
+		/// <summary>
+		/// Used to set/get the color to use for the perimeter lines
+		/// </summary>
 		public Color LineColor {
 			get {
 				return cLineClr;
@@ -52,7 +67,11 @@ namespace MDLN.MGTools {
 			}
 		}
 
-		public Polygon(GraphicsDevice GraphDev) {
+		/// <summary>
+		/// Constructor for the class
+		/// </summary>
+		/// <param name="GraphDev">Graphics Device this object should use to draw though</param>
+		public ConvexPolygon(GraphicsDevice GraphDev) {
 			//Setup all class variables
 			FillShape = true;
 			DrawOutline = true;
@@ -75,10 +94,19 @@ namespace MDLN.MGTools {
 			return;
 		}
 
+		/// <summary>
+		/// Used to retrieve the regions this object occupies
+		/// </summary>
+		/// <returns></returns>
 		public IEnumerable<CollisionRegion> GetCollisionRegions() {
 			return new CollisionRegion[1] { cCollisionList };
 		}
 
+		/// <summary>
+		/// Tests if this object overlaps or collides with another region
+		/// </summary>
+		/// <param name="TestRegions">List of regions to test for collisions with</param>
+		/// <returns>True if a collisions has occurred, false otherwise</returns>
 		public bool TestCollision(IEnumerable<CollisionRegion> TestRegions) {
 			foreach (CollisionRegion CurrReg in TestRegions) {
 				switch (CurrReg.Type) {
@@ -150,16 +178,33 @@ namespace MDLN.MGTools {
 			return false;
 		}
 
+		/// <summary>
+		/// Tests if this object overlaps of collides with another object
+		/// </summary>
+		/// <param name="TestObj">Object to test against for collisions</param>
+		/// <returns>True if a collisions has occurred, false otherwise</returns>
 		public bool TestCollision(ICollidable TestObj) {
 			return TestCollision(TestObj.GetCollisionRegions());
 		}
 
+		/// <summary>
+		/// Add another vertex to the polygon.  These vertexes will not be sorted, so the order they 
+		/// are added must create a convex shape.
+		/// </summary>
+		/// <param name="NewVert">The coordinates of the new vertex</param>
+		/// <returns>True if the vertex was added</returns>
 		public bool AddVertex(Vector2 NewVert) {
 			cCollisionList.Vertexes.Add(NewVert);
 
 			return true;
 		}
 
+		/// <summary>
+		/// Change the coordinates of an existing vertex
+		/// </summary>
+		/// <param name="nIdx">Index (order added) of the vertex</param>
+		/// <param name="Vert">New coordinates for the vertex</param>
+		/// <returns>True if the vertex was updated</returns>
 		public bool UpdateVertex(int nIdx, Vector2 Vert) {
 			if (nIdx >= cCollisionList.Vertexes.Count) { //Vertex does not exist
 				return false;
@@ -171,6 +216,11 @@ namespace MDLN.MGTools {
 			return true;
 		}
 
+		/// <summary>
+		/// Moves all of the vertexes of the shape by some X and/or Y distance
+		/// </summary>
+		/// <param name="Move">Distance to move the shape in X and Y directions</param>
+		/// <returns>True if the shape was correctly repositioned</returns>
 		public bool MoveShape(Vector2 Move) {
 			int nCtr;
 			Vector2 Vert;
@@ -190,10 +240,19 @@ namespace MDLN.MGTools {
 			return true;
 		}
 
+		/// <summary>
+		/// Retrieve a list of all vertexes for this shape
+		/// </summary>
+		/// <returns>A collection of all vertexes in this shape</returns>
 		public IEnumerable<Vector2> GetVertexes() {
 			return cCollisionList.Vertexes;
 		}
 
+		/// <summary>
+		/// Call to render this shape through the specified graphics device
+		/// </summary>
+		/// <param name="DrawBatch">Specify a SpriteBatch to use to render the perimeter</param>
+		/// <returns>True if the shape was drawn successfully</returns>
 		public bool Draw(SpriteBatch DrawBatch) {
 			Rectangle LineRect;
 			int nCtr, nPrevVert, nSurfNum;

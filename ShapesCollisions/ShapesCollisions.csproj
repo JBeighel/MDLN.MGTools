@@ -43,7 +43,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MDLN.MGTools.Polygon.cs" />
     <Compile Include="ShapesTester.cs" />
     <Compile Include="ShapesCollisions-Launcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

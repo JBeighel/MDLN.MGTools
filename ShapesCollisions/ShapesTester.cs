@@ -130,7 +130,7 @@ namespace ShapesCollisions
 
 			cPolyList = new List<Polygon>();
 			cPolyList.Add(new Polygon(cGraphDevMgr.GraphicsDevice));
-			cPolyList[0].BackgroundColor = Color.Blue;
+			cPolyList[0].LineColor = Color.Blue;
 
 			Vert.X = 100;
 			Vert.Y = 100;
@@ -145,7 +145,7 @@ namespace ShapesCollisions
 			cPolyList[0].AddVertex(Vert);
 
 			cPolyList.Add(new Polygon(cGraphDevMgr.GraphicsDevice));
-			cPolyList[1].BackgroundColor = Color.Green;
+			cPolyList[1].LineColor = Color.Green;
 
 			Vert.X = 300;
 			Vert.Y = 300;
@@ -164,7 +164,7 @@ namespace ShapesCollisions
 			cPolyList[1].AddVertex(Vert);
 
 			cPolyList.Add(new Polygon(cGraphDevMgr.GraphicsDevice));
-			cPolyList[2].BackgroundColor = Color.Gray;
+			cPolyList[2].LineColor = Color.Gray;
 
 			Vert.X = 400;
 			Vert.Y = 300;
@@ -236,10 +236,10 @@ namespace ShapesCollisions
 			//Check if the polygons are colliding and make them red
 			for (nPolyCtr = 0; nPolyCtr < cPolyList.Count; nPolyCtr++) {
 				//Reset the background color
-				NewColor = cPolyList[nPolyCtr].BackgroundColor;
+				NewColor = cPolyList[nPolyCtr].LineColor;
 				NewColor.R = 0;
 
-				cPolyList[nPolyCtr].BackgroundColor = NewColor;
+				cPolyList[nPolyCtr].LineColor = NewColor;
 
 				for (nTestCtr = 0; nTestCtr < cPolyList.Count; nTestCtr++) {
 					if (nPolyCtr == nTestCtr) { //Can't collide with itself
@@ -247,10 +247,10 @@ namespace ShapesCollisions
 					}
 
 					if (cPolyList[nPolyCtr].TestCollision(cPolyList[nTestCtr]) == true) {
-						NewColor = cPolyList[nPolyCtr].BackgroundColor;
+						NewColor = cPolyList[nPolyCtr].LineColor;
 						NewColor.R = 255;
 
-						cPolyList[nPolyCtr].BackgroundColor = NewColor;
+						cPolyList[nPolyCtr].LineColor = NewColor;
 					}
 				}
 			}

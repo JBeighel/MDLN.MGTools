@@ -8,38 +8,59 @@ using System;
 using System.Collections.Generic;
 
 namespace MDLN.MGTools {
-	class Polygon : ICollidable {
+	public class Polygon : ICollidable
+	{
 		private CollisionRegion cCollisionList;
-		private Color cBackClr;
-		private Texture2D cTexture;
+		private Color cLineClr;
+		private Color cFillClr;
+		private Texture2D cLineTexture;
+		private Texture2D cFillTexture;
 		private GraphicsDevice cGraphDev;
 		private BasicEffect cBasicShader;
 
-		public bool DrawOutlineOnly;
+		public bool DrawOutline;
+		public bool FillShape;
 		public int LineWidth;
 
-		public Color BackgroundColor {
+		public Color FillColor {
 			get {
-				return cBackClr;
+				return cFillClr;
 			}
 
 			set {
 				//Save the color
-				cBackClr = value;
+				cFillClr = value;
 
 				//Set it as the texture
-				cTexture = new Texture2D(cGraphDev, 1, 1);
-				cTexture.SetData(new[] { value });
+				cFillTexture = new Texture2D(cGraphDev, 1, 1);
+				cFillTexture.SetData(new[] { value });
+			}
+		}
+
+		public Color LineColor {
+			get {
+				return cLineClr;
+			}
+
+			set {
+				//Save the color
+				cLineClr = value;
+
+				//Set it as the texture
+				cLineTexture = new Texture2D(cGraphDev, 1, 1);
+				cLineTexture.SetData(new[] { value });
 			}
 		}
 
 		public Polygon(GraphicsDevice GraphDev) {
 			//Setup all class variables
-			DrawOutlineOnly = true;
+			FillShape = true;
+			DrawOutline = true;
 			LineWidth = 1;
 
 			cGraphDev = GraphDev;
-			cBackClr = new Color(0, 0, 0, 0); //Black and fully transparent
+			cLineClr = new Color(0, 0, 0, 0); //Black and fully transparent
+			cFillClr = new Color(0, 0, 0, 0); //Black and fully transparent
 			cCollisionList = new CollisionRegion();
 
 			cCollisionList.Type = CollideType.ConvexPolygon;
@@ -48,11 +69,12 @@ namespace MDLN.MGTools {
 			//Create a basec shader to use when rendering the polygon
 			cBasicShader = new BasicEffect(GraphDev);
 
+			cBasicShader.TextureEnabled = true;
 			cBasicShader.World = Matrix.CreateOrthographicOffCenter(0, cGraphDev.Viewport.Width, cGraphDev.Viewport.Height, 0, 0, 1);
 
 			return;
 		}
-		
+
 		public IEnumerable<CollisionRegion> GetCollisionRegions() {
 			return new CollisionRegion[1] { cCollisionList };
 		}
@@ -134,7 +156,7 @@ namespace MDLN.MGTools {
 
 		public bool AddVertex(Vector2 NewVert) {
 			cCollisionList.Vertexes.Add(NewVert);
-			
+
 			return true;
 		}
 
@@ -168,7 +190,7 @@ namespace MDLN.MGTools {
 			return true;
 		}
 
-		public IEnumerable<Vector2>GetVertexes() {
+		public IEnumerable<Vector2> GetVertexes() {
 			return cCollisionList.Vertexes;
 		}
 
@@ -179,64 +201,69 @@ namespace MDLN.MGTools {
 			Vector LineSeg = new Vector();
 			RasterizerState PriorRaster, NewRaster;
 
-			RotOrigin.X = 0f;
-			RotOrigin.Y = 0.5f; //Rotation from texture, middle of left side
+			if (DrawOutline == true) {
+				RotOrigin.X = 0f;
+				RotOrigin.Y = 0.5f; //Rotation from texture, middle of left side
 
-			//Draw lines from Vertex -1 to current vertex
-			for (nCtr = 0; nCtr < cCollisionList.Vertexes.Count; nCtr++) {
-				if (nCtr != 0) {
-					nPrevVert = nCtr - 1;
-				} else { 
-					nPrevVert = cCollisionList.Vertexes.Count - 1;
+				//Draw lines from Vertex -1 to current vertex
+				for (nCtr = 0; nCtr < cCollisionList.Vertexes.Count; nCtr++) {
+					if (nCtr != 0) {
+						nPrevVert = nCtr - 1;
+					} else {
+						nPrevVert = cCollisionList.Vertexes.Count - 1;
+					}
+
+					//Get the vector as if the line segment started at the origin
+					LineFromOrigin.X = cCollisionList.Vertexes[nCtr].X - cCollisionList.Vertexes[nPrevVert].X;
+					LineFromOrigin.Y = cCollisionList.Vertexes[nCtr].Y - cCollisionList.Vertexes[nPrevVert].Y;
+					LineSeg.SetRectangularCoordinates(LineFromOrigin.X, LineFromOrigin.Y);
+
+					//Create the rectangle for this line segment
+					LineRect.X = (int)cCollisionList.Vertexes[nPrevVert].X;
+					LineRect.Y = (int)cCollisionList.Vertexes[nPrevVert].Y;
+
+					LineRect.Width = (int)(LineSeg.Polar.Length + (LineWidth / 2));
+					LineRect.Height = LineWidth;
+
+					//Draw the rectangle rotated to create the line
+					DrawBatch.Draw(cLineTexture, LineRect, cLineTexture.Bounds, Color.White, (float)(LineSeg.Polar.Angle * Math.PI / 180), RotOrigin, SpriteEffects.None, 0);
+				}
+			}
+
+			if (FillShape == true) {
+				//Draw the triangle fill (triangles needed is Vertexes -2, then 3 vertexes per triangle)
+				VertexPositionColor[] aVertexes = new VertexPositionColor[(cCollisionList.Vertexes.Count - 2) * 3];
+
+				for (nCtr = 2; nCtr < cCollisionList.Vertexes.Count; nCtr++) {
+					nSurfNum = (nCtr - 2) * 3; //Which surface/triangle are we filling in
+
+					//Every triangle gets 3 vertexes in the list, none are shared in a TriangleList
+					//Always use index zero as a common point
+					aVertexes[nSurfNum] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[0].X, cCollisionList.Vertexes[0].Y, 0), cFillClr);
+
+					//The other vertexes are pairs of the remaining vertexes
+					aVertexes[nSurfNum + 1] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[nCtr - 1].X, cCollisionList.Vertexes[nCtr - 1].Y, 0), cFillClr);
+					aVertexes[nSurfNum + 2] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[nCtr].X, cCollisionList.Vertexes[nCtr].Y, 0), cFillClr);
 				}
 
-				//Get the vector as if the line segment started at the origin
-				LineFromOrigin.X = cCollisionList.Vertexes[nCtr].X - cCollisionList.Vertexes[nPrevVert].X;
-				LineFromOrigin.Y = cCollisionList.Vertexes[nCtr].Y - cCollisionList.Vertexes[nPrevVert].Y;
-				LineSeg.SetRectangularCoordinates(LineFromOrigin.X, LineFromOrigin.Y);
-				
-				//Create the rectangle for this line segment
-				LineRect.X = (int)cCollisionList.Vertexes[nPrevVert].X;
-				LineRect.Y = (int)cCollisionList.Vertexes[nPrevVert].Y;
+				//Save off the current rasterizer, then make sure all primitives are drawn
+				PriorRaster = cGraphDev.RasterizerState;
+				NewRaster = new RasterizerState();
+				NewRaster.CullMode = CullMode.None;
+				cGraphDev.RasterizerState = NewRaster;
 
-				LineRect.Width = (int)(LineSeg.Polar.Length + (LineWidth / 2));
-				LineRect.Height = LineWidth;
+				//Make sure all passes of the effects/shader are being used
+				foreach (EffectPass CurrShadderPass in cBasicShader.CurrentTechnique.Passes) {
+					//This is the all-important line that sets the effect, and all of its settings, on the graphics device
+					CurrShadderPass.Apply();
+					//cBasicShader.CurrentTechnique.Passes[0].Apply();
 
-				//Draw the rectangle rotated to create the line
-				DrawBatch.Draw(cTexture, LineRect, cTexture.Bounds, Color.White, (float)(LineSeg.Polar.Angle * Math.PI / 180), RotOrigin, SpriteEffects.None, 0);
+					cGraphDev.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.TriangleList, aVertexes, 0, aVertexes.Length / 3);
+				}
+
+				//Restore the rasterizer
+				cGraphDev.RasterizerState = PriorRaster;
 			}
-
-			//Draw the triangle fill (triangles needed is Vertexes -2, then 3 vertexes per triangle)
-			VertexPositionColor[] aVertexes = new VertexPositionColor[(cCollisionList.Vertexes.Count - 2) * 3];
-
-			for (nCtr = 2; nCtr < cCollisionList.Vertexes.Count; nCtr++) {
-				nSurfNum = (nCtr - 2) * 3; //Which surface/triangle are we filling in
-
-				//Every triangle gets 3 vertexes in the list, none are shared in a TriangleList
-				//Always use index zero as a common point
-				aVertexes[nSurfNum] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[0].X, cCollisionList.Vertexes[0].Y, 0), Color.White);
-
-				//The other vertexes are pairs of the remaining vertexes
-				aVertexes[nSurfNum + 1] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[nCtr - 1].X, cCollisionList.Vertexes[nCtr - 1].Y, 0), Color.White);
-				aVertexes[nSurfNum + 2] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[nCtr].X, cCollisionList.Vertexes[nCtr].Y, 0), Color.White);
-			}
-
-			//Save off the current rasterizer, then make sure all primitives are drawn
-			PriorRaster = cGraphDev.RasterizerState;
-			NewRaster = new RasterizerState();
-			NewRaster.CullMode = CullMode.None;
-			cGraphDev.RasterizerState = NewRaster;
-
-			//Make sure all passes of the effects/shader are being used
-			foreach (EffectPass CurrShadderPass in cBasicShader.CurrentTechnique.Passes) {
-				// This is the all-important line that sets the effect, and all of its settings, on the graphics device
-				CurrShadderPass.Apply();
-
-				cGraphDev.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.TriangleList, aVertexes, 0, aVertexes.Length / 3);
-			}
-
-			//Restore the rasterizer
-			cGraphDev.RasterizerState = PriorRaster;
 
 			return true;
 		}

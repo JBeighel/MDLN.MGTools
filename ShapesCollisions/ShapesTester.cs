@@ -137,6 +137,10 @@ namespace ShapesCollisions
 			cPolyList[0].AddVertex(Vert);
 
 			Vert.X = 200;
+			Vert.Y = 100;
+			cPolyList[0].AddVertex(Vert);
+
+			Vert.X = 200;
 			Vert.Y = 200;
 			cPolyList[0].AddVertex(Vert);
 
@@ -148,6 +152,10 @@ namespace ShapesCollisions
 			cPolyList[1].BackgroundColor = Color.Green;
 
 			Vert.X = 300;
+			Vert.Y = 300;
+			cPolyList[1].AddVertex(Vert);
+
+			Vert.X = 200;
 			Vert.Y = 300;
 			cPolyList[1].AddVertex(Vert);
 

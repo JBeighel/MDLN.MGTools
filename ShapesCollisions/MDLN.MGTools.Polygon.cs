@@ -13,6 +13,7 @@ namespace MDLN.MGTools {
 		private Color cBackClr;
 		private Texture2D cTexture;
 		private GraphicsDevice cGraphDev;
+		private BasicEffect cBasicShader;
 
 		public bool DrawOutlineOnly;
 		public int LineWidth;
@@ -44,12 +45,18 @@ namespace MDLN.MGTools {
 			cCollisionList.Type = CollideType.ConvexPolygon;
 			cCollisionList.Vertexes = new List<Vector2>();
 
+			//Create a basec shader to use when rendering the polygon
+			cBasicShader = new BasicEffect(GraphDev);
+
+			cBasicShader.World = Matrix.CreateOrthographicOffCenter(0, cGraphDev.Viewport.Width, cGraphDev.Viewport.Height, 0, 0, 1);
+
 			return;
 		}
 		
 		public IEnumerable<CollisionRegion> GetCollisionRegions() {
 			return new CollisionRegion[1] { cCollisionList };
 		}
+
 		public bool TestCollision(IEnumerable<CollisionRegion> TestRegions) {
 			foreach (CollisionRegion CurrReg in TestRegions) {
 				switch (CurrReg.Type) {
@@ -127,6 +134,7 @@ namespace MDLN.MGTools {
 
 		public bool AddVertex(Vector2 NewVert) {
 			cCollisionList.Vertexes.Add(NewVert);
+			
 			return true;
 		}
 
@@ -137,6 +145,7 @@ namespace MDLN.MGTools {
 
 			//Update the array contents
 			cCollisionList.Vertexes[nIdx] = Vert;
+
 			return true;
 		}
 
@@ -168,6 +177,7 @@ namespace MDLN.MGTools {
 			int nCtr, nPrevVert;
 			Vector2 LineFromOrigin, RotOrigin;
 			Vector LineSeg = new Vector();
+			RasterizerState PriorRaster, NewRaster;
 
 			RotOrigin.X = 0f;
 			RotOrigin.Y = 0.5f; //Rotation from texture, middle of left side
@@ -193,8 +203,29 @@ namespace MDLN.MGTools {
 				LineRect.Height = LineWidth;
 
 				//Draw the rectangle rotated to create the line
-				DrawBatch.Draw(cTexture, LineRect, cTexture.Bounds, Color.White, (float)(LineSeg.Polar.Angle * Math.PI / 180) , RotOrigin, SpriteEffects.None, 0);
+				DrawBatch.Draw(cTexture, LineRect, cTexture.Bounds, Color.White, (float)(LineSeg.Polar.Angle * Math.PI / 180), RotOrigin, SpriteEffects.None, 0);
 			}
+
+			//Draw the triangle fill
+			VertexPositionColor[] aVertexes = new VertexPositionColor[cCollisionList.Vertexes.Count + 1];
+
+			for (nCtr = 0; nCtr < cCollisionList.Vertexes.Count; nCtr++) {
+				aVertexes[nCtr] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[nCtr].X, cCollisionList.Vertexes[nCtr].Y, 0), Color.White);
+			}
+			aVertexes[cCollisionList.Vertexes.Count] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[0].X, cCollisionList.Vertexes[0].Y, 0), Color.White);
+
+			PriorRaster = cGraphDev.RasterizerState;
+			NewRaster = new RasterizerState();
+			NewRaster.CullMode = CullMode.None;
+			cGraphDev.RasterizerState = NewRaster;
+
+			foreach (EffectPass CurrShadderPass in cBasicShader.CurrentTechnique.Passes) {
+				// This is the all-important line that sets the effect, and all of its settings, on the graphics device
+				CurrShadderPass.Apply();
+				cGraphDev.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.TriangleStrip, aVertexes, 0, aVertexes.Length - 2);
+			}
+
+			cGraphDev.RasterizerState = PriorRaster;
 
 			return true;
 		}

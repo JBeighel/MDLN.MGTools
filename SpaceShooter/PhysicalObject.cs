@@ -21,6 +21,7 @@ namespace MDLN.MGTools {
 		private int cnMouseVertex;
 		private Vector2 cvMouseVertLast;
 		private MouseState cPriorMouse;
+		private GraphicsDevice cGraphDev;
 
 		public float TextureRotation;
 		public float ObjectRotation;
@@ -75,6 +76,7 @@ namespace MDLN.MGTools {
 			};
 
 			cImgAtlas = TextureList;
+			cGraphDev = GraphDev;
 
 			TextureName = "";
 
@@ -137,12 +139,17 @@ namespace MDLN.MGTools {
 			return true;
 		}
 
-		public bool Draw(SpriteBatch DrawBatch) {
+		public bool Draw() {
 			Rectangle Block;
 
+			SpriteBatch DrawBatch = new SpriteBatch(cGraphDev);
+			DrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
 			cImgAtlas.DrawTile(TextureName, DrawBatch, cDrawRegion, Color.White, ObjectRotation - TextureRotation);
-			cPolyGon.Draw(DrawBatch);
+			DrawBatch.End();
 
+			cPolyGon.Draw();
+
+			DrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
 			//Draw handles on each vertex
 			foreach (Vector2 CurrVert in cPolyGon.GetVertexes()) {
 				Block.X = (int)(CurrVert.X - (nHandleWidth / 2));
@@ -152,7 +159,8 @@ namespace MDLN.MGTools {
 
 				DrawBatch.Draw(cHandleTexture, Block, Color.White);
 			}
-			
+			DrawBatch.End();
+
 			return true;
 		}
 

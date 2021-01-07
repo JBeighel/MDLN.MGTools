@@ -87,7 +87,6 @@ namespace MDLN.MGTools {
 
 			//Create a basec shader to use when rendering the polygon
 			cBasicShader = new BasicEffect(cGraphDev) {
-				TextureEnabled = true,
 				VertexColorEnabled = true,
 				World = Matrix.CreateOrthographicOffCenter(0, cGraphDev.Viewport.Width, cGraphDev.Viewport.Height, 0, 0, 1),
 			};
@@ -283,12 +282,15 @@ namespace MDLN.MGTools {
 		/// </summary>
 		/// <param name="DrawBatch">Specify a SpriteBatch to use to render the perimeter</param>
 		/// <returns>True if the shape was drawn successfully</returns>
-		public bool Draw(SpriteBatch DrawBatch) {
+		public bool Draw() {
 			Rectangle LineRect;
 			int nCtr, nPrevVert, nSurfNum;
 			Vector2 LineFromOrigin, RotOrigin;
 			Vector LineSeg = new Vector();
 			RasterizerState PriorRaster, NewRaster;
+			SpriteBatch DrawBatch = new SpriteBatch(cGraphDev);
+
+			DrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
 
 			if (DrawOutline == true) {
 				RotOrigin.X = 0f;
@@ -319,6 +321,8 @@ namespace MDLN.MGTools {
 				}
 			}
 
+			DrawBatch.End();
+
 			if (FillShape == true) {
 				//Draw the triangle fill (triangles needed is Vertexes -2, then 3 vertexes per triangle)
 				VertexPositionColor[] aVertexes = new VertexPositionColor[(cCollisionList.Vertexes.Count - 2) * 3];
@@ -328,11 +332,11 @@ namespace MDLN.MGTools {
 
 					//Every triangle gets 3 vertexes in the list, none are shared in a TriangleList
 					//Always use index zero as a common point
-					aVertexes[nSurfNum] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[0].X, cCollisionList.Vertexes[0].Y, 0), Color.White);
+					aVertexes[nSurfNum] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[0].X, cCollisionList.Vertexes[0].Y, 0), cFillClr);
 
 					//The other vertexes are pairs of the remaining vertexes
-					aVertexes[nSurfNum + 1] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[nCtr - 1].X, cCollisionList.Vertexes[nCtr - 1].Y, 0), Color.White);
-					aVertexes[nSurfNum + 2] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[nCtr].X, cCollisionList.Vertexes[nCtr].Y, 0), Color.White);
+					aVertexes[nSurfNum + 1] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[nCtr - 1].X, cCollisionList.Vertexes[nCtr - 1].Y, 0), cFillClr);
+					aVertexes[nSurfNum + 2] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[nCtr].X, cCollisionList.Vertexes[nCtr].Y, 0), cFillClr);
 				}
 
 				//Save off the current rasterizer, then make sure all primitives are drawn

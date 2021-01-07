@@ -292,7 +292,7 @@ namespace ShapesCollisions
 				}
 
 				//Draw thenCtrpolygons
-				cPolyList[nPolyCtr].Draw(cDrawBatch);
+				cPolyList[nPolyCtr].Draw();
 			}
 
 			//Always draw console last

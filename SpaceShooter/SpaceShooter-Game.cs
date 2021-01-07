@@ -178,7 +178,7 @@ namespace MDLN.SpaceShooter
 			//cTextureAtlas.DrawTile("spaceShips_003.png", DrawBatch, new Rectangle(0, 256, 256, 256), Color.White);
 			//cTextureAtlas.DrawTile("spaceShips_004.png", DrawBatch, new Rectangle(256, 256, 256, 256), Color.White);
 
-			cShip.Draw(DrawBatch);
+			cShip.Draw();
 
 			//Always draw console last
 			cDevConsole.Draw(DrawBatch);

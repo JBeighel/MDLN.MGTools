@@ -98,7 +98,7 @@ namespace MDLN.MGTools {
 		/// <param name="SpeedY">Speed of the particle along the Y axis.</param>
 		/// <param name="Tint">Tint or color overlay for the particle.</param>
 		public void AddParticle(Texture2D Image, float Top, float Left, int Height, int Width, float SpeedX, float SpeedY, Color Tint) {
-			Particle2D NewBullet = new Particle2D();
+			Particle2D NewBullet = new Particle2D(cGraphDev);
 
 			NewBullet.TopLeft.X = (int)Left;
 			NewBullet.TopLeft.Y = (int)Top;
@@ -275,13 +275,17 @@ namespace MDLN.MGTools {
 		/// </summary>
 		private double ctLastUpdate;
 
+		private GraphicsDevice cGraphDev;
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="MDLN.MGTools.Particle2D"/> class.
 		/// </summary>
-		public Particle2D() {
+		public Particle2D(GraphicsDevice GraphDev) {
 			TimeToLive = 0;
 			AlphaFade = false;
 			cCreationTime = -1;
+
+			cGraphDev = GraphDev;
 		}
 
 		/// <summary>
@@ -414,6 +418,11 @@ namespace MDLN.MGTools {
 			ctLastUpdate = CurrTime.TotalGameTime.TotalMilliseconds;
 
 			return true;
+		}
+
+		public virtual bool Draw() {
+			SpriteBatch DrawBatch = new SpriteBatch(cGraphDev);
+			return Draw(DrawBatch);
 		}
 
 		/// <summary>
@@ -553,6 +562,6 @@ namespace MDLN.MGTools {
 		/// visible components.
 		/// </summary>
 		/// <param name="DrawBatch"></param>
-		bool Draw(SpriteBatch DrawBatch);
+		bool Draw();
 	}
 }

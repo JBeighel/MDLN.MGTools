@@ -131,6 +131,7 @@ namespace ShapesCollisions
 			cPolyList = new List<ConvexPolygon>();
 			cPolyList.Add(new ConvexPolygon(cGraphDevMgr.GraphicsDevice));
 			cPolyList[0].LineColor = Color.Blue;
+			cPolyList[0].FillColor = Color.Wheat;
 
 			Vert.X = 100;
 			Vert.Y = 100;
@@ -146,6 +147,7 @@ namespace ShapesCollisions
 
 			cPolyList.Add(new ConvexPolygon(cGraphDevMgr.GraphicsDevice));
 			cPolyList[1].LineColor = Color.Green;
+			cPolyList[1].FillColor = Color.Wheat;
 
 			Vert.X = 300;
 			Vert.Y = 300;
@@ -165,6 +167,7 @@ namespace ShapesCollisions
 
 			cPolyList.Add(new ConvexPolygon(cGraphDevMgr.GraphicsDevice));
 			cPolyList[2].LineColor = Color.Gray;
+			cPolyList[2].FillColor = Color.Wheat;
 
 			Vert.X = 400;
 			Vert.Y = 300;

@@ -109,9 +109,7 @@ namespace MDLN.MGTools {
 		/// <param name="Button">Button that triggered this event.</param>
 		protected override void MouseEventButtonUp(MouseState CurrMouse, MouseButton Button) {
 			if ((cMouseDown == true) && (cMouseButtonDown == Button)) { //Trigger mouse click event
-				if (Click != null) {
-					Click(this, Button);
-				}
+				Click?.Invoke(this, Button);
 			}
 		}
 

@@ -86,9 +86,10 @@ namespace MDLN.MGTools {
 			};
 
 			//Create a basec shader to use when rendering the polygon
-			cBasicShader = new BasicEffect(GraphDev) {
+			cBasicShader = new BasicEffect(cGraphDev) {
 				TextureEnabled = true,
-				World = Matrix.CreateOrthographicOffCenter(0, cGraphDev.Viewport.Width, cGraphDev.Viewport.Height, 0, 0, 1)
+				VertexColorEnabled = true,
+				World = Matrix.CreateOrthographicOffCenter(0, cGraphDev.Viewport.Width, cGraphDev.Viewport.Height, 0, 0, 1),
 			};
 
 			return;
@@ -240,6 +241,35 @@ namespace MDLN.MGTools {
 			return true;
 		}
 
+		public bool ScaleShape(Vector2 Origin, Vector2 Factors) {
+			int nCtr;
+			Vector2 Vert;
+
+			for (nCtr = 0; nCtr < cCollisionList.Vertexes.Count; nCtr++) {
+				//Get the vertex data
+				Vert = cCollisionList.Vertexes[nCtr];
+
+				//Scale it proportional to its distance from the origin
+				Vert.X += (Vert.X - Origin.X) * Factors.X;
+				Vert.Y += (Vert.Y - Origin.Y) * Factors.Y;
+
+				//Update the vertex lest
+				cCollisionList.Vertexes[nCtr] = Vert;
+			}
+
+			return true;
+		}
+
+		/// <summary>
+		/// Removes all vertexes from the polygon
+		/// </summary>
+		/// <returns>True upon success, false on error</returns>
+		public bool RemoveAllVertexes() {
+			cCollisionList.Vertexes.Clear();
+
+			return true;
+		}
+
 		/// <summary>
 		/// Retrieve a list of all vertexes for this shape
 		/// </summary>
@@ -298,17 +328,19 @@ namespace MDLN.MGTools {
 
 					//Every triangle gets 3 vertexes in the list, none are shared in a TriangleList
 					//Always use index zero as a common point
-					aVertexes[nSurfNum] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[0].X, cCollisionList.Vertexes[0].Y, 0), cFillClr);
+					aVertexes[nSurfNum] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[0].X, cCollisionList.Vertexes[0].Y, 0), Color.White);
 
 					//The other vertexes are pairs of the remaining vertexes
-					aVertexes[nSurfNum + 1] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[nCtr - 1].X, cCollisionList.Vertexes[nCtr - 1].Y, 0), cFillClr);
-					aVertexes[nSurfNum + 2] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[nCtr].X, cCollisionList.Vertexes[nCtr].Y, 0), cFillClr);
+					aVertexes[nSurfNum + 1] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[nCtr - 1].X, cCollisionList.Vertexes[nCtr - 1].Y, 0), Color.White);
+					aVertexes[nSurfNum + 2] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[nCtr].X, cCollisionList.Vertexes[nCtr].Y, 0), Color.White);
 				}
 
 				//Save off the current rasterizer, then make sure all primitives are drawn
 				PriorRaster = cGraphDev.RasterizerState;
-				NewRaster = new RasterizerState();
-				NewRaster.CullMode = CullMode.None;
+				NewRaster = new RasterizerState {
+					CullMode = CullMode.None
+				};
+
 				cGraphDev.RasterizerState = NewRaster;
 
 				//Make sure all passes of the effects/shader are being used

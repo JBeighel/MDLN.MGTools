@@ -37,6 +37,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParticleTest", "ParticleTes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShapesCollisions", "ShapesCollisions\ShapesCollisions.csproj", "{302BA11B-F6C7-4ED2-B1EF-4C7AA1D01FA7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceShooter", "SpaceShooter\SpaceShooter.csproj", "{6DD9A3B2-2E1D-42C7-92D4-9D83BD3CE2E6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -91,6 +93,10 @@ Global
 		{302BA11B-F6C7-4ED2-B1EF-4C7AA1D01FA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{302BA11B-F6C7-4ED2-B1EF-4C7AA1D01FA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{302BA11B-F6C7-4ED2-B1EF-4C7AA1D01FA7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6DD9A3B2-2E1D-42C7-92D4-9D83BD3CE2E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DD9A3B2-2E1D-42C7-92D4-9D83BD3CE2E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DD9A3B2-2E1D-42C7-92D4-9D83BD3CE2E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DD9A3B2-2E1D-42C7-92D4-9D83BD3CE2E6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

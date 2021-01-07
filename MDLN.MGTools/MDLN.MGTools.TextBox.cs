@@ -8,7 +8,7 @@ namespace MDLN.MGTools {
 	/// <summary>
 	/// A control to allow the user to enter text input
 	/// </summary>
-	public class TextBox : Button, IControl, IVisible {
+	public class TextBox : Button, IControl {
 		private bool cCursorOn;
 
 		/// <summary>
@@ -132,14 +132,6 @@ namespace MDLN.MGTools {
 			}
 
 			base.DrawContents(CurrTime);
-		}
-
-		/// <summary>
-		/// Retrieves teh coordinates of the center of the control
-		/// </summary>
-		/// <returns>The center coordinates.</returns>
-		public Vector2 GetCenterCoordinates() {
-			return new Vector2(Left + (Height / 2), Top + (Width / 2));
 		}
 
 		private void ControlClicked(object Sender, MouseButton Button) {

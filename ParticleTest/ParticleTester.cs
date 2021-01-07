@@ -21,7 +21,7 @@ namespace ParticleTest {
 		/// <summary>
 		/// Connection to the graphics device
 		/// </summary>
-		private GraphicsDeviceManager cGraphDevMgr;
+		private readonly GraphicsDeviceManager cGraphDevMgr;
 		/// <summary>
 		/// Object used to draw sprites to the buffer in batches
 		/// </summary>
@@ -40,8 +40,8 @@ namespace ParticleTest {
 		private Button cNumParticlesLbl, cShowingLbl, cHeightLbl, cWidthLbl, cRedLbl, cGreenLbl, cBlueLbl, cLifeLbl, cDelayLbl, cXDistLbl, cYDistLbl, cRotateLbl;
 		private bool cbRotateAfter, cbAlphaFade;
 
-		private Dictionary<TextureFiles, Texture2D> cTextureDict;
-		private Random cRand;
+		private readonly Dictionary<TextureFiles, Texture2D> cTextureDict;
+		private readonly Random cRand;
 
 		public ParticleTester() {
 			cGraphDevMgr = new GraphicsDeviceManager(this);
@@ -77,7 +77,7 @@ namespace ParticleTest {
 				bool bParse;
 				UInt32 nCtr, nNumParticles;
 				TextureFiles eTexture;
-				Particle2D NewParticle = new Particle2D();
+				Particle2D NewParticle;
 
 				strPart = RegEx.GetRegExGroup(CommandEvent, @"^add\s*([0-9]+)\s*([^ ]+)$", 1);
 				nNumParticles = UInt32.Parse(strPart);

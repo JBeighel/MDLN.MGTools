@@ -11,12 +11,12 @@ namespace MDLN.MGTools {
 	/// Class to track, update, and draw particles in 2D graphics.
 	/// </summary>
 	public class ParticleEngine2D {
-		private GraphicsDevice cGraphDev;
-		private SpriteBatch cDrawBatch;
+		private readonly GraphicsDevice cGraphDev;
+		private readonly SpriteBatch cDrawBatch;
 		/// <summary>
 		/// List of all particles this object is managing
 		/// </summary>
-		private List<Particle2D> cParticleList;
+		private readonly List<Particle2D> cParticleList;
 
 		/// <summary>
 		/// If a particle reaches the edge of the screen should it appear on the opposite side or be removed
@@ -202,7 +202,7 @@ namespace MDLN.MGTools {
 	/// <summary>
 	/// Structure that holds all information needed to manage a particle
 	/// </summary>
-	public class Particle2D : ICollidable {
+	public class Particle2D : ICollidable, IVisible {
 		/// <summary>
 		/// Color to tine the particle
 		/// </summary>
@@ -290,11 +290,10 @@ namespace MDLN.MGTools {
 		/// <returns>The collision regions.</returns>
 		public IEnumerable<CollisionRegion> GetCollisionRegions() {
 			List<CollisionRegion> RegionList = new List<CollisionRegion>();
-			CollisionRegion NewRegion = new CollisionRegion();
-
-			NewRegion.Type = CollideType.Circle;
-			NewRegion.Origin.X = TopLeft.X + (Width / 2);
-			NewRegion.Origin.Y = TopLeft.Y + (Height / 2);
+			CollisionRegion NewRegion = new CollisionRegion() {
+				Type = CollideType.Circle,
+				Origin = new Vector2(TopLeft.X + (Width / 2), TopLeft.Y + (Height / 2)),
+			};
 
 			if (Height > Width) {
 				NewRegion.Radius = Height / 2;
@@ -421,13 +420,13 @@ namespace MDLN.MGTools {
 		/// Function to draw this particle to the screen
 		/// </summary>
 		/// <param name="DrawBatch">Draw batch.</param>
-		public virtual void Draw(SpriteBatch DrawBatch) {
+		public virtual bool Draw(SpriteBatch DrawBatch) {
 			Vector2 Origin;
 			Rectangle DrawRegion;
 			double nLifePct;
 
 			if (tCreateDelay > 0) { //Particle is still being delayed
-				return;
+				return true;
 			}
 
 			Origin.X = Image.Bounds.Width / 2;
@@ -446,7 +445,19 @@ namespace MDLN.MGTools {
 
 			DrawBatch.Draw(Image, DrawRegion, Image.Bounds, Tint, Rotation, Origin, SpriteEffects.None, 0);
 
-			return;
+			return true;
+		}
+
+		/// <summary>
+		/// Returns the approximate center point of this object
+		/// </summary>
+		/// <returns></returns>
+		public Vector2 GetCenterCoordinates() {
+			Vector2 Center;
+			Center.X = TopLeft.X + (Width / 2);
+			Center.Y = TopLeft.Y + (Height / 2);
+
+			return Center;
 		}
 	}
 
@@ -529,5 +540,19 @@ namespace MDLN.MGTools {
 		/// </summary>
 		/// <returns>The center coordinates.</returns>
 		Vector2 GetCenterCoordinates();
+
+		/// <summary>
+		/// Allows the object to update itself, this may be visal positions or
+		/// any other action it needs to perform
+		/// </summary>
+		/// <param name="CurrTime"></param>
+		bool Update(GameTime CurrTime);
+
+		/// <summary>
+		/// Tells the object to draw itself using the specified SpriteBatch for rendering the
+		/// visible components.
+		/// </summary>
+		/// <param name="DrawBatch"></param>
+		bool Draw(SpriteBatch DrawBatch);
 	}
 }

@@ -17,7 +17,7 @@ namespace MDLN.AsteroidShooter
 		public float cRotation, cSpeedX, cSpeedY;
 		private Vector2 cOrigin;
 		private Rectangle cDrawRegion;
-		private List<CollisionRegion> cCollisionList;
+		private readonly List<CollisionRegion> cCollisionList;
 		private Color cTint;
 
 		public Ship(GraphicsDevice GraphDev, int HeightAndWidth) : base(GraphDev, HeightAndWidth, HeightAndWidth) {
@@ -148,15 +148,6 @@ namespace MDLN.AsteroidShooter
 			}
 
 			return false;
-		}
-
-		public Vector2 GetCenterCoordinates() {
-			Vector2 CenterCoords;
-
-			CenterCoords.X = Left + (Width / 2);
-			CenterCoords.Y = Top + (Height / 2);
-
-			return CenterCoords;
 		}
 
 		protected override void DrawContents(GameTime CurrTime) {

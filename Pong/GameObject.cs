@@ -148,19 +148,6 @@ namespace MDLN {
 			return false;
 		}
 
-		/// <summary>
-		/// Retrieve the center point in screen coordinates for this object
-		/// </summary>
-		/// <returns>A 2D point specifying the center of this object</returns>
-		public Vector2 GetCenterCoordinates() {
-			Vector2 CenterCoords;
-
-			CenterCoords.X = Left + (Width / 2);
-			CenterCoords.Y = Top + (Height / 2);
-
-			return CenterCoords;
-		}
-
 		public void AddCollisionRegion(CollisionRegion CollideReg) {
 			cCollisionList.Add(CollideReg);
 		}

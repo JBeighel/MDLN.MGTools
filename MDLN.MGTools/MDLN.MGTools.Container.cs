@@ -12,7 +12,7 @@ namespace MDLN.MGTools {
 	/// <summary>
 	/// Class that acts as a visual container for content drawn in Monogame
 	/// </summary>
-	public class Container {
+	public class Container : IVisible {
 		private Rectangle cFullDrawRegion, cCurrDrawRegion;
 		private Color cAlphaOverlay;
 		private Texture2D cBackTexture;
@@ -382,8 +382,8 @@ namespace MDLN.MGTools {
 		/// and mouse input for the update.
 		/// </summary>
 		/// <param name="CurrTime">Current time information in the game</param>
-		public void Update(GameTime CurrTime) {
-			Update(CurrTime, Keyboard.GetState(), Mouse.GetState(), true);
+		public bool Update(GameTime CurrTime) {
+			return Update(CurrTime, Keyboard.GetState(), Mouse.GetState(), true);
 		}
 
 		/// <summary>
@@ -393,8 +393,8 @@ namespace MDLN.MGTools {
 		/// <param name="CurrTime">Current time information in the game</param>
 		/// <param name="CurrKeyboard">Current state of the keyboard.</param>
 		/// <param name="CurrMouse">Current state of the mouse.</param>
-		public void Update(GameTime CurrTime, KeyboardState CurrKeyboard, MouseState CurrMouse) {
-			Update(CurrTime, CurrKeyboard, CurrMouse, true);
+		public bool Update(GameTime CurrTime, KeyboardState CurrKeyboard, MouseState CurrMouse) {
+			return Update(CurrTime, CurrKeyboard, CurrMouse, true);
 		}
 
 		/// <summary>
@@ -642,19 +642,23 @@ namespace MDLN.MGTools {
 		/// <summary>
 		/// Draw function to be called when a frame is rendered for the game.  The class will create it's own SpriteBatch to draw with.
 		/// </summary>
-		public void Draw() {
+		public bool Draw() {
+			bool bRetVal;
+
 			cDrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
-			Draw(cDrawBatch);
+			bRetVal = Draw(cDrawBatch);
 			cDrawBatch.End();
+
+			return bRetVal;
 		}
 
 		/// <summary>
 		/// Draw function to be called when a frame is rendered for the game
 		/// </summary>
 		/// <param name="DrawBatch">Specify the sprite object to use for the drawing</param>
-		public void Draw(SpriteBatch DrawBatch) {
+		public bool Draw(SpriteBatch DrawBatch) {
 			if ((cIsVisible == false) && (cIsClosing == false)) { //Only draw if container is shown
-				return;
+				return true;
 			}
 
 			Rectangle ScreenRegion = new Rectangle();
@@ -671,6 +675,21 @@ namespace MDLN.MGTools {
 			TextureRegion.Height = cCurrDrawRegion.Height - cCurrDrawRegion.Y;
 
 			DrawBatch.Draw(cRenderToBuffer, ScreenRegion, TextureRegion, cAlphaOverlay);
+
+			return true;
+		}
+
+		/// <summary>
+		/// Returns the center point of this container
+		/// </summary>
+		/// <returns>Center coordinates of the container</returns>
+		public Vector2 GetCenterCoordinates() {
+			Vector2 Center;
+
+			Center.X = TopLeft.X + (Width / 2);
+			Center.Y = TopLeft.Y + (Height / 2);
+
+			return Center;
 		}
 
 		private void CalculateEffectStep(double ElapsedTime) {

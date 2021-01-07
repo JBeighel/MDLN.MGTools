@@ -17,8 +17,8 @@ namespace MDLN.MGTools {
 		private Color cLineClr;
 		private Color cFillClr;
 		private Texture2D cLineTexture;
-		private GraphicsDevice cGraphDev;
-		private BasicEffect cBasicShader;
+		private readonly GraphicsDevice cGraphDev;
+		private readonly BasicEffect cBasicShader;
 
 		/// <summary>
 		/// Set true to draw perimeter lines around the shape
@@ -80,16 +80,16 @@ namespace MDLN.MGTools {
 			cGraphDev = GraphDev;
 			cLineClr = new Color(0, 0, 0, 0); //Black and fully transparent
 			cFillClr = new Color(0, 0, 0, 0); //Black and fully transparent
-			cCollisionList = new CollisionRegion();
-
-			cCollisionList.Type = CollideType.ConvexPolygon;
-			cCollisionList.Vertexes = new List<Vector2>();
+			cCollisionList = new CollisionRegion {
+				Type = CollideType.ConvexPolygon,
+				Vertexes = new List<Vector2>()
+			};
 
 			//Create a basec shader to use when rendering the polygon
-			cBasicShader = new BasicEffect(GraphDev);
-
-			cBasicShader.TextureEnabled = true;
-			cBasicShader.World = Matrix.CreateOrthographicOffCenter(0, cGraphDev.Viewport.Width, cGraphDev.Viewport.Height, 0, 0, 1);
+			cBasicShader = new BasicEffect(GraphDev) {
+				TextureEnabled = true,
+				World = Matrix.CreateOrthographicOffCenter(0, cGraphDev.Viewport.Width, cGraphDev.Viewport.Height, 0, 0, 1)
+			};
 
 			return;
 		}

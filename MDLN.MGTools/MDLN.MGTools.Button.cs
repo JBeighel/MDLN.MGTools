@@ -195,12 +195,12 @@ namespace MDLN.MGTools {
 		/// Updates the control based on current information
 		/// </summary>
 		/// <param name="CurrTime">Current game time.</param>
-		void Update(GameTime CurrTime);
+		bool Update(GameTime CurrTime);
 
 		/// <summary>
 		/// Draws the control to the screen
 		/// </summary>
-		void Draw();
+		bool Draw();
 	}
 
 	/// <summary>

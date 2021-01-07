@@ -7,7 +7,7 @@ using System;
 
 namespace MDLN.AsteroidShooter {
 	public class HunterShip : Particle2D {
-		private Random cRand;
+		private readonly Random cRand;
 		private int cStrafeDirection;
 		private double cLastShot; 
 
@@ -57,8 +57,8 @@ namespace MDLN.AsteroidShooter {
 
 				Speed = MGMath.CalculateXYMagnitude(Rotation + 1.57f, 2);
 
-				Speed.X = Speed.X * cStrafeDirection;
-				Speed.Y = Speed.Y * cStrafeDirection;
+				Speed.X *= cStrafeDirection;
+				Speed.Y *= cStrafeDirection;
 			}
 
 			SpeedX = (SpeedX + Speed.X) / 2;

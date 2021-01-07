@@ -22,7 +22,7 @@ namespace MDLN.AsteroidShooter {
 	}
 
 	public class AsteroidShooter : Game {
-		private GraphicsDeviceManager cGraphDevMgr;
+		private readonly GraphicsDeviceManager cGraphDevMgr;
 		private Ship cPlayerShip;
 		private ParticleEngine2D cPlayerBullets, cEnemyBullets;
 		private ParticleEngine2D cAsteroids, cUFOs;
@@ -30,9 +30,8 @@ namespace MDLN.AsteroidShooter {
 		private double cLastShot, cLastAsteroid;
 		private MDLN.MGTools.GameConsole cDevConsole;
 		private KeyboardState cPriorKeyState;
-		private MouseState cPriorMouseState;
-		private Dictionary<Textures, Texture2D> cTextureDict;
-		private Random cRandom;
+		private readonly Dictionary<Textures, Texture2D> cTextureDict;
+		private readonly Random cRandom;
 		private uint cEnemyKills, cAliveSince, cSpawnNum, cEnemyKillsMax;
 		private SpriteBatch cDrawBatch;
 		private Texture2D cSolidTexture;
@@ -41,11 +40,12 @@ namespace MDLN.AsteroidShooter {
 		//private Effect cShader, cShipShader;
 
 		public AsteroidShooter() {
-			cGraphDevMgr = new GraphicsDeviceManager(this);
-			cGraphDevMgr.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
+			cGraphDevMgr = new GraphicsDeviceManager(this) {
+				PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8,
 
-			cGraphDevMgr.PreferredBackBufferWidth = 1024;//Set the window size
-			cGraphDevMgr.PreferredBackBufferHeight = 768;
+				PreferredBackBufferWidth = 1024,//Set the window size
+				PreferredBackBufferHeight = 768
+			};
 			cGraphDevMgr.ApplyChanges();
 
 			Content.RootDirectory = "Content";
@@ -282,7 +282,6 @@ namespace MDLN.AsteroidShooter {
 				}
 			}
 
-			cPriorMouseState = CurrMouse;
 			cPriorKeyState = CurrKeys;
 
 			//Use monogame update

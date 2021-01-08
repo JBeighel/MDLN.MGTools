@@ -88,23 +88,26 @@ namespace MDLN.MGTools {
 		}
 
 		public void DrawTile(string strTileName, SpriteBatch DrawBatch, Rectangle DrawRect, Color TintClr, float nRotateRadians) {
+			Vector2 vRotateOrigin;
+			
 			if (cTileSet.ContainsKey(strTileName) == false) {
 				throw new Exception("Loaded tile set does not contain an entry named: " + strTileName);
 			}
 
-			//Set the origin proportion to be the center of the image
+			//Set the origin to the percent across the region
 			Vector2 OriginProp = new Vector2(0.5f, 0.5f);
 
-			Vector2 RotateOrigin = new Vector2() { //Set the texture origin to the correct proportion
-				Y = cTileSet[strTileName].Height * OriginProp.X,
-				X = cTileSet[strTileName].Width * OriginProp.Y,
+			vRotateOrigin = new Vector2() {
+				X = OriginProp.X * cTileSet[strTileName].Width,
+				Y = OriginProp.Y * cTileSet[strTileName].Height,
 			};
 
 			//Adjust the draw region so that image origin is in the same proportional place
 			DrawRect.X += (int)(DrawRect.Width * OriginProp.X);
 			DrawRect.Y += (int)(DrawRect.Height * OriginProp.Y);
-			
-			DrawBatch.Draw(cTexture, DrawRect, cTileSet[strTileName], TintClr, nRotateRadians, RotateOrigin, SpriteEffects.None, 0);
+
+			//nRotateRadians = (float)(-45 * Math.PI / 180);
+			DrawBatch.Draw(cTexture, DrawRect, cTileSet[strTileName], TintClr, nRotateRadians, vRotateOrigin, SpriteEffects.None, 0);
 			return;
 		}
 	}

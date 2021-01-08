@@ -240,6 +240,12 @@ namespace MDLN.MGTools {
 			return true;
 		}
 
+		/// <summary>
+		/// Resize the polygon proportional to its current size
+		/// </summary>
+		/// <param name="Origin">The origin point to scale the polygon from</param>
+		/// <param name="Factors">The X any Y scale factors to apply</param>
+		/// <returns>True upon success, false on any error</returns>
 		public bool ScaleShape(Vector2 Origin, Vector2 Factors) {
 			int nCtr;
 			Vector2 Vert;
@@ -280,7 +286,6 @@ namespace MDLN.MGTools {
 		/// <summary>
 		/// Call to render this shape through the specified graphics device
 		/// </summary>
-		/// <param name="DrawBatch">Specify a SpriteBatch to use to render the perimeter</param>
 		/// <returns>True if the shape was drawn successfully</returns>
 		public bool Draw() {
 			Rectangle LineRect;

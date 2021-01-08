@@ -420,6 +420,11 @@ namespace MDLN.MGTools {
 			return true;
 		}
 
+		/// <summary>
+		/// Function to use to draw this object.  It will generate its own SpriteBatch 
+		/// to group all the polygon draws needed for particles
+		/// </summary>
+		/// <returns>True on success, fals on any error</returns>
 		public virtual bool Draw() {
 			SpriteBatch DrawBatch = new SpriteBatch(cGraphDev);
 			return Draw(DrawBatch);
@@ -561,7 +566,6 @@ namespace MDLN.MGTools {
 		/// Tells the object to draw itself using the specified SpriteBatch for rendering the
 		/// visible components.
 		/// </summary>
-		/// <param name="DrawBatch"></param>
 		bool Draw();
 	}
 }

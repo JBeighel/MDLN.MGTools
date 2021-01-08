@@ -35,7 +35,6 @@ namespace MDLN.SpaceShooter
 		private GameConsole cDevConsole;
 		private TextureAtlas cTextureAtlas;
 		private MouseState cPriorMouse;
-		private float cnRotation;
 
 		private PhysicalObject cShip;
 
@@ -45,8 +44,6 @@ namespace MDLN.SpaceShooter
 			IsMouseVisible = true;
 			Window.AllowUserResizing = true;
 			Window.ClientSizeChanged += FormResizeHandler;
-
-			cnRotation = 0;
 
 			return;
 		}
@@ -63,8 +60,23 @@ namespace MDLN.SpaceShooter
 		/// <param name="Sender"></param>
 		/// <param name="CommandEvent"></param>
 		private void ConsoleCommandHandler(object Sender, string CommandEvent) {
+			int nCtr;
+
 			if (RegEx.LooseTest(CommandEvent, @"^\s*(quit|exit|close)\s*$") == true) {
 				Exit();
+			} else if (RegEx.LooseTest(CommandEvent, @"edit\s*vertexes=(on|1|off|0)") == true) {
+				if (RegEx.LooseTest(CommandEvent, @"edit\s*vertexes=(on|1)") == true) {
+					cShip.AllowCollisionVertexEdits = true;
+				} else {
+					cShip.AllowCollisionVertexEdits = false;
+				}
+			} else if (RegEx.LooseTest(CommandEvent, @"list\s*vertexes") == true) {
+				List<CollisionRegion> CollReg = new List<CollisionRegion>(cShip.GetCollisionRegions());
+				nCtr = 0;
+				foreach (Vector2 vVert in CollReg[0].Vertexes) {
+					cDevConsole.AddText(String.Format("{0}:X{1} Y{2}", nCtr, vVert.X, vVert.Y));
+					nCtr += 1;
+				}
 			} else {
 				cDevConsole.AddText("Unrecognized command: " + CommandEvent);
 			}
@@ -127,11 +139,11 @@ namespace MDLN.SpaceShooter
 			};
 
 			List<Vector2> VertList = new List<Vector2>();
-			VertList.Add(new Vector2(100, 100));
-			VertList.Add(new Vector2(100, 110));
-			VertList.Add(new Vector2(100, 120));
-			VertList.Add(new Vector2(100, 130));
-			VertList.Add(new Vector2(100, 140));
+			VertList.Add(new Vector2(32, 39));
+			VertList.Add(new Vector2(175, 11));
+			VertList.Add(new Vector2(201, 127));
+			VertList.Add(new Vector2(176, 244));
+			VertList.Add(new Vector2(32, 215));
 
 			cShip.SetCollisionVertexes(VertList);
 
@@ -145,11 +157,49 @@ namespace MDLN.SpaceShooter
 		/// <param name="gameTime">Current time information of the application</param>
 		protected override void Update(GameTime gameTime) {
 			MouseState Currmouse = Mouse.GetState();
+			Vector2 vShipCenter = cShip.GetCenterCoordinates();
 			Vector vShipToMouse = new Vector();
+			Rectangle Region;
 
-			if (Currmouse.LeftButton == ButtonState.Pressed) {
-				vShipToMouse.SetRectangularCoordinates(Currmouse.Position.X - 128, Currmouse.Position.Y - 128);
-				cnRotation = (float)(vShipToMouse.Polar.Angle * Math.PI / 180);
+			if ((Currmouse.RightButton == ButtonState.Pressed) && (cPriorMouse.RightButton == ButtonState.Pressed)) {
+				//User is holding the right mouse button
+				Region = cShip.DrawRegion;
+
+				Region.X += Currmouse.X - cPriorMouse.X;
+				Region.Y += Currmouse.Y - cPriorMouse.Y;
+
+				cShip.DrawRegion = Region;
+			}
+
+			if ((Currmouse.RightButton == ButtonState.Pressed) && (cPriorMouse.RightButton == ButtonState.Released)){
+				//User jsut clicked the right mouse button
+			}
+
+			if ((Currmouse.MiddleButton == ButtonState.Pressed) && (cPriorMouse.MiddleButton == ButtonState.Pressed)) {
+				//User is holding the middle mouse button
+				Region = cShip.DrawRegion;
+
+				Region.X = 0;
+				Region.Y = 0;
+				Region.Width = Currmouse.X;
+				Region.Height = Currmouse.Y;
+
+				cShip.DrawRegion = Region;
+			}
+
+			if ((Currmouse.MiddleButton == ButtonState.Pressed) && (cPriorMouse.MiddleButton == ButtonState.Released)) {
+				//User jsut clicked the middle mouse button
+			}
+
+			if ((Currmouse.XButton1 == ButtonState.Pressed) && (cPriorMouse.XButton1 == ButtonState.Pressed)) {
+				//User is holding the middle mouse button
+				vShipToMouse.SetRectangularCoordinates(Currmouse.X - vShipCenter.X, Currmouse.Y - vShipCenter.Y);
+
+				cShip.ObjectRotation = (float)(vShipToMouse.Polar.Angle * Math.PI / 180);
+			}
+
+			if ((Currmouse.XButton1 == ButtonState.Pressed) && (cPriorMouse.XButton1 == ButtonState.Released)) {
+				//User jsut clicked the middle mouse button
 			}
 
 			cPriorMouse = Currmouse;
@@ -172,18 +222,25 @@ namespace MDLN.SpaceShooter
 			GraphicsDevice.Clear(Color.Black);
 			DrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
 
+			Texture2D ColorTexture = new Texture2D(cGraphDevMgr.GraphicsDevice, 1, 1);
+			ColorTexture.SetData(new[] { Color.Pink });
+
+			DrawBatch.Draw(ColorTexture, cShip.DrawRegion, Color.White);
+			
+
 			//cTextureAtlas.DrawTile("spaceShips_001.png", DrawBatch, new Rectangle(0, 0, 256, 256), Color.White, cnRotation);
 
 			//cTextureAtlas.DrawTile("spaceShips_002.png", DrawBatch, new Rectangle(256, 0, 256, 256), Color.White);
 			//cTextureAtlas.DrawTile("spaceShips_003.png", DrawBatch, new Rectangle(0, 256, 256, 256), Color.White);
 			//cTextureAtlas.DrawTile("spaceShips_004.png", DrawBatch, new Rectangle(256, 256, 256, 256), Color.White);
 
-			cShip.Draw();
-
 			//Always draw console last
 			cDevConsole.Draw(DrawBatch);
 
 			DrawBatch.End();
+
+			cShip.Draw();
+
 
 			//Use monogame draw
 			base.Draw(gameTime);

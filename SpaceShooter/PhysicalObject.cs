@@ -19,13 +19,25 @@ namespace MDLN.MGTools {
 		private Rectangle cDrawRegion;
 		private Texture2D cHandleTexture;
 		private int cnMouseVertex;
-		private Vector2 cvMouseVertLast;
 		private MouseState cPriorMouse;
 		private GraphicsDevice cGraphDev;
+		private bool cbVertexEdits;
 
 		public float TextureRotation;
 		public float ObjectRotation;
 		public string TextureName;
+		public bool AllowCollisionVertexEdits {
+			get {
+				return cbVertexEdits;
+			}
+
+			set {
+				cbVertexEdits = value;
+
+				cPolyGon.FillShape = cbVertexEdits;
+				cPolyGon.DrawOutline = cbVertexEdits;
+			}
+		}
 
 		public Rectangle DrawRegion {
 			get {
@@ -57,7 +69,7 @@ namespace MDLN.MGTools {
 					Scale.Y = 1;
 				}
 
-				if ((Move.X != 1) || (Move.Y != 1)) {
+				if ((Scale.X != 1) || (Scale.Y != 1)) {
 					cPolyGon.ScaleShape(Center, Scale);
 				}
 
@@ -70,7 +82,7 @@ namespace MDLN.MGTools {
 		public PhysicalObject(GraphicsDevice GraphDev, TextureAtlas TextureList) {
 			cPolyGon = new ConvexPolygon(GraphDev) {
 				LineColor = Color.Blue,
-				FillColor = Color.Orange,
+				FillColor = new Color(Color.Orange, 128),
 				DrawOutline = true,
 				FillShape = true,
 			};
@@ -102,36 +114,38 @@ namespace MDLN.MGTools {
 			Vector2 vVertPos;
 			MouseState CurrMouse = Mouse.GetState();
 
-			if ((CurrMouse.LeftButton == ButtonState.Pressed) && (cnMouseVertex >= 0)) {
-				//User is draging a vertex around
-				vVertPos.X = CurrMouse.X;
-				vVertPos.Y = CurrMouse.Y;
+			if (cbVertexEdits == true) {
+				if ((CurrMouse.LeftButton == ButtonState.Pressed) && (cnMouseVertex >= 0)) {
+					//User is draging a vertex around
+					vVertPos.X = CurrMouse.X;
+					vVertPos.Y = CurrMouse.Y;
 
-				cPolyGon.UpdateVertex(cnMouseVertex, vVertPos);
-			}
-
-			if ((CurrMouse.LeftButton == ButtonState.Pressed) && (cPriorMouse.LeftButton == ButtonState.Released)) {
-				//User just clicked, see if they got a polygon vertex
-				Handle.Width = nHandleWidth;
-				Handle.Height = nHandleWidth;
-
-				nVertCtr = 0;
-				foreach (Vector2 vCurrVert in cPolyGon.GetVertexes()) {
-					Handle.X = (int)(vCurrVert.X - (nHandleWidth / 2));
-					Handle.Y = (int)(vCurrVert.Y - (nHandleWidth / 2));
-
-					if (MGMath.IsPointInRect(CurrMouse.Position, Handle) == true) {
-						cnMouseVertex = nVertCtr;
-
-						break;
-					}
-
-					nVertCtr += 1;
+					cPolyGon.UpdateVertex(cnMouseVertex, vVertPos);
 				}
-			}
 
-			if (CurrMouse.LeftButton == ButtonState.Released) {
-				cnMouseVertex = -1;
+				if ((CurrMouse.LeftButton == ButtonState.Pressed) && (cPriorMouse.LeftButton == ButtonState.Released)) {
+					//User just clicked, see if they got a polygon vertex
+					Handle.Width = nHandleWidth;
+					Handle.Height = nHandleWidth;
+
+					nVertCtr = 0;
+					foreach (Vector2 vCurrVert in cPolyGon.GetVertexes()) {
+						Handle.X = (int)(vCurrVert.X - (nHandleWidth / 2));
+						Handle.Y = (int)(vCurrVert.Y - (nHandleWidth / 2));
+
+						if (MGMath.IsPointInRect(CurrMouse.Position, Handle) == true) {
+							cnMouseVertex = nVertCtr;
+
+							break;
+						}
+
+						nVertCtr += 1;
+					}
+				}
+
+				if (CurrMouse.LeftButton == ButtonState.Released) {
+					cnMouseVertex = -1;
+				}
 			}
 
 			cPriorMouse = CurrMouse;
@@ -142,24 +156,27 @@ namespace MDLN.MGTools {
 		public bool Draw() {
 			Rectangle Block;
 
+			//Draw the object
 			SpriteBatch DrawBatch = new SpriteBatch(cGraphDev);
 			DrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
 			cImgAtlas.DrawTile(TextureName, DrawBatch, cDrawRegion, Color.White, ObjectRotation - TextureRotation);
 			DrawBatch.End();
 
-			cPolyGon.Draw();
+			if (cbVertexEdits == true) {
+				cPolyGon.Draw();
 
-			DrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
-			//Draw handles on each vertex
-			foreach (Vector2 CurrVert in cPolyGon.GetVertexes()) {
-				Block.X = (int)(CurrVert.X - (nHandleWidth / 2));
-				Block.Y = (int)(CurrVert.Y - (nHandleWidth / 2));
-				Block.Width = nHandleWidth;
-				Block.Height = nHandleWidth;
+				DrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
+				//Draw handles on each vertex
+				foreach (Vector2 CurrVert in cPolyGon.GetVertexes()) {
+					Block.X = (int)(CurrVert.X - (nHandleWidth / 2));
+					Block.Y = (int)(CurrVert.Y - (nHandleWidth / 2));
+					Block.Width = nHandleWidth;
+					Block.Height = nHandleWidth;
 
-				DrawBatch.Draw(cHandleTexture, Block, Color.White);
+					DrawBatch.Draw(cHandleTexture, Block, Color.White);
+				}
+				DrawBatch.End();
 			}
-			DrawBatch.End();
 
 			return true;
 		}
@@ -177,7 +194,7 @@ namespace MDLN.MGTools {
 
 		public Vector2 GetCenterCoordinates() {
 			Vector2 Center = new Vector2(0, 0);
-			int nVertCnt = 0;
+			/*int nVertCnt = 0;
 
 			foreach (Vector2 Vertex in cPolyGon.GetVertexes()) {
 				Center.X += Vertex.X;
@@ -188,7 +205,10 @@ namespace MDLN.MGTools {
 
 			Center.X /= nVertCnt;
 			Center.Y /= nVertCnt;
+			*/
 
+			Center.X = cDrawRegion.X + (cDrawRegion.Width / 2);
+			Center.Y = cDrawRegion.Y + (cDrawRegion.Height / 2);
 			return Center;
 		}
 

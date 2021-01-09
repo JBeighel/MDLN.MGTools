@@ -72,6 +72,10 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Specifies the base offset, meaning the starting position, to be used for all
+		/// directional offsets
+		/// </summary>
 		public Vector2 BaseOffset {
 			get {
 				return cvBaseOffset;
@@ -209,6 +213,10 @@ namespace MDLN.MGTools {
 			return TestCollision(TestObj.GetCollisionRegions());
 		}
 
+		/// <summary>
+		/// Gets the coordinates that are the center of the shape
+		/// </summary>
+		/// <returns></returns>
 		public Vector2 GetCenterCoordinates() {
 			Vector2 vCoords = cvBaseOffset;
 
@@ -232,6 +240,13 @@ namespace MDLN.MGTools {
 			return true;
 		}
 
+		/// <summary>
+		/// Specify all base vertexes this polygon should use
+		/// These vertexes are as they appear before any of the transformations
+		/// Directional offsets, scaling, and rotation
+		/// </summary>
+		/// <param name="avVertList"></param>
+		/// <returns></returns>
 		public bool SetVertexes(IEnumerable<Vector2> avVertList) {
 			cavBaseVertexList.Clear();
 			cavBaseVertexList.AddRange(avVertList);
@@ -278,10 +293,8 @@ namespace MDLN.MGTools {
 		}
 
 		/// <summary>
-		/// Moves all of the vertexes of the shape by some X and/or Y distance
+		/// Specifies the center coordinates for this shape
 		/// </summary>
-		/// <param name="Move">Distance to move the shape in X and Y directions</param>
-		/// <returns>True if the shape was correctly repositioned</returns>
 		public Vector2 CenterCoordinates {
 			get {
 				return cvMove;
@@ -299,9 +312,8 @@ namespace MDLN.MGTools {
 
 		/// <summary>
 		/// Resize the polygon proportional to its current size
+		/// The scalign will have its origin be the shape's center coordinates
 		/// </summary>
-		/// <param name="Factors">The X any Y scale factors to apply</param>
-		/// <returns>True upon success, false on any error</returns>
 		public Vector2 ScaleShape {
 			get {
 				return cvScale;
@@ -316,6 +328,9 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Rotate the shape around the center coordinates this amount in Radians
+		/// </summary>
 		public float RotateShape {
 			get {
 				return cnRotation;
@@ -330,6 +345,12 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Specift the values for all transformations
+		/// </summary>
+		/// <param name="vMove">Directional offset</param>
+		/// <param name="vScale">Scaling factors</param>
+		/// <param name="nRadians">Radians of rotation</param>
 		public void SetPositionOffsets(Vector2 vMove, Vector2 vScale, float nRadians) {
 			cvMove = vMove;
 			cvScale = vScale;
@@ -443,6 +464,12 @@ namespace MDLN.MGTools {
 			return true;
 		}
 
+		/// <summary>
+		/// Any routine adjustments that this object needs to make regularly are handled
+		/// by this function
+		/// </summary>
+		/// <param name="CurrTime">Current time in the game</param>
+		/// <returns></returns>
 		public bool Update(GameTime CurrTime) {
 			return true;
 		}

@@ -72,6 +72,10 @@ namespace MDLN.MGTools {
 				vPolyCenter.X = value.X - vPolyCenter.X;
 				vPolyCenter.Y = value.Y - vPolyCenter.Y;
 
+				//Adjust for the center offset the draw region gets
+				vPolyCenter.X += cDrawRegion.Width / 2;
+				vPolyCenter.Y += cDrawRegion.Height / 2;
+
 				//Move the collision polygons
 				cPolyGon.MoveShape(vPolyCenter);
 

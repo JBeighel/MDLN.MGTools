@@ -132,11 +132,6 @@ namespace MDLN.SpaceShooter
 				TextureRotation = (float)(90 * Math.PI / 180),
 				Width = 256,
 				Height = 256,
-
-				CenterPoint = new Vector2() {
-					X = 128,
-					Y = 128,
-				},
 			};
 
 			List<Vector2> VertList = new List<Vector2>();
@@ -147,6 +142,9 @@ namespace MDLN.SpaceShooter
 			VertList.Add(new Vector2(32, 215));
 
 			cShip.SetCollisionVertexes(VertList);
+
+			//Have to set position after adding vertexes to get the centers lined up
+			cShip.CenterPoint = new Vector2(cShip.Width / 2, cShip.Height / 2);
 
 			return;
 		}
@@ -165,8 +163,10 @@ namespace MDLN.SpaceShooter
 				//User is holding the right mouse button
 				vShipCenter = cShip.CenterPoint;
 
-				vShipCenter.X += Currmouse.X - cPriorMouse.X;
-				vShipCenter.Y += Currmouse.Y - cPriorMouse.Y;
+				//vShipCenter.X += Currmouse.X - cPriorMouse.X;
+				//vShipCenter.Y += Currmouse.Y - cPriorMouse.Y;
+				vShipCenter.X = Currmouse.X;
+				vShipCenter.Y = Currmouse.Y;
 
 				cShip.CenterPoint = vShipCenter;
 			}

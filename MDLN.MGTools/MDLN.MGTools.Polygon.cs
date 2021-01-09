@@ -11,7 +11,7 @@ namespace MDLN.MGTools {
 	/// <summary>
 	/// Class to manage and draw a 2D polygon shape using the provided GraphicsDevice
 	/// </summary>
-	public class ConvexPolygon : ICollidable
+	public class ConvexPolygon : ICollidable, IVisible
 	{
 		private CollisionRegion cCollisionList;
 		private Color cLineClr;
@@ -19,6 +19,11 @@ namespace MDLN.MGTools {
 		private Texture2D cLineTexture;
 		private readonly GraphicsDevice cGraphDev;
 		private readonly BasicEffect cBasicShader;
+		private Vector2 cvCenter;
+		private Vector2 cvScale;
+		private Vector2 cvMove;
+		private float cnRotation;
+		private List<Vector2> cavBaseVertexList;
 
 		/// <summary>
 		/// Set true to draw perimeter lines around the shape
@@ -76,6 +81,13 @@ namespace MDLN.MGTools {
 			FillShape = true;
 			DrawOutline = true;
 			LineWidth = 1;
+			cnRotation = 0;
+
+			cavBaseVertexList = new List<Vector2>();
+
+			cvScale = new Vector2(1, 1);
+			cvMove = new Vector2(0, 0);
+			cvCenter = new Vector2(0, 0);
 
 			cGraphDev = GraphDev;
 			cLineClr = new Color(0, 0, 0, 0); //Black and fully transparent
@@ -187,6 +199,15 @@ namespace MDLN.MGTools {
 			return TestCollision(TestObj.GetCollisionRegions());
 		}
 
+		public Vector2 GetCenterCoordinates() {
+			Vector2 vCoords = cvCenter;
+
+			vCoords.X += cvMove.X;
+			vCoords.Y += cvMove.Y;
+
+			return vCoords;
+		}
+
 		/// <summary>
 		/// Add another vertex to the polygon.  These vertexes will not be sorted, so the order they 
 		/// are added must create a convex shape.
@@ -194,7 +215,18 @@ namespace MDLN.MGTools {
 		/// <param name="NewVert">The coordinates of the new vertex</param>
 		/// <returns>True if the vertex was added</returns>
 		public bool AddVertex(Vector2 NewVert) {
-			cCollisionList.Vertexes.Add(NewVert);
+			cavBaseVertexList.Add(NewVert);
+
+			RecalculateCoordinates();
+
+			return true;
+		}
+
+		public bool SetVertexes(IEnumerable<Vector2> avVertList) {
+			cavBaseVertexList.Clear();
+			cavBaseVertexList.AddRange(avVertList);
+
+			RecalculateCoordinates();
 
 			return true;
 		}
@@ -210,8 +242,7 @@ namespace MDLN.MGTools {
 				return false;
 			}
 
-			//Update the array contents
-			cCollisionList.Vertexes[nIdx] = Vert;
+			RecalculateCoordinates();
 
 			return true;
 		}
@@ -222,20 +253,10 @@ namespace MDLN.MGTools {
 		/// <param name="Move">Distance to move the shape in X and Y directions</param>
 		/// <returns>True if the shape was correctly repositioned</returns>
 		public bool MoveShape(Vector2 Move) {
-			int nCtr;
-			Vector2 Vert;
+			cvMove.X += Move.X;
+			cvMove.Y += Move.Y;
 
-			for (nCtr = 0; nCtr < cCollisionList.Vertexes.Count; nCtr++) {
-				//Get the vertex data
-				Vert = cCollisionList.Vertexes[nCtr];
-
-				//Move it the horizontal and vertical distance
-				Vert.X += Move.X;
-				Vert.Y += Move.Y;
-
-				//Update the vertex lest
-				cCollisionList.Vertexes[nCtr] = Vert;
-			}
+			RecalculateCoordinates();
 
 			return true;
 		}
@@ -243,26 +264,32 @@ namespace MDLN.MGTools {
 		/// <summary>
 		/// Resize the polygon proportional to its current size
 		/// </summary>
-		/// <param name="Origin">The origin point to scale the polygon from</param>
 		/// <param name="Factors">The X any Y scale factors to apply</param>
 		/// <returns>True upon success, false on any error</returns>
-		public bool ScaleShape(Vector2 Origin, Vector2 Factors) {
-			int nCtr;
-			Vector2 Vert;
+		public bool ScaleShape(Vector2 Factors) {
+			cvScale = Factors;
 
-			for (nCtr = 0; nCtr < cCollisionList.Vertexes.Count; nCtr++) {
-				//Get the vertex data
-				Vert = cCollisionList.Vertexes[nCtr];
-
-				//Scale it proportional to its distance from the origin
-				Vert.X += (Vert.X - Origin.X) * Factors.X;
-				Vert.Y += (Vert.Y - Origin.Y) * Factors.Y;
-
-				//Update the vertex lest
-				cCollisionList.Vertexes[nCtr] = Vert;
-			}
+			RecalculateCoordinates();
 
 			return true;
+		}
+
+		public bool RotateShape(float nRadians) {
+			cnRotation = nRadians;
+
+			RecalculateCoordinates();
+
+			return true;
+		}
+
+		public void SetPositionOffsets(Vector2 vMove, Vector2 vScale, float nRadians) {
+			cvMove = vMove;
+			cvScale = vScale;
+			cnRotation = nRadians;
+
+			RecalculateCoordinates();
+
+			return;
 		}
 
 		/// <summary>
@@ -366,6 +393,53 @@ namespace MDLN.MGTools {
 			}
 
 			return true;
+		}
+
+		public bool Update(GameTime CurrTime) {
+			return true;
+		}
+
+		private void RecalculateCoordinates() {
+			int nCtr;
+			Vector2 vScale, vRotate;
+
+			cvCenter.X = 0;
+			cvCenter.Y = 0;
+
+			if (cavBaseVertexList.Count == 0) { //If there's no vertexes, there's nothing to calculate
+				return;
+			}
+
+			//First find the center point of all the vertexes
+			for (nCtr = 0; nCtr < cavBaseVertexList.Count; nCtr++) {
+				cvCenter.X += cavBaseVertexList[nCtr].X;
+				cvCenter.Y += cavBaseVertexList[nCtr].Y;
+			}
+
+			cvCenter.X /= cavBaseVertexList.Count;
+			cvCenter.Y /= cavBaseVertexList.Count;
+
+			//Now calculate the position of all the collision vertexes
+			cCollisionList.Vertexes.Clear();
+			for (nCtr = 0; nCtr < cavBaseVertexList.Count; nCtr++) {
+				vScale.X = cavBaseVertexList[nCtr].X - cvCenter.X;
+				vScale.Y = cavBaseVertexList[nCtr].Y - cvCenter.Y;
+
+				//With Center as the origin Scale first
+				vScale.X *= cvScale.X;
+				vScale.Y *= cvScale.Y;
+
+				//With center as origin, handle the rotation next
+				vRotate.X = (float)((vScale.X * Math.Cos(cnRotation)) - (vScale.Y * Math.Sin(cnRotation)));
+				vRotate.Y = (float)((vScale.X * Math.Sin(cnRotation)) + (vScale.Y * Math.Cos(cnRotation)));
+
+				//Finally apply any movement
+				vRotate.X += cvMove.X;
+				vRotate.Y += cvMove.Y;
+
+				//Add this to the collision list
+				cCollisionList.Vertexes.Add(vRotate);
+			}
 		}
 	}
 }

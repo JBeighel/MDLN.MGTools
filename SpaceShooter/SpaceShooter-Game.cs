@@ -130,11 +130,12 @@ namespace MDLN.SpaceShooter
 			cShip = new PhysicalObject(cGraphDevMgr.GraphicsDevice, cTextureAtlas) {
 				TextureName = "spaceShips_001.png",
 				TextureRotation = (float)(90 * Math.PI / 180),
-				DrawRegion = new Rectangle() {
-					X = 0,
-					Y = 0,
-					Width = 256,
-					Height = 256,
+				Width = 256,
+				Height = 256,
+
+				CenterPoint = new Vector2() {
+					X = 128,
+					Y = 128,
 				},
 			};
 
@@ -159,16 +160,15 @@ namespace MDLN.SpaceShooter
 			MouseState Currmouse = Mouse.GetState();
 			Vector2 vShipCenter = cShip.GetCenterCoordinates();
 			Vector vShipToMouse = new Vector();
-			Rectangle Region;
 
 			if ((Currmouse.RightButton == ButtonState.Pressed) && (cPriorMouse.RightButton == ButtonState.Pressed)) {
 				//User is holding the right mouse button
-				Region = cShip.DrawRegion;
+				vShipCenter = cShip.CenterPoint;
 
-				Region.X += Currmouse.X - cPriorMouse.X;
-				Region.Y += Currmouse.Y - cPriorMouse.Y;
+				vShipCenter.X += Currmouse.X - cPriorMouse.X;
+				vShipCenter.Y += Currmouse.Y - cPriorMouse.Y;
 
-				cShip.DrawRegion = Region;
+				cShip.CenterPoint = vShipCenter;
 			}
 
 			if ((Currmouse.RightButton == ButtonState.Pressed) && (cPriorMouse.RightButton == ButtonState.Released)){
@@ -177,14 +177,7 @@ namespace MDLN.SpaceShooter
 
 			if ((Currmouse.MiddleButton == ButtonState.Pressed) && (cPriorMouse.MiddleButton == ButtonState.Pressed)) {
 				//User is holding the middle mouse button
-				Region = cShip.DrawRegion;
-
-				Region.X = 0;
-				Region.Y = 0;
-				Region.Width = Currmouse.X;
-				Region.Height = Currmouse.Y;
-
-				cShip.DrawRegion = Region;
+				
 			}
 
 			if ((Currmouse.MiddleButton == ButtonState.Pressed) && (cPriorMouse.MiddleButton == ButtonState.Released)) {
@@ -217,6 +210,8 @@ namespace MDLN.SpaceShooter
 		/// </summary>
 		/// <param name="gameTime">Current time information of the application</param>
 		protected override void Draw(GameTime gameTime) {
+			Rectangle rectShip;
+			Vector2 vOrigin;
 			SpriteBatch DrawBatch = new SpriteBatch(GraphicsDevice);
 
 			GraphicsDevice.Clear(Color.Black);
@@ -225,7 +220,17 @@ namespace MDLN.SpaceShooter
 			Texture2D ColorTexture = new Texture2D(cGraphDevMgr.GraphicsDevice, 1, 1);
 			ColorTexture.SetData(new[] { Color.Pink });
 
-			DrawBatch.Draw(ColorTexture, cShip.DrawRegion, Color.White);
+			vOrigin = cShip.CenterPoint;
+
+			rectShip.X = (int)vOrigin.X;
+			rectShip.Y = (int)vOrigin.Y;
+			rectShip.Width = cShip.Width;
+			rectShip.Height = cShip.Height;
+
+			vOrigin.X = 0.5f;
+			vOrigin.Y = 0.5f;
+
+			DrawBatch.Draw(ColorTexture, rectShip, ColorTexture.Bounds, Color.White, 0f, vOrigin, SpriteEffects.None, 0);
 			
 
 			//cTextureAtlas.DrawTile("spaceShips_001.png", DrawBatch, new Rectangle(0, 0, 256, 256), Color.White, cnRotation);

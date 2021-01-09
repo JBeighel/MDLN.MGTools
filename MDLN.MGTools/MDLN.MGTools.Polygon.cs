@@ -19,7 +19,7 @@ namespace MDLN.MGTools {
 		private Texture2D cLineTexture;
 		private readonly GraphicsDevice cGraphDev;
 		private readonly BasicEffect cBasicShader;
-		private Vector2 cvCenter;
+		private Vector2 cvBaseOffset;
 		private Vector2 cvScale;
 		private Vector2 cvMove;
 		private float cnRotation;
@@ -72,6 +72,16 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		public Vector2 BaseOffset {
+			get {
+				return cvBaseOffset;
+			}
+
+			set {
+				cvBaseOffset = value;
+			}
+		}
+
 		/// <summary>
 		/// Constructor for the class
 		/// </summary>
@@ -87,7 +97,7 @@ namespace MDLN.MGTools {
 
 			cvScale = new Vector2(1, 1);
 			cvMove = new Vector2(0, 0);
-			cvCenter = new Vector2(0, 0);
+			cvBaseOffset = new Vector2(0, 0);
 
 			cGraphDev = GraphDev;
 			cLineClr = new Color(0, 0, 0, 0); //Black and fully transparent
@@ -200,7 +210,7 @@ namespace MDLN.MGTools {
 		}
 
 		public Vector2 GetCenterCoordinates() {
-			Vector2 vCoords = cvCenter;
+			Vector2 vCoords = cvBaseOffset;
 
 			vCoords.X += cvMove.X;
 			vCoords.Y += cvMove.Y;
@@ -238,9 +248,29 @@ namespace MDLN.MGTools {
 		/// <param name="Vert">New coordinates for the vertex</param>
 		/// <returns>True if the vertex was updated</returns>
 		public bool UpdateVertex(int nIdx, Vector2 Vert) {
-			if (nIdx >= cCollisionList.Vertexes.Count) { //Vertex does not exist
+			Vector2 vAdjVert;
+
+			if (nIdx >= cavBaseVertexList.Count) { //Vertex does not exist
 				return false;
 			}
+
+			//Undo all transformations, move and center offset
+			Vert.X -= cvMove.X + cvBaseOffset.X;
+			Vert.Y -= cvMove.Y + cvBaseOffset.Y;
+
+			//Rotation
+			vAdjVert.X = (float)((Vert.X * Math.Cos(-1 * cnRotation)) - (Vert.Y * Math.Sin(-1 * cnRotation)));
+			vAdjVert.Y = (float)((Vert.X * Math.Sin(-1 * cnRotation)) + (Vert.Y * Math.Cos(-1 * cnRotation)));
+
+			//Scaling
+			vAdjVert.X /= cvScale.X;
+			vAdjVert.Y /= cvScale.Y;
+
+			//Re-apply center offset
+			vAdjVert.X += cvBaseOffset.X;
+			vAdjVert.Y += cvBaseOffset.Y;
+
+			cavBaseVertexList[nIdx] = vAdjVert;
 
 			RecalculateCoordinates();
 
@@ -252,13 +282,19 @@ namespace MDLN.MGTools {
 		/// </summary>
 		/// <param name="Move">Distance to move the shape in X and Y directions</param>
 		/// <returns>True if the shape was correctly repositioned</returns>
-		public bool MoveShape(Vector2 Move) {
-			cvMove.X += Move.X;
-			cvMove.Y += Move.Y;
+		public Vector2 CenterCoordinates {
+			get {
+				return cvMove;
+			}
 
-			RecalculateCoordinates();
+			set {
+				cvMove.X = value.X - cvBaseOffset.X;
+				cvMove.Y = value.Y - cvBaseOffset.Y;
 
-			return true;
+				RecalculateCoordinates();
+
+				return;
+			}
 		}
 
 		/// <summary>
@@ -266,20 +302,32 @@ namespace MDLN.MGTools {
 		/// </summary>
 		/// <param name="Factors">The X any Y scale factors to apply</param>
 		/// <returns>True upon success, false on any error</returns>
-		public bool ScaleShape(Vector2 Factors) {
-			cvScale = Factors;
+		public Vector2 ScaleShape {
+			get {
+				return cvScale;
+			}
 
-			RecalculateCoordinates();
+			set {
+				cvScale = value;
 
-			return true;
+				RecalculateCoordinates();
+
+				return;
+			}
 		}
 
-		public bool RotateShape(float nRadians) {
-			cnRotation = nRadians;
+		public float RotateShape {
+			get {
+				return cnRotation;
+			}
 
-			RecalculateCoordinates();
+			set {
+				cnRotation = value;
 
-			return true;
+				RecalculateCoordinates();
+
+				return;
+			}
 		}
 
 		public void SetPositionOffsets(Vector2 vMove, Vector2 vScale, float nRadians) {
@@ -307,7 +355,7 @@ namespace MDLN.MGTools {
 		/// </summary>
 		/// <returns>A collection of all vertexes in this shape</returns>
 		public IEnumerable<Vector2> GetVertexes() {
-			return cCollisionList.Vertexes;
+			return cavBaseVertexList;
 		}
 
 		/// <summary>
@@ -403,27 +451,14 @@ namespace MDLN.MGTools {
 			int nCtr;
 			Vector2 vScale, vRotate;
 
-			cvCenter.X = 0;
-			cvCenter.Y = 0;
-
-			if (cavBaseVertexList.Count == 0) { //If there's no vertexes, there's nothing to calculate
-				return;
-			}
-
-			//First find the center point of all the vertexes
-			for (nCtr = 0; nCtr < cavBaseVertexList.Count; nCtr++) {
-				cvCenter.X += cavBaseVertexList[nCtr].X;
-				cvCenter.Y += cavBaseVertexList[nCtr].Y;
-			}
-
-			cvCenter.X /= cavBaseVertexList.Count;
-			cvCenter.Y /= cavBaseVertexList.Count;
+			cvBaseOffset.X = 0;
+			cvBaseOffset.Y = 0;
 
 			//Now calculate the position of all the collision vertexes
 			cCollisionList.Vertexes.Clear();
 			for (nCtr = 0; nCtr < cavBaseVertexList.Count; nCtr++) {
-				vScale.X = cavBaseVertexList[nCtr].X - cvCenter.X;
-				vScale.Y = cavBaseVertexList[nCtr].Y - cvCenter.Y;
+				vScale.X = cavBaseVertexList[nCtr].X - cvBaseOffset.X;
+				vScale.Y = cavBaseVertexList[nCtr].Y - cvBaseOffset.Y;
 
 				//With Center as the origin Scale first
 				vScale.X *= cvScale.X;
@@ -433,9 +468,9 @@ namespace MDLN.MGTools {
 				vRotate.X = (float)((vScale.X * Math.Cos(cnRotation)) - (vScale.Y * Math.Sin(cnRotation)));
 				vRotate.Y = (float)((vScale.X * Math.Sin(cnRotation)) + (vScale.Y * Math.Cos(cnRotation)));
 
-				//Finally apply any movement
-				vRotate.X += cvMove.X;
-				vRotate.Y += cvMove.Y;
+				//Finally apply any movement (put back in the cente offset as well)
+				vRotate.X += cvMove.X + cvBaseOffset.X;
+				vRotate.Y += cvMove.Y + cvBaseOffset.Y;
 
 				//Add this to the collision list
 				cCollisionList.Vertexes.Add(vRotate);

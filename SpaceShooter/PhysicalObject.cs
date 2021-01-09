@@ -16,15 +16,15 @@ namespace MDLN.MGTools {
 
 		private ConvexPolygon cPolyGon;
 		private TextureAtlas cImgAtlas;
-		private Rectangle cDrawRegion;
+		private Rectangle crectExtents;
 		private Texture2D cHandleTexture;
 		private int cnMouseVertex;
 		private MouseState cPriorMouse;
 		private GraphicsDevice cGraphDev;
 		private bool cbVertexEdits;
 		private float cnRotation;
+		private Vector2 cvScale;
 
-		public float TextureRotation;
 		public string TextureName;
 		public bool AllowCollisionVertexEdits {
 			get {
@@ -46,7 +46,7 @@ namespace MDLN.MGTools {
 
 			set {
 				cnRotation = value;
-				cPolyGon.RotateShape(cnRotation);
+				cPolyGon.RotateShape = cnRotation;
 
 				return;
 			}
@@ -57,31 +57,19 @@ namespace MDLN.MGTools {
 			get {
 				Vector2 vCenter;
 
-				vCenter.X = cDrawRegion.X + (cDrawRegion.Width / 2);
-				vCenter.Y = cDrawRegion.Y + (cDrawRegion.Height / 2);
+				vCenter.X = crectExtents.X + (crectExtents.Width / 2);
+				vCenter.Y = crectExtents.Y + (crectExtents.Height / 2);
 
 				return vCenter;
 			}
 
 			set {
-				Vector2 vPolyCenter;
-				//Find the polygon center point
-				vPolyCenter = cPolyGon.GetCenterCoordinates();
-
-				//Find the difference to the new point
-				vPolyCenter.X = value.X - vPolyCenter.X;
-				vPolyCenter.Y = value.Y - vPolyCenter.Y;
-
-				//Adjust for the center offset the draw region gets
-				vPolyCenter.X += cDrawRegion.Width / 2;
-				vPolyCenter.Y += cDrawRegion.Height / 2;
-
 				//Move the collision polygons
-				cPolyGon.MoveShape(vPolyCenter);
+				cPolyGon.CenterCoordinates = value;
 
 				//Update the rendered object
-				cDrawRegion.X = (int)(value.X - (cDrawRegion.Width / 2));
-				cDrawRegion.Y = (int)(value.Y - (cDrawRegion.Height / 2));
+				crectExtents.X = (int)(value.X - (crectExtents.Width / 2));
+				crectExtents.Y = (int)(value.Y - (crectExtents.Height / 2));
 
 				return;
 			}
@@ -89,21 +77,43 @@ namespace MDLN.MGTools {
 
 		public int Height {
 			get {
-				return cDrawRegion.Height;
+				return crectExtents.Height;
 			}
 
 			set {
-				cDrawRegion.Height = value;
+				crectExtents.Height = value;
 			}
 		}
 
 		public int Width {
 			get {
-				return cDrawRegion.Width;
+				return crectExtents.Width;
 			}
 
 			set {
-				cDrawRegion.Width = value;
+				crectExtents.Width = value;
+			}
+		}
+
+		public Vector2 Scale {
+			get {
+				return cvScale;
+			}
+
+			set {
+				cvScale = value;
+
+				cPolyGon.ScaleShape = cvScale;
+			}
+		}
+
+		public Vector2 CollisionOffset {
+			get {
+				return cPolyGon.BaseOffset;
+			}
+
+			set {
+				cPolyGon.BaseOffset = value;
 			}
 		}
 
@@ -121,9 +131,8 @@ namespace MDLN.MGTools {
 			TextureName = "";
 
 			ObjectRotation = 0;
-			TextureRotation = 0;
 
-			cDrawRegion = new Rectangle() { 
+			crectExtents = new Rectangle() { 
 				X = 0, 
 				Y = 0,
 				Width = 0,
@@ -132,6 +141,16 @@ namespace MDLN.MGTools {
 
 			cHandleTexture = new Texture2D(GraphDev, 1, 1);
 			cHandleTexture.SetData(new[] { Color.Purple });
+
+			return;
+		}
+
+		public void SetPosition(Vector2 vCenter, int nHeight, int nWidth, Vector2 vScale, float nRotateRadians) {
+			Height = nHeight;
+			Width = nWidth;
+			cvScale = vScale;
+			ObjectRotation = nRotateRadians;
+			CenterPoint = vCenter;
 
 			return;
 		}
@@ -149,15 +168,19 @@ namespace MDLN.MGTools {
 					vVertPos.Y = CurrMouse.Y;
 
 					cPolyGon.UpdateVertex(cnMouseVertex, vVertPos);
+
+					CenterPoint = CenterPoint;
 				}
 
 				if ((CurrMouse.LeftButton == ButtonState.Pressed) && (cPriorMouse.LeftButton == ButtonState.Released)) {
 					//User just clicked, see if they got a polygon vertex
+					List<CollisionRegion> CollList = new List<CollisionRegion>(cPolyGon.GetCollisionRegions());
+
 					Handle.Width = nHandleWidth;
 					Handle.Height = nHandleWidth;
 
 					nVertCtr = 0;
-					foreach (Vector2 vCurrVert in cPolyGon.GetVertexes()) {
+					foreach (Vector2 vCurrVert in CollList[0].Vertexes) {
 						Handle.X = (int)(vCurrVert.X - (nHandleWidth / 2));
 						Handle.Y = (int)(vCurrVert.Y - (nHandleWidth / 2));
 
@@ -182,12 +205,18 @@ namespace MDLN.MGTools {
 		}
 
 		public bool Draw() {
-			Rectangle Block;
+			Rectangle rectBlock;
+
+			rectBlock = crectExtents;
+			rectBlock.Width = (int)(rectBlock.Width * cvScale.X); // Resize the rendered image
+			rectBlock.Height = (int)(rectBlock.Height * cvScale.Y);
+			rectBlock.X += (crectExtents.Width - rectBlock.Width) / 2; //Keep the image centered on origin
+			rectBlock.Y += (crectExtents.Height - rectBlock.Height) / 2;
 
 			//Draw the object
 			SpriteBatch DrawBatch = new SpriteBatch(cGraphDev);
 			DrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
-			cImgAtlas.DrawTile(TextureName, DrawBatch, cDrawRegion, Color.White, ObjectRotation - TextureRotation);
+			cImgAtlas.DrawTile(TextureName, DrawBatch, rectBlock, Color.White, ObjectRotation);
 			DrawBatch.End();
 
 			if (cbVertexEdits == true) {
@@ -195,13 +224,15 @@ namespace MDLN.MGTools {
 
 				DrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
 				//Draw handles on each vertex
-				foreach (Vector2 CurrVert in cPolyGon.GetVertexes()) {
-					Block.X = (int)(CurrVert.X - (nHandleWidth / 2));
-					Block.Y = (int)(CurrVert.Y - (nHandleWidth / 2));
-					Block.Width = nHandleWidth;
-					Block.Height = nHandleWidth;
+				List<CollisionRegion> CollList = new List<CollisionRegion>(cPolyGon.GetCollisionRegions());
 
-					DrawBatch.Draw(cHandleTexture, Block, Color.White);
+				foreach (Vector2 CurrVert in CollList[0].Vertexes) {
+					rectBlock.X = (int)(CurrVert.X - (nHandleWidth / 2));
+					rectBlock.Y = (int)(CurrVert.Y - (nHandleWidth / 2));
+					rectBlock.Width = nHandleWidth;
+					rectBlock.Height = nHandleWidth;
+
+					DrawBatch.Draw(cHandleTexture, rectBlock, Color.White);
 				}
 				DrawBatch.End();
 			}
@@ -231,8 +262,8 @@ namespace MDLN.MGTools {
 			Center.Y /= nVertCnt;
 			*/
 
-			Center.X = cDrawRegion.X + (cDrawRegion.Width / 2);
-			Center.Y = cDrawRegion.Y + (cDrawRegion.Height / 2);
+			Center.X = crectExtents.X + (crectExtents.Width / 2);
+			Center.Y = crectExtents.Y + (crectExtents.Height / 2);
 			return Center;
 		}
 
@@ -246,6 +277,10 @@ namespace MDLN.MGTools {
 
 		public bool TestCollision(IEnumerable<CollisionRegion> aRegions) {
 			return cPolyGon.TestCollision(aRegions);
+		}
+
+		public IEnumerable<Vector2> GetCollisionVertexes() {
+			return cPolyGon.GetVertexes();
 		}
 	}
 }

@@ -71,9 +71,9 @@ namespace MDLN.SpaceShooter
 					cShip.AllowCollisionVertexEdits = false;
 				}
 			} else if (RegEx.LooseTest(CommandEvent, @"list\s*vertexes") == true) {
-				List<CollisionRegion> CollReg = new List<CollisionRegion>(cShip.GetCollisionRegions());
+				List<Vector2> VertList = new List<Vector2>(cShip.GetCollisionVertexes());
 				nCtr = 0;
-				foreach (Vector2 vVert in CollReg[0].Vertexes) {
+				foreach (Vector2 vVert in VertList) {
 					cDevConsole.AddText(String.Format("{0}:X{1} Y{2}", nCtr, vVert.X, vVert.Y));
 					nCtr += 1;
 				}
@@ -129,22 +129,21 @@ namespace MDLN.SpaceShooter
 
 			cShip = new PhysicalObject(cGraphDevMgr.GraphicsDevice, cTextureAtlas) {
 				TextureName = "spaceShips_001.png",
-				TextureRotation = (float)(90 * Math.PI / 180),
 				Width = 256,
 				Height = 256,
 			};
 
 			List<Vector2> VertList = new List<Vector2>();
-			VertList.Add(new Vector2(32, 39));
-			VertList.Add(new Vector2(175, 11));
-			VertList.Add(new Vector2(201, 127));
-			VertList.Add(new Vector2(176, 244));
-			VertList.Add(new Vector2(32, 215));
+			VertList.Add(new Vector2(100, 100));
+			VertList.Add(new Vector2(100, 100));
+			VertList.Add(new Vector2(100, 100));
+			VertList.Add(new Vector2(100, 100));
+			VertList.Add(new Vector2(100, 100));
 
 			cShip.SetCollisionVertexes(VertList);
 
 			//Have to set position after adding vertexes to get the centers lined up
-			cShip.CenterPoint = new Vector2(cShip.Width / 2, cShip.Height / 2);
+			cShip.SetPosition(new Vector2(256/2, 256/2), 256, 256, new Vector2(1, 1), 0);
 
 			return;
 		}
@@ -178,6 +177,16 @@ namespace MDLN.SpaceShooter
 			if ((Currmouse.MiddleButton == ButtonState.Pressed) && (cPriorMouse.MiddleButton == ButtonState.Pressed)) {
 				//User is holding the middle mouse button
 				
+				vShipCenter.X = Currmouse.X - cShip.CenterPoint.X; //distance to add via scaling
+				vShipCenter.Y = Currmouse.Y - cShip.CenterPoint.Y;
+
+				vShipCenter.X += cShip.Width; //New width/height of ship
+				vShipCenter.Y += cShip.Height;
+
+				vShipCenter.X = vShipCenter.X / cShip.Width;
+				vShipCenter.Y = vShipCenter.Y / cShip.Height;
+
+				cShip.Scale = vShipCenter;
 			}
 
 			if ((Currmouse.MiddleButton == ButtonState.Pressed) && (cPriorMouse.MiddleButton == ButtonState.Released)) {

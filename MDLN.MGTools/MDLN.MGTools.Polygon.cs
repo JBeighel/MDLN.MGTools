@@ -434,7 +434,7 @@ namespace MDLN.MGTools {
 
 			DrawBatch.End();
 
-			if (FillShape == true) {
+			if ((FillShape == true) && (cCollisionList.Vertexes.Count > 2)) {
 				//Draw the triangle fill (triangles needed is Vertexes -2, then 3 vertexes per triangle)
 				VertexPositionColor[] aVertexes = new VertexPositionColor[(cCollisionList.Vertexes.Count - 2) * 3];
 
@@ -462,7 +462,6 @@ namespace MDLN.MGTools {
 				foreach (EffectPass CurrShadderPass in cBasicShader.CurrentTechnique.Passes) {
 					//This is the all-important line that sets the effect, and all of its settings, on the graphics device
 					CurrShadderPass.Apply();
-					//cBasicShader.CurrentTechnique.Passes[0].Apply();
 
 					cGraphDev.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.TriangleList, aVertexes, 0, aVertexes.Length / 3);
 				}

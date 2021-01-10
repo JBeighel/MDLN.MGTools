@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace MDLN.MGTools {
-	class TextureAtlas {
+	public class TextureAtlas {
 		private Dictionary<string, Rectangle> cTileSet;
 		private Texture2D cTexture;
 

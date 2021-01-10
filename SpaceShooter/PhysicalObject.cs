@@ -11,21 +11,59 @@ using Microsoft.Xna.Framework.Input;
 using MDLN.MGTools;
 
 namespace MDLN.MGTools {
-	class PhysicalObject : ICollidable, IVisible {
+	public class PhysicalObject : ICollidable, IVisible {
+		/// <summary>
+		/// Size of handles used when editing collision vertexes
+		/// </summary>
 		private const int nHandleWidth = 16;
 
+		/// <summary>
+		/// Polygon object used to store collision regions
+		/// </summary>
 		private ConvexPolygon cPolyGon;
+		/// <summary>
+		/// Texture atlas holding the texture for this object
+		/// </summary>
 		private TextureAtlas cImgAtlas;
+		/// <summary>
+		/// Rectangle holding the region to draw this shape in
+		/// </summary>
 		private Rectangle crectExtents;
+		/// <summary>
+		/// Texture used for the handles when editing collision vertexes
+		/// </summary>
 		private Texture2D cHandleTexture;
+		/// <summary>
+		/// Vertex that was clicked on and is being moved by the mouse
+		/// </summary>
 		private int cnMouseVertex;
+		/// <summary>
+		/// Prior state of the mouse from the last update
+		/// </summary>
 		private MouseState cPriorMouse;
+		/// <summary>
+		/// Graphics device being used to render this object
+		/// </summary>
 		private GraphicsDevice cGraphDev;
+		/// <summary>
+		/// True if the vertexes are beng displayed and edited, false otherwise
+		/// </summary>
 		private bool cbVertexEdits;
+		/// <summary>
+		/// Requested rotation of this object
+		/// </summary>
 		private float cnRotation;
+		/// <summary>
+		/// How far to turn to make the texture facing 0 degrees
+		/// </summary>
+		private float cnTextureRotation;
+		/// <summary>
+		/// Scale factors for this object
+		/// </summary>
 		private Vector2 cvScale;
 
 		public string TextureName;
+
 		public bool AllowCollisionVertexEdits {
 			get {
 				return cbVertexEdits;
@@ -46,7 +84,7 @@ namespace MDLN.MGTools {
 
 			set {
 				cnRotation = value;
-				cPolyGon.RotateShape = cnRotation;
+				cPolyGon.RotateShape = cnRotation + cnTextureRotation;
 
 				return;
 			}
@@ -115,6 +153,27 @@ namespace MDLN.MGTools {
 				cPolyGon.BaseOffset = value;
 			}
 		}
+
+		public float TextureRotation {
+			get {
+				return cnTextureRotation;
+			}
+
+			set {
+				//Remove the old rotation
+				cPolyGon.RotateShape -= cnTextureRotation;
+
+				cnTextureRotation = value;
+
+				//Apply the new rotation
+				cPolyGon.RotateShape += cnTextureRotation;
+			}
+		}
+
+		/// <summary>
+		/// This is not used by the class, it is only there for external usage
+		/// </summary>
+		public object Tag;
 
 		public PhysicalObject(GraphicsDevice GraphDev, TextureAtlas TextureList) {
 			cPolyGon = new ConvexPolygon(GraphDev) {
@@ -215,7 +274,7 @@ namespace MDLN.MGTools {
 			//Draw the object
 			SpriteBatch DrawBatch = new SpriteBatch(cGraphDev);
 			DrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
-			cImgAtlas.DrawTile(TextureName, DrawBatch, rectBlock, Color.White, ObjectRotation);
+			cImgAtlas.DrawTile(TextureName, DrawBatch, rectBlock, Color.White, cnTextureRotation + cnRotation);
 			DrawBatch.End();
 
 			if (cbVertexEdits == true) {
@@ -291,6 +350,11 @@ namespace MDLN.MGTools {
 			return cPolyGon.TestCollision(aRegions);
 		}
 
+		/// <summary>
+		/// This retreives the list of collision vertexes before any transforms are done.
+		/// The coordinates will be before movement, scaling, or rotations.
+		/// </summary>
+		/// <returns>List of unmodified collision vertexes</returns>
 		public IEnumerable<Vector2> GetCollisionVertexes() {
 			return cPolyGon.GetVertexes();
 		}

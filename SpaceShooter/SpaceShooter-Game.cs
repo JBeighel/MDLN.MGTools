@@ -35,8 +35,7 @@ namespace MDLN.SpaceShooter
 		private GameConsole cDevConsole;
 		private TextureAtlas cTextureAtlas;
 		private MouseState cPriorMouse;
-
-		private PhysicalObject cShip;
+		private ObjectManager cObjManager;
 
 		public SpaceShooter() {
 			cGraphDevMgr = new GraphicsDeviceManager(this);
@@ -50,7 +49,8 @@ namespace MDLN.SpaceShooter
 
 		private void FormResizeHandler(object Sender, EventArgs Args) {
 			cDevConsole.Width = Window.ClientBounds.Width;
-			cShip.UpdateGaphicsDevice(cGraphDevMgr.GraphicsDevice);
+			cObjManager.UpdateGraphicsDevice(cGraphDevMgr.GraphicsDevice);
+
 			return;
 		}
 
@@ -67,12 +67,12 @@ namespace MDLN.SpaceShooter
 				Exit();
 			} else if (RegEx.LooseTest(CommandEvent, @"edit\s*vertexes=(on|1|off|0)") == true) {
 				if (RegEx.LooseTest(CommandEvent, @"edit\s*vertexes=(on|1)") == true) {
-					cShip.AllowCollisionVertexEdits = true;
+					cObjManager[0][0].AllowCollisionVertexEdits = true;
 				} else {
-					cShip.AllowCollisionVertexEdits = false;
+					cObjManager[0][0].AllowCollisionVertexEdits = false;
 				}
 			} else if (RegEx.LooseTest(CommandEvent, @"list\s*vertexes") == true) {
-				List<Vector2> VertList = new List<Vector2>(cShip.GetCollisionVertexes());
+				List<Vector2> VertList = new List<Vector2>(cObjManager[0][0].GetCollisionVertexes());
 				nCtr = 0;
 				foreach (Vector2 vVert in VertList) {
 					cDevConsole.AddText(String.Format("{0}:X{1} Y{2}", nCtr, vVert.X, vVert.Y));
@@ -86,7 +86,7 @@ namespace MDLN.SpaceShooter
 					return;
 				}
 
-				cShip.TextureName = strParam;
+				cObjManager[0][0].TextureName = strParam;
 			} else {
 				cDevConsole.AddText("Unrecognized command: " + CommandEvent);
 			}
@@ -116,6 +116,8 @@ namespace MDLN.SpaceShooter
 		/// Load all external content files that are needed
 		/// </summary>
 		protected override void LoadContent() {
+			PhysicalObject NewObj;
+
 			//The font texture isn't needed, but this is an example of loading a PNG
 			string strFileName = INTERFACECONTENTDIR + "Font.png";
 			FileStream FileLoad = new FileStream(strFileName, FileMode.Open);
@@ -136,29 +138,13 @@ namespace MDLN.SpaceShooter
 			}
 
 			cTextureAtlas = new TextureAtlas(cGraphDevMgr.GraphicsDevice, INTERFACECONTENTDIR + "spaceShooter2_spritesheet.png", INTERFACECONTENTDIR + "spaceShooter2_spritesheet.xml");
+			cObjManager = new ObjectManager(cGraphDevMgr.GraphicsDevice, cTextureAtlas, INTERFACECONTENTDIR + "GameObjects.xml");
 
-			cShip = new PhysicalObject(cGraphDevMgr.GraphicsDevice, cTextureAtlas) {
-				TextureName = "spaceMissiles_001.png",
-				Width = 256,
-				Height = 256,
-			};
+			cObjManager.SpawnGameObject("ship01", 0);
 
-			List<Vector2> VertList = new List<Vector2>();
-			VertList.Add(new Vector2(-77, -105));
-			VertList.Add(new Vector2(77, -105));
-			VertList.Add(new Vector2(121, 25));
-			VertList.Add(new Vector2(77, 98));
-			VertList.Add(new Vector2(-77, 98));
-			VertList.Add(new Vector2(-121, 25));
-			VertList.Add(new Vector2(0, 0));
-			VertList.Add(new Vector2(0, 0));
-			VertList.Add(new Vector2(0, 0));
-
-			cShip.SetCollisionVertexes(VertList);
-
-			//Have to set position after adding vertexes to get the centers lined up
-			cShip.SetPosition(new Vector2(256/2, 256/2), 256, 256, new Vector2(1, 1), 0);
-
+			NewObj = cObjManager[0][0];
+			NewObj.SetPosition(new Vector2(128, 128), 256, 256, new Vector2(1, 1), 0);
+			
 			return;
 		}
 
@@ -169,38 +155,38 @@ namespace MDLN.SpaceShooter
 		/// <param name="gameTime">Current time information of the application</param>
 		protected override void Update(GameTime gameTime) {
 			MouseState Currmouse = Mouse.GetState();
-			Vector2 vShipCenter = cShip.GetCenterCoordinates();
+			Vector2 vShipCenter = cObjManager[0][0].GetCenterCoordinates();
 			Vector vShipToMouse = new Vector();
 
 			if ((Currmouse.RightButton == ButtonState.Pressed) && (cPriorMouse.RightButton == ButtonState.Pressed)) {
 				//User is holding the right mouse button
-				vShipCenter = cShip.CenterPoint;
+				vShipCenter = cObjManager[0][0].CenterPoint;
 
 				//vShipCenter.X += Currmouse.X - cPriorMouse.X;
 				//vShipCenter.Y += Currmouse.Y - cPriorMouse.Y;
 				vShipCenter.X = Currmouse.X;
 				vShipCenter.Y = Currmouse.Y;
 
-				cShip.CenterPoint = vShipCenter;
+				cObjManager[0][0].CenterPoint = vShipCenter;
 			}
 
 			if ((Currmouse.RightButton == ButtonState.Pressed) && (cPriorMouse.RightButton == ButtonState.Released)){
-				//User jsut clicked the right mouse button
+				//User just clicked the right mouse button
 			}
 
 			if ((Currmouse.MiddleButton == ButtonState.Pressed) && (cPriorMouse.MiddleButton == ButtonState.Pressed)) {
 				//User is holding the middle mouse button
 				
-				vShipCenter.X = Currmouse.X - cShip.CenterPoint.X; //distance to add via scaling
-				vShipCenter.Y = Currmouse.Y - cShip.CenterPoint.Y;
+				vShipCenter.X = Currmouse.X - cObjManager[0][0].CenterPoint.X; //distance to add via scaling
+				vShipCenter.Y = Currmouse.Y - cObjManager[0][0].CenterPoint.Y;
 
-				vShipCenter.X += cShip.Width; //New width/height of ship
-				vShipCenter.Y += cShip.Height;
+				vShipCenter.X += cObjManager[0][0].Width; //New width/height of ship
+				vShipCenter.Y += cObjManager[0][0].Height;
 
-				vShipCenter.X = vShipCenter.X / cShip.Width;
-				vShipCenter.Y = vShipCenter.Y / cShip.Height;
+				vShipCenter.X = vShipCenter.X / cObjManager[0][0].Width;
+				vShipCenter.Y = vShipCenter.Y / cObjManager[0][0].Height;
 
-				cShip.Scale = vShipCenter;
+				cObjManager[0][0].Scale = vShipCenter;
 			}
 
 			if ((Currmouse.MiddleButton == ButtonState.Pressed) && (cPriorMouse.MiddleButton == ButtonState.Released)) {
@@ -211,7 +197,7 @@ namespace MDLN.SpaceShooter
 				//User is holding the middle mouse button
 				vShipToMouse.SetRectangularCoordinates(Currmouse.X - vShipCenter.X, Currmouse.Y - vShipCenter.Y);
 
-				cShip.ObjectRotation = (float)(vShipToMouse.Polar.Angle * Math.PI / 180);
+				cObjManager[0][0].ObjectRotation = (float)(vShipToMouse.Polar.Angle * Math.PI / 180);
 			}
 
 			if ((Currmouse.XButton1 == ButtonState.Pressed) && (cPriorMouse.XButton1 == ButtonState.Released)) {
@@ -220,7 +206,7 @@ namespace MDLN.SpaceShooter
 
 			cPriorMouse = Currmouse;
 
-			cShip.Update(gameTime);
+			cObjManager.UpdateObjects(gameTime);
 			cDevConsole.Update(gameTime);
 
 			//Use monogame update
@@ -237,7 +223,7 @@ namespace MDLN.SpaceShooter
 
 			GraphicsDevice.Clear(Color.Black);
 
-			cShip.Draw();
+			cObjManager.DrawObjects();
 
 			DrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
 			

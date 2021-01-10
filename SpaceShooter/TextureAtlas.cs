@@ -72,6 +72,10 @@ namespace MDLN.MGTools {
 			return;
 		}
 
+		public bool ContainsImage(string strTileName) {
+			return cTileSet.ContainsKey(strTileName);
+		}
+
 		public void GetTileInfo(string strTileName, out Texture2D ImgTexture, out Rectangle ImgRect) {
 			if (cTileSet.ContainsKey(strTileName) == false) {
 				throw new Exception("Loaded tile set does not contain an entry named: " + strTileName);

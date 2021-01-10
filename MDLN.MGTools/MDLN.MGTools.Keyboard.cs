@@ -100,6 +100,24 @@ namespace MDLN.MGTools {
 						} else {
 							NewKeys += "]";
 						}
+					} else if (CurrKey == Keys.OemComma) {
+						if (ShiftDown == true) {
+							NewKeys += "<";
+						} else {
+							NewKeys += ",";
+						}
+					} else if (CurrKey == Keys.OemPeriod) {
+						if (ShiftDown == true) {
+							NewKeys += ">";
+						} else {
+							NewKeys += ".";
+						}
+					} else if (CurrKey == Keys.OemQuestion) {
+						if (ShiftDown == true) {
+							NewKeys += "?";
+						} else {
+							NewKeys += "/";
+						}
 					} else if (CurrKey == Keys.Space) {
 						NewKeys += " ";
 					} else if (CurrKey == Keys.Enter) {

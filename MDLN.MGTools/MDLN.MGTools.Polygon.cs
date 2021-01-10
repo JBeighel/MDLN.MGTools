@@ -17,8 +17,8 @@ namespace MDLN.MGTools {
 		private Color cLineClr;
 		private Color cFillClr;
 		private Texture2D cLineTexture;
-		private readonly GraphicsDevice cGraphDev;
-		private readonly BasicEffect cBasicShader;
+		private GraphicsDevice cGraphDev;
+		private BasicEffect cBasicShader;
 		private Vector2 cvBaseOffset;
 		private Vector2 cvScale;
 		private Vector2 cvMove;
@@ -103,7 +103,6 @@ namespace MDLN.MGTools {
 			cvMove = new Vector2(0, 0);
 			cvBaseOffset = new Vector2(0, 0);
 
-			cGraphDev = GraphDev;
 			cLineClr = new Color(0, 0, 0, 0); //Black and fully transparent
 			cFillClr = new Color(0, 0, 0, 0); //Black and fully transparent
 			cCollisionList = new CollisionRegion {
@@ -111,11 +110,7 @@ namespace MDLN.MGTools {
 				Vertexes = new List<Vector2>()
 			};
 
-			//Create a basec shader to use when rendering the polygon
-			cBasicShader = new BasicEffect(cGraphDev) {
-				VertexColorEnabled = true,
-				World = Matrix.CreateOrthographicOffCenter(0, cGraphDev.Viewport.Width, cGraphDev.Viewport.Height, 0, 0, 1),
-			};
+			UpdateGaphicsDevice(GraphDev);
 
 			return;
 		}
@@ -377,6 +372,21 @@ namespace MDLN.MGTools {
 		/// <returns>A collection of all vertexes in this shape</returns>
 		public IEnumerable<Vector2> GetVertexes() {
 			return cavBaseVertexList;
+		}
+
+		/// <summary>
+		/// If the graphics device being used is modified externally this must be called for
+		/// the changes to be reflected in this objects rendering
+		/// </summary>
+		/// <param name="NewGraphDev">Modified graphics device</param>
+		public void UpdateGaphicsDevice(GraphicsDevice NewGraphDev) {
+			cGraphDev = NewGraphDev;
+
+			//Create a basec shader to use when rendering the polygon
+			cBasicShader = new BasicEffect(cGraphDev) {
+				VertexColorEnabled = true,
+				World = Matrix.CreateOrthographicOffCenter(0, cGraphDev.Viewport.Width, cGraphDev.Viewport.Height, 0, 0, 1),
+			};
 		}
 
 		/// <summary>

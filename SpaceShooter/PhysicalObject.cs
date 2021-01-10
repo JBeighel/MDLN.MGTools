@@ -52,7 +52,6 @@ namespace MDLN.MGTools {
 			}
 		}
 
-
 		public Vector2 CenterPoint {
 			get {
 				Vector2 vCenter;
@@ -247,6 +246,10 @@ namespace MDLN.MGTools {
 			return;
 		}
 
+		/// <summary>
+		/// Returns the coordinates of the center point of this object in its draw area
+		/// </summary>
+		/// <returns>Center point coordinates</returns>
 		public Vector2 GetCenterCoordinates() {
 			Vector2 Center = new Vector2(0, 0);
 			/*int nVertCnt = 0;
@@ -265,6 +268,15 @@ namespace MDLN.MGTools {
 			Center.X = crectExtents.X + (crectExtents.Width / 2);
 			Center.Y = crectExtents.Y + (crectExtents.Height / 2);
 			return Center;
+		}
+
+		/// <summary>
+		/// Must be called when the graphics device is changed in some way.
+		/// This includes when the viewport is resized
+		/// </summary>
+		public void UpdateGaphicsDevice(GraphicsDevice NewGraphDev) {
+			cGraphDev = NewGraphDev;
+			cPolyGon.UpdateGaphicsDevice(NewGraphDev);
 		}
 
 		public IEnumerable<CollisionRegion> GetCollisionRegions() {

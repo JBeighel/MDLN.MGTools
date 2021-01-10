@@ -50,7 +50,7 @@ namespace MDLN.SpaceShooter
 
 		private void FormResizeHandler(object Sender, EventArgs Args) {
 			cDevConsole.Width = Window.ClientBounds.Width;
-
+			cShip.UpdateGaphicsDevice(cGraphDevMgr.GraphicsDevice);
 			return;
 		}
 
@@ -61,6 +61,7 @@ namespace MDLN.SpaceShooter
 		/// <param name="CommandEvent"></param>
 		private void ConsoleCommandHandler(object Sender, string CommandEvent) {
 			int nCtr;
+			string strParam;
 
 			if (RegEx.LooseTest(CommandEvent, @"^\s*(quit|exit|close)\s*$") == true) {
 				Exit();
@@ -77,6 +78,15 @@ namespace MDLN.SpaceShooter
 					cDevConsole.AddText(String.Format("{0}:X{1} Y{2}", nCtr, vVert.X, vVert.Y));
 					nCtr += 1;
 				}
+			} else if (RegEx.LooseTest(CommandEvent, @"set\s*texture\s*=(.*)") == true) {
+				strParam = RegEx.GetRegExGroup(CommandEvent, @"set\s*texture\s*=(.*)", 1);
+
+				if (cTextureAtlas.ContainsImage(strParam) == false) {
+					cDevConsole.AddText(String.Format("No tile exists named '{0}'", strParam));
+					return;
+				}
+
+				cShip.TextureName = strParam;
 			} else {
 				cDevConsole.AddText("Unrecognized command: " + CommandEvent);
 			}
@@ -128,17 +138,21 @@ namespace MDLN.SpaceShooter
 			cTextureAtlas = new TextureAtlas(cGraphDevMgr.GraphicsDevice, INTERFACECONTENTDIR + "spaceShooter2_spritesheet.png", INTERFACECONTENTDIR + "spaceShooter2_spritesheet.xml");
 
 			cShip = new PhysicalObject(cGraphDevMgr.GraphicsDevice, cTextureAtlas) {
-				TextureName = "spaceShips_001.png",
+				TextureName = "spaceMissiles_001.png",
 				Width = 256,
 				Height = 256,
 			};
 
 			List<Vector2> VertList = new List<Vector2>();
-			VertList.Add(new Vector2(100, 100));
-			VertList.Add(new Vector2(100, 100));
-			VertList.Add(new Vector2(100, 100));
-			VertList.Add(new Vector2(100, 100));
-			VertList.Add(new Vector2(100, 100));
+			VertList.Add(new Vector2(-77, -105));
+			VertList.Add(new Vector2(77, -105));
+			VertList.Add(new Vector2(121, 25));
+			VertList.Add(new Vector2(77, 98));
+			VertList.Add(new Vector2(-77, 98));
+			VertList.Add(new Vector2(-121, 25));
+			VertList.Add(new Vector2(0, 0));
+			VertList.Add(new Vector2(0, 0));
+			VertList.Add(new Vector2(0, 0));
 
 			cShip.SetCollisionVertexes(VertList);
 
@@ -219,42 +233,17 @@ namespace MDLN.SpaceShooter
 		/// </summary>
 		/// <param name="gameTime">Current time information of the application</param>
 		protected override void Draw(GameTime gameTime) {
-			Rectangle rectShip;
-			Vector2 vOrigin;
 			SpriteBatch DrawBatch = new SpriteBatch(GraphicsDevice);
 
 			GraphicsDevice.Clear(Color.Black);
-			DrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
-
-			Texture2D ColorTexture = new Texture2D(cGraphDevMgr.GraphicsDevice, 1, 1);
-			ColorTexture.SetData(new[] { Color.Pink });
-
-			vOrigin = cShip.CenterPoint;
-
-			rectShip.X = (int)vOrigin.X;
-			rectShip.Y = (int)vOrigin.Y;
-			rectShip.Width = cShip.Width;
-			rectShip.Height = cShip.Height;
-
-			vOrigin.X = 0.5f;
-			vOrigin.Y = 0.5f;
-
-			DrawBatch.Draw(ColorTexture, rectShip, ColorTexture.Bounds, Color.White, 0f, vOrigin, SpriteEffects.None, 0);
-			
-
-			//cTextureAtlas.DrawTile("spaceShips_001.png", DrawBatch, new Rectangle(0, 0, 256, 256), Color.White, cnRotation);
-
-			//cTextureAtlas.DrawTile("spaceShips_002.png", DrawBatch, new Rectangle(256, 0, 256, 256), Color.White);
-			//cTextureAtlas.DrawTile("spaceShips_003.png", DrawBatch, new Rectangle(0, 256, 256, 256), Color.White);
-			//cTextureAtlas.DrawTile("spaceShips_004.png", DrawBatch, new Rectangle(256, 256, 256, 256), Color.White);
-
-			//Always draw console last
-			cDevConsole.Draw(DrawBatch);
-
-			DrawBatch.End();
 
 			cShip.Draw();
 
+			DrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
+			
+			cDevConsole.Draw(DrawBatch);
+
+			DrawBatch.End();
 
 			//Use monogame draw
 			base.Draw(gameTime);

@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<objects>
+	<object name="ship01" subtexturename="spaceShips_001.png">
+		<collisionpolygon>
+			<vertex X="-75" y="-105"/>
+			<vertex X="75" y="-105"/>
+			<vertex X="120" y="45"/>
+			<vertex X="0" y="75"/>
+			<vertex X="-120" y="45"/>
+		</collisionpolygon>
+	</object>
+	<object name="ship02" subtexturename="spaceShips_002.png">
+		<collisionpolygon>
+			<vertex X="-77" y="-105"/>
+			<vertex X="77" y="-105"/>
+			<vertex X="121" y="25"/>
+			<vertex X="77" y="98"/>
+			<vertex X="-77" y="98"/>
+			<vertex X="-121" y="25"/>
+		</collisionpolygon>
+	</object>
+	<object name="ship03" subtexturename="spaceShips_003.png">
+		<collisionpolygon>
+			<vertex X="-119" y="-100"/>
+			<vertex X="119" y="-100"/>
+			<vertex X="80" y="25"/>
+			<vertex X="22" y="115"/>
+			<vertex X="-22" y="115"/>
+			<vertex X="-80" y="25"/>
+		</collisionpolygon>
+	</object>
+	<object name="missile01" subtexturename="spaceShips_001.png">
+		<collisionpolygon>
+			<vertex X="0" y="-121"/>
+			<vertex X="48" y="-78"/>
+			<vertex X="36" y="116"/>
+			<vertex X="-36" y="116"/>
+			<vertex X="-48" y="-78"/>
+		</collisionpolygon>
+	</object>
+	<object name="missile02" subtexturename="spaceShips_002.png">
+		<collisionpolygon>
+			<vertex X="0" y="-121"/>
+			<vertex X="48" y="-78"/>
+			<vertex X="36" y="116"/>
+			<vertex X="-36" y="116"/>
+			<vertex X="-48" y="-78"/>
+		</collisionpolygon>
+	</object>
+	<object name="missile03" subtexturename="spaceShips_003.png">
+		<collisionpolygon>
+			<vertex X="-63" y="-47"/>
+			<vertex X="0" y="-124"/>
+			<vertex X="63" y="47"/>
+			<vertex X="48" y="108"/>
+			<vertex X="-48" y="108"/>
+		</collisionpolygon>
+	</object>
+</objects>

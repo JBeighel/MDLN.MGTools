@@ -11,6 +11,8 @@ using Microsoft.Xna.Framework.Input;
 using MDLN.MGTools;
 
 namespace MDLN.MGTools {
+	public delegate void PhysicalObjectEvent(PhysicalObject CurrObj);
+
 	public class PhysicalObject : ICollidable, IVisible {
 		/// <summary>
 		/// Size of handles used when editing collision vertexes
@@ -61,6 +63,8 @@ namespace MDLN.MGTools {
 		/// Scale factors for this object
 		/// </summary>
 		private Vector2 cvScale;
+
+		public event PhysicalObjectEvent Updating;
 
 		public string TextureName;
 
@@ -213,6 +217,13 @@ namespace MDLN.MGTools {
 			return;
 		}
 
+		/// <summary>
+		/// Will update the object in order to allow editing of the collision vertexes
+		/// Can be replaced in the inheritting class.  It only needs called if the vertex editing is 
+		/// needed feature, otherwise it can be skipped.
+		/// </summary>
+		/// <param name="CurrTime"></param>
+		/// <returns>True on success, false to indicate an error</returns>
 		public bool Update(GameTime CurrTime) {
 			Rectangle Handle;
 			int nVertCtr;
@@ -258,6 +269,9 @@ namespace MDLN.MGTools {
 			}
 
 			cPriorMouse = CurrMouse;
+
+			//Raise the event handler for external logic
+			Updating?.Invoke(this);
 
 			return true;
 		}

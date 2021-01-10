@@ -37,12 +37,16 @@ namespace MDLN.SpaceShooter
 		private MouseState cPriorMouse;
 		private ObjectManager cObjManager;
 
+		sPlayerShipInfo_t cPlayer;
+
 		public SpaceShooter() {
 			cGraphDevMgr = new GraphicsDeviceManager(this);
 
 			IsMouseVisible = true;
 			Window.AllowUserResizing = true;
 			Window.ClientSizeChanged += FormResizeHandler;
+
+			cPlayer = new sPlayerShipInfo_t(0);
 
 			return;
 		}
@@ -140,9 +144,13 @@ namespace MDLN.SpaceShooter
 			cTextureAtlas = new TextureAtlas(cGraphDevMgr.GraphicsDevice, INTERFACECONTENTDIR + "spaceShooter2_spritesheet.png", INTERFACECONTENTDIR + "spaceShooter2_spritesheet.xml");
 			cObjManager = new ObjectManager(cGraphDevMgr.GraphicsDevice, cTextureAtlas, INTERFACECONTENTDIR + "GameObjects.xml");
 
-			NewObj = cObjManager.SpawnGameObject("ship01", 0);
+			//Plaeyer's object
+			NewObj = cObjManager.SpawnGameObject("ship01", (int)eObjGroups_t.Player);
 
-			NewObj.SetPosition(new Vector2(128, 128), 256, 256, new Vector2(1, 1), 0);
+			NewObj.SetPosition(new Vector2(128, 128), 100, 100, new Vector2(1, 1), 0);
+			NewObj.Updating += UserShipUpdating;
+
+			cPlayer.nMaxSpeed = 12;
 			
 			return;
 		}
@@ -176,14 +184,14 @@ namespace MDLN.SpaceShooter
 			if ((Currmouse.MiddleButton == ButtonState.Pressed) && (cPriorMouse.MiddleButton == ButtonState.Pressed)) {
 				//User is holding the middle mouse button
 				
-				vShipCenter.X = Currmouse.X - cObjManager[0][0].CenterPoint.X; //distance to add via scaling
-				vShipCenter.Y = Currmouse.Y - cObjManager[0][0].CenterPoint.Y;
+				vShipCenter.X = Currmouse.X - cObjManager[(int)eObjGroups_t.Player][0].CenterPoint.X; //distance to add via scaling
+				vShipCenter.Y = Currmouse.Y - cObjManager[(int)eObjGroups_t.Player][0].CenterPoint.Y;
 
-				vShipCenter.X += cObjManager[0][0].Width; //New width/height of ship
-				vShipCenter.Y += cObjManager[0][0].Height;
+				vShipCenter.X += cObjManager[(int)eObjGroups_t.Player][0].Width; //New width/height of ship
+				vShipCenter.Y += cObjManager[(int)eObjGroups_t.Player][0].Height;
 
-				vShipCenter.X = vShipCenter.X / cObjManager[0][0].Width;
-				vShipCenter.Y = vShipCenter.Y / cObjManager[0][0].Height;
+				vShipCenter.X = vShipCenter.X / cObjManager[(int)eObjGroups_t.Player][0].Width;
+				vShipCenter.Y = vShipCenter.Y / cObjManager[(int)eObjGroups_t.Player][0].Height;
 
 				cObjManager[0][0].Scale = vShipCenter;
 			}
@@ -196,7 +204,7 @@ namespace MDLN.SpaceShooter
 				//User is holding the middle mouse button
 				vShipToMouse.SetRectangularCoordinates(Currmouse.X - vShipCenter.X, Currmouse.Y - vShipCenter.Y);
 
-				cObjManager[0][0].ObjectRotation = (float)(vShipToMouse.Polar.Angle * Math.PI / 180);
+				cObjManager[(int)eObjGroups_t.Player][0].ObjectRotation = (float)(vShipToMouse.Polar.Angle * Math.PI / 180);
 			}
 
 			if ((Currmouse.XButton1 == ButtonState.Pressed) && (cPriorMouse.XButton1 == ButtonState.Released)) {
@@ -234,5 +242,70 @@ namespace MDLN.SpaceShooter
 			base.Draw(gameTime);
 		}
 
+		protected void UserShipUpdating(PhysicalObject Player) {
+			GamePadState CurrPad = GamePad.GetState(PlayerIndex.One);
+			Vector2 vControl;
+			Vector2 vPlayerPos = Player.CenterPoint;
+			float nDirection = Player.ObjectRotation;
+
+			if (CurrPad.IsConnected == true) { //Handle gamepad input (Y axis is inverted?)
+				vControl = new Vector2(CurrPad.ThumbSticks.Left.X, -1 * CurrPad.ThumbSticks.Left.Y);
+
+				//Constant drag on the ship slowing it down
+				if (cPlayer.vVelocity.Polar.Length > 0.1){
+					cPlayer.vVelocity.SetPolarCoordinates(cPlayer.vVelocity.Polar.Length - 0.1, cPlayer.vVelocity.Polar.Angle);
+				} else {
+					cPlayer.vVelocity.SetPolarCoordinates(0, 0);
+				}
+
+				//Speed controls, accelerating it
+				cPlayer.vVelocity.SetRectangularCoordinates(cPlayer.vVelocity.Rectangular.Real + vControl.X, cPlayer.vVelocity.Rectangular.Imaginary + vControl.Y);
+
+				if (cPlayer.vVelocity.Polar.Length > cPlayer.nMaxSpeed) {
+					cPlayer.vVelocity.SetPolarCoordinates(cPlayer.nMaxSpeed, cPlayer.vVelocity.Polar.Angle);
+				}
+
+				//Rotation contol
+				vControl = new Vector2(CurrPad.ThumbSticks.Right.X, -1 * CurrPad.ThumbSticks.Right.Y);
+				if (vControl.X != 0) {
+					nDirection = (float)Math.Atan((vControl.Y) / vControl.X);
+
+					if (vControl.X <= 0) {
+						nDirection += (float)(Math.PI);
+					}
+				} else {
+					if (vControl.Y > 0) {
+						nDirection = (float)(Math.PI / 2);
+					} else if (vControl.Y < 0) {
+						nDirection = (float)(-1 * Math.PI / 2);
+					}
+				}
+
+				vPlayerPos.X += (float)cPlayer.vVelocity.Rectangular.Real;
+				vPlayerPos.Y += (float)cPlayer.vVelocity.Rectangular.Imaginary;
+			} else { //Maybe do keyboard?
+
+			}
+
+			Player.CenterPoint = vPlayerPos;
+			Player.ObjectRotation = nDirection;
+		}
+
+		private struct sPlayerShipInfo_t {
+			public float nMaxSpeed;
+			public Vector vVelocity;
+
+			public sPlayerShipInfo_t(float nMaxSpd = 0) {
+				nMaxSpeed = nMaxSpd;
+				vVelocity = new Vector();
+			}
+		}
+
+		private enum eObjGroups_t {
+			Player = 0,
+			Bullets = 1,
+			Enemies = 2,
+		}
 	}
 }
+

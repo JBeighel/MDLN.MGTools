@@ -140,9 +140,8 @@ namespace MDLN.SpaceShooter
 			cTextureAtlas = new TextureAtlas(cGraphDevMgr.GraphicsDevice, INTERFACECONTENTDIR + "spaceShooter2_spritesheet.png", INTERFACECONTENTDIR + "spaceShooter2_spritesheet.xml");
 			cObjManager = new ObjectManager(cGraphDevMgr.GraphicsDevice, cTextureAtlas, INTERFACECONTENTDIR + "GameObjects.xml");
 
-			cObjManager.SpawnGameObject("ship01", 0);
+			NewObj = cObjManager.SpawnGameObject("ship01", 0);
 
-			NewObj = cObjManager[0][0];
 			NewObj.SetPosition(new Vector2(128, 128), 256, 256, new Vector2(1, 1), 0);
 			
 			return;

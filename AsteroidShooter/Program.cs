@@ -427,7 +427,7 @@ namespace MDLN.AsteroidShooter {
 				cDevConsole.AddText("Particle burst on player ship");
 
 				for (int Ctr = 0; Ctr < 25; Ctr++) {
-					NewSparkle = new Particle2D();
+					NewSparkle = new Particle2D(cGraphDevMgr.GraphicsDevice);
 
 					NewSparkle.AlphaFade = true;
 					NewSparkle.TimeToLive = 100 + (cRandom.NextDouble() * 1000);
@@ -467,7 +467,7 @@ namespace MDLN.AsteroidShooter {
 			Particle2D AstInfo;
 			Vector2 AstSpeed;
 
-			AstInfo = new Particle2D();
+			AstInfo = new Particle2D(GraphicsDevice);
 
 			AstInfo.Width = Size;
 			AstInfo.Height = Size;
@@ -494,7 +494,7 @@ namespace MDLN.AsteroidShooter {
 		}
 
 		private void CreateNewHunter(int Size, Vector2 Position) {
-			HunterShip NewShip = new HunterShip();
+			HunterShip NewShip = new HunterShip(GraphicsDevice);
 
 			NewShip.Height = Size;
 			NewShip.Width = Size;
@@ -532,7 +532,7 @@ namespace MDLN.AsteroidShooter {
 			Vector2 Speed;
 
 			for (int Ctr = 0; Ctr < Count; Ctr++) {
-				NewSparkle = new Particle2D();
+				NewSparkle = new Particle2D(GraphicsDevice);
 
 				NewSparkle.AlphaFade = true;
 				NewSparkle.TimeToLive = 100 + (cRandom.NextDouble() * 1000);

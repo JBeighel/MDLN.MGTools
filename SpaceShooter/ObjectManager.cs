@@ -15,19 +15,22 @@ namespace MDLN.MGTools
 		/// This is a list of all object groups
 		/// Each list in the dictionary is a collection of every object in that group
 		/// </summary>
-		Dictionary<Int32, List<PhysicalObject>> cObjGroups;
+		private Dictionary<Int32, List<PhysicalObject>> cObjGroups;
 
 		/// <summary>
 		/// This is a collection of all object definitions that were loaded and are available for use
 		/// </summary>
-		Dictionary<string, sObjectInfo_t> cObjDefsList;
+		private Dictionary<string, sObjectInfo_t> cObjDefsList;
 
 		/// <summary>
 		/// Graphics device used in this application, used when creating new game objects
 		/// </summary>
-		GraphicsDevice cGraphDev;
+		private GraphicsDevice cGraphDev;
 
-		TextureAtlas cImageAtlas;
+		/// <summary>
+		/// Texture atlas holding the images for the objects managed by this class
+		/// </summary>
+		private readonly TextureAtlas cImageAtlas;
 
 		public ObjectManager(GraphicsDevice GraphDev, TextureAtlas TileAtlas, string strXMLFile, string strXMLRoot = "/objects") {
 			XmlDocument ObjXML;
@@ -171,31 +174,26 @@ namespace MDLN.MGTools
 			return;
 		}
 
+		/// <summary>
+		/// Definition structure for objects that can be created
+		/// </summary>
 		private struct sObjectInfo_t {
+			/// <summary>
+			/// Identifying name of the object
+			/// </summary>
 			public string strObjName;
+			/// <summary>
+			/// Name of the texture in the atlas
+			/// </summary>
 			public string strTextureName;
+			/// <summary>
+			/// Radians the texture needs rotated to be a 0 degrees on screen
+			/// </summary>
 			public float nTextureRotate;
+			/// <summary>
+			/// List of collision vertexes for this object
+			/// </summary>
 			public List<Vector2> avVertexes;
-		}
-
-		private struct sObjectIndexes_t
-		{
-			/// <summary>
-			/// Game object class instance
-			/// </summary>
-			public PhysicalObject Obj;
-			/// <summary>
-			/// True if a unique identifer was set, false otherwise
-			/// </summary>
-			public bool bHasID;
-			/// <summary>
-			/// Unique identifier assigned
-			/// </summary>
-			public Int32 nID;
-			/// <summary>
-			/// List of all groups it was assigned to
-			/// </summary>
-			public List<Int32> anGroups;
 		}
 	}
 }

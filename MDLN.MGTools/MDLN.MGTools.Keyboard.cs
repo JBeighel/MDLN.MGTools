@@ -16,7 +16,7 @@ namespace MDLN.MGTools {
 		public static string GetTypedChars(KeyboardState CurrKeys, KeyboardState PriorKeys) {
 			Keys[] PressedList = CurrKeys.GetPressedKeys();
 			string NewKeys = "";
-			bool ShiftDown = false;
+			bool ShiftDown;
 
 			if ((CurrKeys.IsKeyDown(Keys.LeftShift) == true) || (CurrKeys.IsKeyDown(Keys.RightShift) == true)) {
 				ShiftDown = true;

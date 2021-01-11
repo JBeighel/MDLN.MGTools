@@ -36,6 +36,8 @@ namespace MDLN.SpaceShooter
 		private TextureAtlas cTextureAtlas;
 		private MouseState cPriorMouse;
 		private ObjectManager cObjManager;
+		private ParticleEngine2D cParticles;
+		private GamePadState cPriorPad;
 
 		sPlayerShipInfo_t cPlayer;
 
@@ -122,6 +124,8 @@ namespace MDLN.SpaceShooter
 		protected override void LoadContent() {
 			PhysicalObject NewObj;
 
+			cParticles = new ParticleEngine2D(GraphicsDevice);
+
 			//The font texture isn't needed, but this is an example of loading a PNG
 			string strFileName = INTERFACECONTENTDIR + "Font.png";
 			FileStream FileLoad = new FileStream(strFileName, FileMode.Open);
@@ -147,7 +151,7 @@ namespace MDLN.SpaceShooter
 			//Plaeyer's object
 			NewObj = cObjManager.SpawnGameObject("ship01", (int)eObjGroups_t.Player);
 
-			NewObj.SetPosition(new Vector2(128, 128), 100, 100, new Vector2(1, 1), 0);
+			NewObj.SetPosition(new Vector2(128, 128), new Vector2(0.25f, 0.25f), 0);
 			NewObj.Updating += UserShipUpdating;
 
 			cPlayer.nMaxSpeed = 12;
@@ -215,6 +219,7 @@ namespace MDLN.SpaceShooter
 
 			cObjManager.UpdateObjects(gameTime);
 			cDevConsole.Update(gameTime);
+			cParticles.Update(gameTime);
 
 			//Use monogame update
 			base.Update(gameTime);
@@ -231,9 +236,10 @@ namespace MDLN.SpaceShooter
 			GraphicsDevice.Clear(Color.Black);
 
 			cObjManager.DrawObjects();
+			cParticles.Draw();
 
 			DrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
-			
+
 			cDevConsole.Draw(DrawBatch);
 
 			DrawBatch.End();
@@ -267,6 +273,7 @@ namespace MDLN.SpaceShooter
 
 				//Rotation contol
 				vControl = new Vector2(CurrPad.ThumbSticks.Right.X, -1 * CurrPad.ThumbSticks.Right.Y);
+				nDirection = Player.ObjectRotation;
 				if (vControl.X != 0) {
 					nDirection = (float)Math.Atan((vControl.Y) / vControl.X);
 
@@ -283,6 +290,21 @@ namespace MDLN.SpaceShooter
 
 				vPlayerPos.X += (float)cPlayer.vVelocity.Rectangular.Real;
 				vPlayerPos.Y += (float)cPlayer.vVelocity.Rectangular.Imaginary;
+
+				//Shoot button
+				if ((CurrPad.Buttons.A == ButtonState.Pressed) && (cPriorPad.Buttons.A == ButtonState.Released)) {
+					//Button A was just pushed
+					Missile NewShot = new Missile(cGraphDevMgr.GraphicsDevice, cTextureAtlas);
+					cObjManager.ApplyDefinition(NewShot, "missile01");
+					NewShot.SetPosition(Player.CenterPoint, new Vector2(0.1f, 0.1f), nDirection);
+					NewShot.Speed = new Vector2(10,10);
+
+					cParticles.AddParticle(NewShot);
+				}
+
+
+				//Save pad state for next time
+				cPriorPad = CurrPad;
 			} else { //Maybe do keyboard?
 
 			}

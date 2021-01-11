@@ -81,6 +81,18 @@ namespace MDLN.MGTools
 					}
 				}
 
+				if (ObjNode.Attributes["width"] != null) {
+					if (Int32.TryParse(ObjNode.Attributes["width"].InnerText, out NewDef.nWidth) == false) {
+						throw new Exception(String.Format("Inside object tag named {0} attribute 'width' had invalid format: {1}{2}In file {3}", NewDef.strObjName, ObjNode.Attributes["width"].InnerText, Environment.NewLine, strXMLFile));
+					}
+				}
+
+				if (ObjNode.Attributes["height"] != null) {
+					if (Int32.TryParse(ObjNode.Attributes["height"].InnerText, out NewDef.nHeight) == false) {
+						throw new Exception(String.Format("Inside object tag named {0} attribute 'height' had invalid format: {1}{2}In file {3}", NewDef.strObjName, ObjNode.Attributes["height"].InnerText, Environment.NewLine, strXMLFile));
+					}
+				}
+
 				//Read all child node values
 				VertList = ObjNode.SelectNodes("vertex");
 				foreach (XmlNode VertNode in VertList) {
@@ -108,24 +120,38 @@ namespace MDLN.MGTools
 			return;
 		}
 
+		/// <summary>
+		/// Creates a new instance of PhysicalObject, applies the specified object definition,
+		/// ands adds it to the suggested group to be managed by this class
+		/// </summary>
+		/// <param name="strDefName">Object definition name</param>
+		/// <param name="nGroupID">Group to add this object to</param>
+		/// <returns></returns>
 		public PhysicalObject SpawnGameObject(string strDefName, Int32 nGroupID) {
-			sObjectInfo_t ObjDef;
 			PhysicalObject NewObj;
 
 			if (cObjDefsList.ContainsKey(strDefName) == false) {
 				throw new Exception("No object definition with name '" + strDefName + "' exists in this manager");
 			}
 
-			//Load the object definition
-			ObjDef = cObjDefsList[strDefName];
-
 			//Create and initialize the object
 			NewObj = new PhysicalObject(cGraphDev, cImageAtlas);
 
-			NewObj.TextureName = ObjDef.strTextureName;
-			NewObj.TextureRotation = ObjDef.nTextureRotate;
-			NewObj.SetCollisionVertexes(ObjDef.avVertexes);
-			
+			ImportGameObject(NewObj, strDefName, nGroupID);
+
+			return NewObj;
+		}
+
+		/// <summary>
+		/// Takes an externally created PhysicalObject applies an object definition to it, then 
+		/// adds it to the group to be managed by this class.
+		/// </summary>
+		/// <param name="NewObj">Object to define and import</param>
+		/// <param name="strDefName">Object definition to apply</param>
+		/// <param name="nGroupID">Group to add this object to</param>
+		public void ImportGameObject(PhysicalObject NewObj,  string strDefName, Int32 nGroupID) {
+			ApplyDefinition(NewObj, strDefName);
+
 			//Add the object to all lists
 			if (cObjGroups.ContainsKey(nGroupID) == false) { //New gorup, add the entry
 				cObjGroups.Add(nGroupID, new List<PhysicalObject>());
@@ -133,7 +159,32 @@ namespace MDLN.MGTools
 
 			cObjGroups[nGroupID].Add(NewObj);
 
-			return NewObj;
+			return;
+		}
+
+		/// <summary>
+		/// Applies an object definition to an externally created PhysicalObject only
+		/// The object is not imported to a group and will not be managed by this class
+		/// </summary>
+		/// <param name="Obj">Object to apply a definition to</param>
+		/// <param name="strDefName">Object definition name</param>
+		public void ApplyDefinition(PhysicalObject Obj, string strDefName) {
+			sObjectInfo_t ObjDef;
+			
+			if (cObjDefsList.ContainsKey(strDefName) == false) {
+				throw new Exception("No object definition with name '" + strDefName + "' exists in this manager");
+			}
+
+			//Load the object definition
+			ObjDef = cObjDefsList[strDefName];
+
+			Obj.Width = ObjDef.nWidth;
+			Obj.Height = ObjDef.nHeight;
+			Obj.TextureName = ObjDef.strTextureName;
+			Obj.TextureRotation = ObjDef.nTextureRotate;
+			Obj.SetCollisionVertexes(ObjDef.avVertexes);
+
+			return;
 		}
 
 		public List<PhysicalObject> this[Int32 nIndex] {
@@ -194,6 +245,8 @@ namespace MDLN.MGTools
 			/// List of collision vertexes for this object
 			/// </summary>
 			public List<Vector2> avVertexes;
+			public Int32 nHeight;
+			public Int32 nWidth;
 		}
 	}
 }

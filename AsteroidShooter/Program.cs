@@ -182,11 +182,11 @@ namespace MDLN.AsteroidShooter {
 			//Collision detection
 			cPlayerShip.ImageTint = Color.White;
 			for (Cnt = 0; Cnt < cAsteroids.ParticleList.Count; Cnt++) {
-				EnemyInfo = cAsteroids.ParticleList[Cnt];
+				EnemyInfo = (Particle2D)cAsteroids.ParticleList[Cnt];
 
 				//Are bullts hitting the asteroid?
 				for (Ctr = 0; Ctr < cPlayerBullets.ParticleList.Count; Ctr++) {
-					BulletInfo = cPlayerBullets.ParticleList[Ctr];
+					BulletInfo = (Particle2D)cPlayerBullets.ParticleList[Ctr];
 
 					if (BulletInfo.TestCollision(EnemyInfo.GetCollisionRegions()) == true) {
 						CreateParticleBurst(new Vector2(EnemyInfo.TopLeft.X + (EnemyInfo.Width / 2), EnemyInfo.TopLeft.Y + (EnemyInfo.Height / 2)), 25 * EnemyInfo.Height / 6, EnemyInfo.Height / 3, Color.SaddleBrown, cTextureDict[Textures.Dust]);
@@ -241,11 +241,11 @@ namespace MDLN.AsteroidShooter {
 			ParticlesToRemove.Clear();
 
 			for (Cnt = 0; Cnt < cUFOs.ParticleList.Count; Cnt++) {
-				EnemyInfo = cUFOs.ParticleList[Cnt];
+				EnemyInfo = (Particle2D)cUFOs.ParticleList[Cnt];
 
 				//Are bullts hitting the UFO?
 				for (Ctr = 0; Ctr < cPlayerBullets.ParticleList.Count; Ctr++) {
-					BulletInfo = cPlayerBullets.ParticleList[Ctr];
+					BulletInfo = (Particle2D)cPlayerBullets.ParticleList[Ctr];
 
 					if (BulletInfo.TestCollision(EnemyInfo.GetCollisionRegions()) == true) {
 						//Destroy shot and UFO
@@ -272,7 +272,7 @@ namespace MDLN.AsteroidShooter {
 			}
 
 			for (Cnt = 0; Cnt < cEnemyBullets.ParticleList.Count; Cnt++) {
-				BulletInfo = cEnemyBullets.ParticleList[Cnt];
+				BulletInfo = (Particle2D)cEnemyBullets.ParticleList[Cnt];
 
 				//Is the bullet hitting the player?
 				if (BulletInfo.TestCollision(cPlayerShip) == true) {

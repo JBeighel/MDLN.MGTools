@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Missile.cs" />
     <Compile Include="ObjectManager.cs" />
     <Compile Include="PhysicalObject.cs" />
     <Compile Include="SpaceShooter-Game.cs" />

@@ -24,14 +24,6 @@ namespace MDLN.MGTools {
 		/// </summary>
 		private ConvexPolygon cPolyGon;
 		/// <summary>
-		/// Texture atlas holding the texture for this object
-		/// </summary>
-		private TextureAtlas cImgAtlas;
-		/// <summary>
-		/// Rectangle holding the region to draw this shape in
-		/// </summary>
-		private Rectangle crectExtents;
-		/// <summary>
 		/// Texture used for the handles when editing collision vertexes
 		/// </summary>
 		private Texture2D cHandleTexture;
@@ -43,10 +35,6 @@ namespace MDLN.MGTools {
 		/// Prior state of the mouse from the last update
 		/// </summary>
 		private MouseState cPriorMouse;
-		/// <summary>
-		/// Graphics device being used to render this object
-		/// </summary>
-		private GraphicsDevice cGraphDev;
 		/// <summary>
 		/// True if the vertexes are beng displayed and edited, false otherwise
 		/// </summary>
@@ -64,10 +52,32 @@ namespace MDLN.MGTools {
 		/// </summary>
 		private Vector2 cvScale;
 
+		/// <summary>
+		/// Texture atlas holding the texture for this object
+		/// </summary>
+		protected TextureAtlas cImgAtlas;
+		/// <summary>
+		/// Graphics device being used to render this object
+		/// </summary>
+		protected GraphicsDevice cGraphDev;
+		/// <summary>
+		/// Rectangle holding the region to draw this shape in
+		/// </summary>
+		protected Rectangle crectExtents;
+
+		/// <summary>
+		/// Event called when this object is performing its regular update
+		/// </summary>
 		public event PhysicalObjectEvent Updating;
 
+		/// <summary>
+		/// Name of the texture in the texture atlas to use when drawing this object
+		/// </summary>
 		public string TextureName;
 
+		/// <summary>
+		/// Set true to display the collision polygon with handles to left click and drag their positions
+		/// </summary>
 		public bool AllowCollisionVertexEdits {
 			get {
 				return cbVertexEdits;
@@ -81,6 +91,9 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Amount this object is rotated in radians
+		/// </summary>
 		public float ObjectRotation { 
 			get {
 				return cnRotation;
@@ -94,6 +107,9 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Coordinates of the center point of this object
+		/// </summary>
 		public Vector2 CenterPoint {
 			get {
 				Vector2 vCenter;
@@ -116,6 +132,12 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Height of this object in pixels
+		/// This may not be its size on screen as this is the pre-scaled value
+		/// This value is intended to be set upon creation and not modified.  Setting it again
+		/// will throw off the collision polygon sizes
+		/// </summary>
 		public int Height {
 			get {
 				return crectExtents.Height;
@@ -126,6 +148,12 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Width of this object in pixels
+		/// This may not be its size on screen as this is the pre-scaled value
+		/// This value is intended to be set upon creation and not modified.  Setting it again
+		/// will throw off the collision polygon sizes
+		/// </summary>
 		public int Width {
 			get {
 				return crectExtents.Width;
@@ -136,6 +164,9 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Amount to scale this object by when rendering it
+		/// </summary>
 		public Vector2 Scale {
 			get {
 				return cvScale;
@@ -148,6 +179,10 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// If the collision polygon needs to have its center be offset from the
+		/// rendered texture, this is the X and Y distances to move the polygon
+		/// </summary>
 		public Vector2 CollisionOffset {
 			get {
 				return cPolyGon.BaseOffset;
@@ -158,6 +193,9 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Amount of rotation in radians the texture must be rotated to face 0 radians on screen
+		/// </summary>
 		public float TextureRotation {
 			get {
 				return cnTextureRotation;
@@ -207,10 +245,8 @@ namespace MDLN.MGTools {
 			return;
 		}
 
-		public void SetPosition(Vector2 vCenter, int nHeight, int nWidth, Vector2 vScale, float nRotateRadians) {
-			Height = nHeight;
-			Width = nWidth;
-			cvScale = vScale;
+		public void SetPosition(Vector2 vCenter, Vector2 vScale, float nRotateRadians) {
+			Scale = vScale;
 			ObjectRotation = nRotateRadians;
 			CenterPoint = vCenter;
 
@@ -224,7 +260,7 @@ namespace MDLN.MGTools {
 		/// </summary>
 		/// <param name="CurrTime"></param>
 		/// <returns>True on success, false to indicate an error</returns>
-		public bool Update(GameTime CurrTime) {
+		public virtual bool Update(GameTime CurrTime) {
 			Rectangle Handle;
 			int nVertCtr;
 			Vector2 vVertPos;

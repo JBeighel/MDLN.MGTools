@@ -11,7 +11,7 @@ using Microsoft.Xna.Framework.Input;
 using MDLN.MGTools;
 
 namespace MDLN.MGTools {
-	public delegate void PhysicalObjectEvent(PhysicalObject CurrObj);
+	public delegate void PhysicalObjectEvent(PhysicalObject CurrObj, GameTime CurrTime);
 
 	public class PhysicalObject : ICollidable, IVisible {
 		/// <summary>
@@ -307,7 +307,7 @@ namespace MDLN.MGTools {
 			cPriorMouse = CurrMouse;
 
 			//Raise the event handler for external logic
-			Updating?.Invoke(this);
+			Updating?.Invoke(this, CurrTime);
 
 			return true;
 		}

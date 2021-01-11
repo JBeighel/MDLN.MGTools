@@ -93,6 +93,8 @@ namespace MDLN.SpaceShooter
 				}
 
 				cObjManager[0][0].TextureName = strParam;
+			} else if (RegEx.LooseTest(CommandEvent, @"(bullet|missile)\s*count") == true) {
+				cDevConsole.AddText(String.Format("Misile count: {0}", cParticles.ParticleList.Count));
 			} else {
 				cDevConsole.AddText("Unrecognized command: " + CommandEvent);
 			}
@@ -248,7 +250,7 @@ namespace MDLN.SpaceShooter
 			base.Draw(gameTime);
 		}
 
-		protected void UserShipUpdating(PhysicalObject Player) {
+		protected void UserShipUpdating(PhysicalObject Player, GameTime tCurrTime) {
 			GamePadState CurrPad = GamePad.GetState(PlayerIndex.One);
 			Vector2 vControl;
 			Vector2 vPlayerPos = Player.CenterPoint;
@@ -288,18 +290,24 @@ namespace MDLN.SpaceShooter
 					}
 				}
 
+				if (((Math.Abs(vControl.X) > 0.1) || (Math.Abs(vControl.Y) > 0.1)) && (tCurrTime.TotalGameTime.TotalMilliseconds - cPlayer.tLastShot > 1000)) {
+					//User is aiming, so fire too
+					Missile NewShot = new Missile(cGraphDevMgr.GraphicsDevice, cTextureAtlas, cObjManager, (int)eObjGroups_t.Player);
+					cObjManager.ApplyDefinition(NewShot, "missile01");
+					NewShot.SetPosition(Player.CenterPoint, new Vector2(0.1f, 0.1f), nDirection);
+					NewShot.SetMovement(nDirection, 5);
+
+					cParticles.AddParticle(NewShot);
+					cPlayer.tLastShot = tCurrTime.TotalGameTime.TotalMilliseconds;
+				}
+
 				vPlayerPos.X += (float)cPlayer.vVelocity.Rectangular.Real;
 				vPlayerPos.Y += (float)cPlayer.vVelocity.Rectangular.Imaginary;
 
 				//Shoot button
 				if ((CurrPad.Buttons.A == ButtonState.Pressed) && (cPriorPad.Buttons.A == ButtonState.Released)) {
 					//Button A was just pushed
-					Missile NewShot = new Missile(cGraphDevMgr.GraphicsDevice, cTextureAtlas);
-					cObjManager.ApplyDefinition(NewShot, "missile01");
-					NewShot.SetPosition(Player.CenterPoint, new Vector2(0.1f, 0.1f), nDirection);
-					NewShot.Speed = new Vector2(10,10);
-
-					cParticles.AddParticle(NewShot);
+					
 				}
 
 
@@ -316,14 +324,16 @@ namespace MDLN.SpaceShooter
 		private struct sPlayerShipInfo_t {
 			public float nMaxSpeed;
 			public Vector vVelocity;
+			public double tLastShot;
 
 			public sPlayerShipInfo_t(float nMaxSpd = 0) {
 				nMaxSpeed = nMaxSpd;
 				vVelocity = new Vector();
+				tLastShot = 0;
 			}
 		}
 
-		private enum eObjGroups_t {
+		private enum eObjGroups_t : Int32 {
 			Player = 0,
 			Bullets = 1,
 			Enemies = 2,

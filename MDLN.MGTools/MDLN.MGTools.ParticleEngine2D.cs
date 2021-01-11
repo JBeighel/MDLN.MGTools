@@ -164,7 +164,7 @@ namespace MDLN.MGTools {
 			}
 
 			for (Ctr = IndexesToRemove.Count - 1; Ctr >= 0; Ctr--) {
-				cParticleList.RemoveAt(Ctr);
+				cParticleList.RemoveAt(IndexesToRemove[Ctr]);
 			}
 		}
 

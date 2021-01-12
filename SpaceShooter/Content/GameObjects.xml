@@ -45,5 +45,31 @@
 		<vertex x="-48" y="108"/>
 	</object>
 
+	<object name="bullet01" subtexturename="spaceEffects_001.png" texturerotation="-90" height="23" width="14">
+		<vertex x="4" y="1.65"/>
+		<vertex x="0" y="10.3"/>
+		<vertex x="-4" y="1.65"/>
+	</object>
+	<object name="bullet02" subtexturename="spaceEffects_002.png" texturerotation="-90" height="30" width="13">
+		<vertex x="0" y="-4"/>
+		<vertex x="6.2" y="5.3"/>
+		<vertex x="1.7" y="13.6"/>
+		<vertex x="-1.7" y="13.6"/>
+		<vertex x="-6.2" y="5.3"/>
+	</object>
+
+	<object name="bullet17" subtexturename="spaceEffects_017.png" texturerotation="-90" height="23" width="14">
+		<vertex x="4" y="1.65"/>
+		<vertex x="0" y="10.3"/>
+		<vertex x="-4" y="1.65"/>
+	</object>
+	<object name="bullet18" subtexturename="spaceEffects_018.png" texturerotation="-90" height="30" width="13">
+		<vertex x="0" y="-4"/>
+		<vertex x="6.2" y="5.3"/>
+		<vertex x="1.7" y="13.6"/>
+		<vertex x="-1.7" y="13.6"/>
+		<vertex x="-6.2" y="5.3"/>
+	</object>
+
 <!-- effect 8-16 is cloud 0-->
 </objects>

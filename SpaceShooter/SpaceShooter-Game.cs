@@ -37,8 +37,10 @@ namespace MDLN.SpaceShooter
 		private MouseState cPriorMouse;
 		private ObjectManager cObjManager;
 		private GamePadState cPriorPad;
+		private ParticleEngine2D cParticles;
+		private readonly Random cRand;
 
-		sPlayerShipInfo_t cPlayer;
+		private sPlayerShipInfo_t cPlayer;
 
 		public SpaceShooter() {
 			cGraphDevMgr = new GraphicsDeviceManager(this);
@@ -48,6 +50,7 @@ namespace MDLN.SpaceShooter
 			Window.ClientSizeChanged += FormResizeHandler;
 
 			cPlayer = new sPlayerShipInfo_t(0);
+			cRand = new Random();
 
 			return;
 		}
@@ -67,6 +70,8 @@ namespace MDLN.SpaceShooter
 		private void ConsoleCommandHandler(object Sender, string CommandEvent) {
 			int nCtr;
 			string strParam;
+			Texture2D Txtr;
+			Rectangle rectRegion;
 
 			if (RegEx.LooseTest(CommandEvent, @"^\s*(quit|exit|close)\s*$") == true) {
 				Exit();
@@ -91,7 +96,13 @@ namespace MDLN.SpaceShooter
 					return;
 				}
 
+				cTextureAtlas.GetTileInfo(strParam, out Txtr, out rectRegion);
 				cObjManager[0][0].TextureName = strParam;
+				cObjManager[0][0].Scale = new Vector2(1, 1);
+				cObjManager[0][0].Width = rectRegion.Width;
+				cObjManager[0][0].Height = rectRegion.Height;
+
+				cDevConsole.AddText(String.Format("Tile is H{0} x W{1}", rectRegion.Height, rectRegion.Width));
 			} else if (RegEx.LooseTest(CommandEvent, @"(bullet|missile)\s*count") == true) {
 				cDevConsole.AddText(String.Format("Misile count: {0}", cObjManager[(int)eObjGroups_t.PlayerBullets].Count));
 			} else {
@@ -146,6 +157,7 @@ namespace MDLN.SpaceShooter
 
 			cTextureAtlas = new TextureAtlas(cGraphDevMgr.GraphicsDevice, INTERFACECONTENTDIR + "spaceShooter2_spritesheet.png", INTERFACECONTENTDIR + "spaceShooter2_spritesheet.xml");
 			cObjManager = new ObjectManager(cGraphDevMgr.GraphicsDevice, cTextureAtlas, INTERFACECONTENTDIR + "GameObjects.xml");
+			cParticles = new ParticleEngine2D(cGraphDevMgr.GraphicsDevice);
 
 			//Plaeyer's object
 			NewObj = cObjManager.SpawnGameObject("ship01", (int)eObjGroups_t.Player);
@@ -217,6 +229,7 @@ namespace MDLN.SpaceShooter
 			cPriorMouse = Currmouse;
 
 			cObjManager.UpdateObjects(gameTime);
+			cParticles.Update(gameTime);
 			cDevConsole.Update(gameTime);
 
 			//Use monogame update
@@ -237,6 +250,7 @@ namespace MDLN.SpaceShooter
 
 			DrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
 
+			cParticles.Draw(DrawBatch);
 			cDevConsole.Draw(DrawBatch);
 
 			DrawBatch.End();
@@ -285,26 +299,45 @@ namespace MDLN.SpaceShooter
 					}
 				}
 
-				if (((Math.Abs(vControl.X) > 0.1) || (Math.Abs(vControl.Y) > 0.1)) && (tCurrTime.TotalGameTime.TotalMilliseconds - cPlayer.tLastShot > 1000)) {
+				if ((Math.Abs(vControl.X) > 0.1) || (Math.Abs(vControl.Y) > 0.1)) {
 					//User is aiming, so fire too
-					Missile NewShot = new Missile(cGraphDevMgr.GraphicsDevice, cTextureAtlas, cObjManager, (int)eObjGroups_t.Enemies);
-					cObjManager.ImportGameObject(NewShot, "missile01", (Int32)eObjGroups_t.PlayerBullets);
-					NewShot.SetPosition(Player.CenterPoint, new Vector2(0.1f, 0.1f), nDirection);
-					NewShot.SetMovement(nDirection, 5);
+					if (tCurrTime.TotalGameTime.TotalMilliseconds - cPlayer.tLastBullet > 100) {
+						//Button A was just pushed
+						Projectile_t NewShot = new Projectile_t(cGraphDevMgr.GraphicsDevice, cTextureAtlas, cObjManager, (int)eObjGroups_t.Enemies, eProjectileType_t.Straight);
+						cObjManager.ImportGameObject(NewShot, "bullet02", (Int32)eObjGroups_t.PlayerBullets);
+						NewShot.SetPosition(Player.CenterPoint, new Vector2(1.5f, 1.5f), nDirection);
+						NewShot.SetMovement(nDirection, 10);
+						NewShot.ParticleHandler = cParticles;
+						NewShot.Rand = cRand;
 
-					cPlayer.tLastShot = tCurrTime.TotalGameTime.TotalMilliseconds;
+						cPlayer.tLastBullet = tCurrTime.TotalGameTime.TotalMilliseconds;
+					}
 				}
 
 				vPlayerPos.X += (float)cPlayer.vVelocity.Rectangular.Real;
 				vPlayerPos.Y += (float)cPlayer.vVelocity.Rectangular.Imaginary;
 
-				//Shoot button
+				//Gamepad Buttons
 				if ((CurrPad.Buttons.A == ButtonState.Pressed) && (cPriorPad.Buttons.A == ButtonState.Released)) {
 					//Button A was just pushed
 					EnemyShip NewShip = new EnemyShip(cGraphDevMgr.GraphicsDevice, cTextureAtlas, cObjManager, (int)eObjGroups_t.Player);
 					cObjManager.ImportGameObject(NewShip, "ship02", (int)eObjGroups_t.Enemies);
 					NewShip.SetPosition(new Vector2(0, 0), new Vector2(0.25f, 0.25f), 0);
 					NewShip.cDevConsole = cDevConsole;
+				}
+
+				if (CurrPad.Triggers.Right == 1.0) {
+					if (tCurrTime.TotalGameTime.TotalMilliseconds - cPlayer.tLastMisslie > 1000) {
+						//Button A was just pushed
+						Projectile_t NewShot = new Projectile_t(cGraphDevMgr.GraphicsDevice, cTextureAtlas, cObjManager, (int)eObjGroups_t.Enemies, eProjectileType_t.Tracking);
+						cObjManager.ImportGameObject(NewShot, "missile01", (Int32)eObjGroups_t.PlayerBullets);
+						NewShot.SetPosition(Player.CenterPoint, new Vector2(0.1f, 0.1f), nDirection);
+						NewShot.SetMovement(nDirection, 5);
+						NewShot.ParticleHandler = cParticles;
+						NewShot.Rand = cRand;
+
+						cPlayer.tLastMisslie = tCurrTime.TotalGameTime.TotalMilliseconds;
+					}
 				}
 
 
@@ -323,12 +356,14 @@ namespace MDLN.SpaceShooter
 		private struct sPlayerShipInfo_t {
 			public float nMaxSpeed;
 			public Vector vVelocity;
-			public double tLastShot;
+			public double tLastMisslie;
+			public double tLastBullet;
 
 			public sPlayerShipInfo_t(float nMaxSpd = 0) {
 				nMaxSpeed = nMaxSpd;
 				vVelocity = new Vector();
-				tLastShot = 0;
+				tLastMisslie = 0;
+				tLastBullet = 0;
 			}
 		}
 

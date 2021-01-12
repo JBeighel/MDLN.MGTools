@@ -93,7 +93,7 @@ namespace MDLN.SpaceShooter
 
 				cObjManager[0][0].TextureName = strParam;
 			} else if (RegEx.LooseTest(CommandEvent, @"(bullet|missile)\s*count") == true) {
-				cDevConsole.AddText(String.Format("Misile count: {0}", cObjManager[(int)eObjGroups_t.Bullets].Count));
+				cDevConsole.AddText(String.Format("Misile count: {0}", cObjManager[(int)eObjGroups_t.PlayerBullets].Count));
 			} else {
 				cDevConsole.AddText("Unrecognized command: " + CommandEvent);
 			}
@@ -287,8 +287,8 @@ namespace MDLN.SpaceShooter
 
 				if (((Math.Abs(vControl.X) > 0.1) || (Math.Abs(vControl.Y) > 0.1)) && (tCurrTime.TotalGameTime.TotalMilliseconds - cPlayer.tLastShot > 1000)) {
 					//User is aiming, so fire too
-					Missile NewShot = new Missile(cGraphDevMgr.GraphicsDevice, cTextureAtlas, cObjManager, (int)eObjGroups_t.Player);
-					cObjManager.ImportGameObject(NewShot, "missile01", (Int32)eObjGroups_t.Bullets);
+					Missile NewShot = new Missile(cGraphDevMgr.GraphicsDevice, cTextureAtlas, cObjManager, (int)eObjGroups_t.Enemies);
+					cObjManager.ImportGameObject(NewShot, "missile01", (Int32)eObjGroups_t.PlayerBullets);
 					NewShot.SetPosition(Player.CenterPoint, new Vector2(0.1f, 0.1f), nDirection);
 					NewShot.SetMovement(nDirection, 5);
 
@@ -301,7 +301,9 @@ namespace MDLN.SpaceShooter
 				//Shoot button
 				if ((CurrPad.Buttons.A == ButtonState.Pressed) && (cPriorPad.Buttons.A == ButtonState.Released)) {
 					//Button A was just pushed
-					
+					EnemyShip NewShip = new EnemyShip(cGraphDevMgr.GraphicsDevice, cTextureAtlas, cObjManager, (int)eObjGroups_t.Player);
+					cObjManager.ImportGameObject(NewShip, "ship02", (int)eObjGroups_t.Enemies);
+					NewShip.SetPosition(new Vector2(0, 0), new Vector2(0.25f, 0.25f), 0);
 				}
 
 
@@ -331,8 +333,9 @@ namespace MDLN.SpaceShooter
 
 		private enum eObjGroups_t : Int32 {
 			Player = 0,
-			Bullets = 1,
-			Enemies = 2,
+			Enemies = 1,
+			PlayerBullets = 2,
+			EnemyBullets = 3,
 		}
 	}
 }

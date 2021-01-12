@@ -75,6 +75,8 @@ namespace MDLN.MGTools {
 		/// </summary>
 		public string TextureName;
 
+		public Color TintColor;
+
 		/// <summary>
 		/// Set true to display the collision polygon with handles to left click and drag their positions
 		/// </summary>
@@ -228,6 +230,7 @@ namespace MDLN.MGTools {
 			cImgAtlas = TextureList;
 			cGraphDev = GraphDev;
 
+			TintColor = Color.White;
 			TextureName = "";
 
 			ObjectRotation = 0;
@@ -330,7 +333,7 @@ namespace MDLN.MGTools {
 			//Draw the object
 			SpriteBatch DrawBatch = new SpriteBatch(cGraphDev);
 			DrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
-			cImgAtlas.DrawTile(TextureName, DrawBatch, rectBlock, Color.White, cnTextureRotation + cnRotation);
+			cImgAtlas.DrawTile(TextureName, DrawBatch, rectBlock, TintColor, cnTextureRotation + cnRotation);
 			DrawBatch.End();
 
 			if (cbVertexEdits == true) {

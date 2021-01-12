@@ -75,8 +75,7 @@ namespace MDLN
 		public override bool Update(GameTime CurrTime) {
 			Vector2 vNewPos;
 			int nCtr, nBestTargetID = -1;
-			float nBestTargetDist = 0, nCurrDist, nAngToTarget;
-			Vector2 vToTarget;
+			float nBestTargetDist = 0, nCurrDist;
 			List<PhysicalObject> aTargetList = cObjMgr[cnTargetGroupID];
 
 			base.Update(CurrTime);
@@ -94,41 +93,13 @@ namespace MDLN
 			}
 
 			if (nBestTargetID != -1) { //Found a valid target, steer toward it
-				vToTarget = new Vector2() {
-					X = aTargetList[nBestTargetID].CenterPoint.X - CenterPoint.X,
-					Y = aTargetList[nBestTargetID].CenterPoint.Y - CenterPoint.Y,
-				};
-
-				if (vToTarget.X != 0) {
-					nAngToTarget = (float)Math.Atan2(vToTarget.Y, vToTarget.X); //Direction to target
-
-					nCurrDist = nAngToTarget - ObjectRotation; //How far we need to turn to point at target
-
-					if ((nCurrDist > Math.PI) || (nCurrDist < -1 * Math.PI)) {
-						//Have to turn more than 180 degrees?  The other way is shorter
-						nCurrDist *= -1;
-					}
-
-					//Don't exceed our max turn radius
-					if (nCurrDist > cnMaxTurn) {
-						nCurrDist = cnMaxTurn;
-					} else if (nCurrDist < -1 * cnMaxTurn) {
-						nCurrDist = -1 * cnMaxTurn;
-					}
-				} else {
-					if (((vToTarget.Y < 0) && (ObjectRotation > 0)) || ((vToTarget.Y > 0) && (ObjectRotation < 0))) {
-						//Targe is directly above/below and we are pointed the other way
-						nCurrDist = cnMaxTurn;
-					} else {
-						nCurrDist = 0;
-					}
-				}
+				nCurrDist = AITools.SteerTowardTarget(CenterPoint, aTargetList[nBestTargetID].CenterPoint, ObjectRotation, cnMaxTurn);
 
 				//Set the new movement direction, but don't change the speed
-				SetMovement(ObjectRotation + nCurrDist, cnMaxSpeed);
+				SetMovement(nCurrDist, cnMaxSpeed);
 			}
 
-			//Return True to keep this alive, false to have it removed
+			//Apply the current speed
 			vNewPos = CenterPoint;
 			vNewPos.X += Speed.X;
 			vNewPos.Y += Speed.Y;
@@ -151,6 +122,7 @@ namespace MDLN
 
 			CenterPoint = vNewPos;
 
+			//Return True to keep this alive, false to have it removed
 			return true;
 		}
 	}

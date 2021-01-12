@@ -189,7 +189,11 @@ namespace MDLN.MGTools
 
 		public List<PhysicalObject> this[Int32 nIndex] {
 			get {
-				return cObjGroups[nIndex];
+				if (cObjGroups.ContainsKey(nIndex) == false) {
+					return new List<PhysicalObject>();
+				} else {
+					return cObjGroups[nIndex];
+				}
 			}
 		}
 

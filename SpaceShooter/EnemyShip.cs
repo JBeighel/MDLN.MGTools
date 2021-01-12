@@ -15,6 +15,9 @@ namespace MDLN {
 		private ObjectManager cObjMgr;
 		private Int32 cnTargetGroupID;
 
+		private int cnLastMove = 0;
+		public GameConsole cDevConsole;
+
 		public EnemyShip(GraphicsDevice GraphDev, TextureAtlas TxtrAtlas, ObjectManager ObjManager, Int32 nTargetGroupID) : base(GraphDev, TxtrAtlas) {
 			cObjMgr = ObjManager;
 			cnTargetGroupID = nTargetGroupID;
@@ -67,13 +70,25 @@ namespace MDLN {
 			}
 
 			if (nBestTargetID != -1) { //Found a valid target, attack it
-				if (nBestTargetDist > cnMaxStrafeDist * cnMaxStrafeDist) {
+				if (nBestTargetDist > (cnMaxStrafeDist * cnMaxStrafeDist)) {
+					if (cnLastMove != 1) {
+						cDevConsole?.AddText("Move closer");
+					}
+					cnLastMove = 1;
 					//Too far away to strafe, move closer
 					nCurrDist = AITools.SteerTowardTarget(CenterPoint, aTargetList[nBestTargetID].CenterPoint, ObjectRotation, cnMaxTurn);
-				} if (nBestTargetDist < cnMinStrafeDist * cnMinStrafeDist) {
+				} else if (nBestTargetDist < cnMinStrafeDist * cnMinStrafeDist) {
+					if (cnLastMove != 2) {
+						cDevConsole?.AddText("Back away");
+					}
+					cnLastMove = 2;
 					//Too close, steer away from target
 					nCurrDist = AITools.SteerAwayFromTarget(CenterPoint, aTargetList[nBestTargetID].CenterPoint, ObjectRotation, cnMaxTurn);
 				}  else { //Close enough, strafe around the target
+					if (cnLastMove != 3) {
+						cDevConsole?.AddText("Strafe");
+					}
+					cnLastMove = 3;
 					nCurrDist = AITools.SteerToCircleTarget(CenterPoint, aTargetList[nBestTargetID].CenterPoint, ObjectRotation, cnMaxTurn, true);
 				}
 

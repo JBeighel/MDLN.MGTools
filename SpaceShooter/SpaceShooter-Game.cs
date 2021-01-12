@@ -304,6 +304,7 @@ namespace MDLN.SpaceShooter
 					EnemyShip NewShip = new EnemyShip(cGraphDevMgr.GraphicsDevice, cTextureAtlas, cObjManager, (int)eObjGroups_t.Player);
 					cObjManager.ImportGameObject(NewShip, "ship02", (int)eObjGroups_t.Enemies);
 					NewShip.SetPosition(new Vector2(0, 0), new Vector2(0.25f, 0.25f), 0);
+					NewShip.cDevConsole = cDevConsole;
 				}
 
 

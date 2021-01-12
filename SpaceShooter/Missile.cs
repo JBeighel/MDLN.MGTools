@@ -86,6 +86,7 @@ namespace MDLN
 
 				if (nBestTargetID == -1) { //No target picked
 					nBestTargetID = nCtr;
+					nBestTargetDist = nCurrDist;
 				} else if (nCurrDist < nBestTargetDist) {
 					nBestTargetID = nCtr;
 					nBestTargetDist = nCurrDist;

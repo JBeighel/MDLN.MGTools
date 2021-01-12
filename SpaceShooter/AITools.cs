@@ -101,8 +101,16 @@ namespace MDLN.MGTools {
 				nNewDir = (float)Math.Atan2(vMeToTarget.Y, vMeToTarget.X); //Direction to target
 				if (bClockWise == true) { //Adjust target 90 degrees to travel paralel to target
 					nNewDir += (float)(Math.PI / 2);
+
+					if (nNewDir > Math.PI) {//Crossed Y axis
+						nNewDir -= (float)(2 * Math.PI);
+					}
 				} else {
-					nNewDir -= (float)(Math.PI / 2);
+					nNewDir -= (float)(Math.PI / 2);//this is screen clockwise
+
+					if (nNewDir < Math.PI) { //Crossed Y axis
+						nNewDir += (float)(2 * Math.PI);
+					}
 				}
 
 				nNewDir -= nMyCurrDir; //How far I must turn to face target

@@ -11,7 +11,7 @@ using Microsoft.Xna.Framework.Input;
 using MDLN.MGTools;
 
 namespace MDLN.MGTools {
-	public delegate void PhysicalObjectEvent(PhysicalObject CurrObj, GameTime CurrTime);
+	public delegate bool PhysicalObjectEvent(PhysicalObject CurrObj, GameTime CurrTime);
 
 	public class PhysicalObject : ICollidable, IVisible {
 		/// <summary>
@@ -257,9 +257,13 @@ namespace MDLN.MGTools {
 		/// Will update the object in order to allow editing of the collision vertexes
 		/// Can be replaced in the inheritting class.  It only needs called if the vertex editing is 
 		/// needed feature, otherwise it can be skipped.
+		/// 
+		/// The return value must retain the purpose described here.  The ObjectManager and
+		/// Particle engines will attempt to purge this object if it returns false.
 		/// </summary>
 		/// <param name="CurrTime"></param>
-		/// <returns>True on success, false to indicate an error</returns>
+		/// <returns>True indicates the object still exists, false means the update decided the
+		/// object can be removed</returns>
 		public virtual bool Update(GameTime CurrTime) {
 			Rectangle Handle;
 			int nVertCtr;
@@ -307,9 +311,11 @@ namespace MDLN.MGTools {
 			cPriorMouse = CurrMouse;
 
 			//Raise the event handler for external logic
-			Updating?.Invoke(this, CurrTime);
-
-			return true;
+			if (Updating != null) {
+				return Updating.Invoke(this, CurrTime);
+			} else {
+				return true; //Returning true means the object should stick around
+			}
 		}
 
 		public bool Draw() {

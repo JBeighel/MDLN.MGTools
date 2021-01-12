@@ -206,9 +206,32 @@ namespace MDLN.MGTools
 		}
 
 		public void UpdateObjects(GameTime CurrTime) {
-			foreach (KeyValuePair<Int32, List<PhysicalObject>> CurrList in cObjGroups) {
-				foreach (PhysicalObject CurrObj in CurrList.Value) {
-					CurrObj.Update(CurrTime);
+			List<Int32> aIdxToRemove = new List<int>();
+			List<PhysicalObject> CurrList;
+			List<Int32> aIdxList;
+			PhysicalObject CurrObj;
+			Int32 nCtr;
+
+			//Get the keys in a separatex collection so updates to key list won't cause problems
+			aIdxList = new List<int>(cObjGroups.Keys);
+
+			//Loop through all of hte lists calling for updates
+			foreach (Int32 CurrKey in aIdxList) { 
+				CurrList = cObjGroups[CurrKey];
+				aIdxToRemove.Clear();
+
+				//Loop through all objects in this list
+				for (nCtr = 0; nCtr < CurrList.Count; nCtr++) {
+					CurrObj = CurrList[nCtr];
+					if (CurrObj.Update(CurrTime) == false) {
+						aIdxToRemove.Add(nCtr); //Save this index to be purged later
+					}
+				}
+
+				//Any Updates that return false must be removed,go backwards to avoid removed keys 
+				//messing up the indexing
+				for (nCtr = aIdxToRemove.Count - 1; nCtr >= 0; nCtr--) { 
+					CurrList.RemoveAt(aIdxToRemove[nCtr]);
 				}
 			}
 

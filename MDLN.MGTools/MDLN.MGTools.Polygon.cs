@@ -17,8 +17,10 @@ namespace MDLN.MGTools {
 		private Color cLineClr;
 		private Color cFillClr;
 		private Texture2D cLineTexture;
+		private Texture2D cFillTexture;
 		private readonly GraphicsDevice cGraphDev;
 		private readonly BasicEffect cBasicShader;
+		private List<Vector2> caTexturePos;
 
 		/// <summary>
 		/// Set true to draw perimeter lines around the shape
@@ -46,6 +48,10 @@ namespace MDLN.MGTools {
 			set {
 				//Save the color
 				cFillClr = value;
+
+				//Set it as the texture
+				cFillTexture = new Texture2D(cGraphDev, 1, 1);
+				cFillTexture.SetData(new[] { value });
 			}
 		}
 
@@ -67,6 +73,12 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		public Texture2D FillTexture {
+			set {
+				cFillTexture = value;
+			}
+		}
+
 		/// <summary>
 		/// Constructor for the class
 		/// </summary>
@@ -76,6 +88,8 @@ namespace MDLN.MGTools {
 			FillShape = true;
 			DrawOutline = true;
 			LineWidth = 1;
+
+			caTexturePos = new List<Vector2>();
 
 			cGraphDev = GraphDev;
 			cLineClr = new Color(0, 0, 0, 0); //Black and fully transparent
@@ -124,6 +138,9 @@ namespace MDLN.MGTools {
 							return true;
 						}
 					}
+
+					//Need a test for when edges completely span the other polygon.  
+					//Vertexes are all outside, edges intersect
 
 					return false;
 				case CollideType.Rectangle:
@@ -196,6 +213,31 @@ namespace MDLN.MGTools {
 		public bool AddVertex(Vector2 NewVert) {
 			cCollisionList.Vertexes.Add(NewVert);
 
+			if (cCollisionList.Vertexes.Count == 1) {
+				caTexturePos.Add(new Vector2(0, 0));
+			} else {
+				switch (cCollisionList.Vertexes.Count % 3) {
+				case 0:
+					caTexturePos.Add(new Vector2(0, 1));
+					break;
+				case 1:
+					caTexturePos.Add(new Vector2(1, 1));
+					break;
+				case 2:
+				default:
+					caTexturePos.Add(new Vector2(1, 0));
+					break;
+				}
+			}
+
+			return true;
+		}
+
+		public bool AddVertex(Vector2 NewVert, Vector2 TexturePos) {
+			cCollisionList.Vertexes.Add(NewVert);
+
+			caTexturePos.Add(TexturePos);
+
 			return true;
 		}
 
@@ -259,6 +301,8 @@ namespace MDLN.MGTools {
 			Vector2 LineFromOrigin, RotOrigin;
 			Vector LineSeg = new Vector();
 			RasterizerState PriorRaster, NewRaster;
+			VertexPositionTexture[] aVertexes;
+			VertexBuffer VtxBuff;
 
 			if (DrawOutline == true) {
 				RotOrigin.X = 0f;
@@ -291,18 +335,21 @@ namespace MDLN.MGTools {
 
 			if (FillShape == true) {
 				//Draw the triangle fill (triangles needed is Vertexes -2, then 3 vertexes per triangle)
-				VertexPositionColor[] aVertexes = new VertexPositionColor[(cCollisionList.Vertexes.Count - 2) * 3];
+				aVertexes = new VertexPositionTexture[(cCollisionList.Vertexes.Count - 2) * 3];
 
 				for (nCtr = 2; nCtr < cCollisionList.Vertexes.Count; nCtr++) {
 					nSurfNum = (nCtr - 2) * 3; //Which surface/triangle are we filling in
 
 					//Every triangle gets 3 vertexes in the list, none are shared in a TriangleList
 					//Always use index zero as a common point
-					aVertexes[nSurfNum] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[0].X, cCollisionList.Vertexes[0].Y, 0), cFillClr);
+					aVertexes[nSurfNum].Position = new Vector3(cCollisionList.Vertexes[0].X, cCollisionList.Vertexes[0].Y, 0);
+					aVertexes[nSurfNum].TextureCoordinate = caTexturePos[0];
 
 					//The other vertexes are pairs of the remaining vertexes
-					aVertexes[nSurfNum + 1] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[nCtr - 1].X, cCollisionList.Vertexes[nCtr - 1].Y, 0), cFillClr);
-					aVertexes[nSurfNum + 2] = new VertexPositionColor(new Vector3(cCollisionList.Vertexes[nCtr].X, cCollisionList.Vertexes[nCtr].Y, 0), cFillClr);
+					aVertexes[nSurfNum + 1].Position = new Vector3(cCollisionList.Vertexes[nCtr].X, cCollisionList.Vertexes[nCtr].Y, 0);
+					aVertexes[nSurfNum + 1].TextureCoordinate = caTexturePos[nCtr];
+					aVertexes[nSurfNum + 2].Position = new Vector3(cCollisionList.Vertexes[nCtr - 1].X, cCollisionList.Vertexes[nCtr - 1].Y, 0);
+					aVertexes[nSurfNum + 2].TextureCoordinate = caTexturePos[nCtr - 1];
 				}
 
 				//Save off the current rasterizer, then make sure all primitives are drawn
@@ -311,13 +358,18 @@ namespace MDLN.MGTools {
 				NewRaster.CullMode = CullMode.None;
 				cGraphDev.RasterizerState = NewRaster;
 
+				cBasicShader.Texture = cFillTexture;
+
+				VtxBuff = new VertexBuffer(cGraphDev, typeof(VertexPositionTexture), aVertexes.Length, BufferUsage.WriteOnly);
+				VtxBuff.SetData(aVertexes);
+				cGraphDev.SetVertexBuffer(VtxBuff);
+
 				//Make sure all passes of the effects/shader are being used
 				foreach (EffectPass CurrShadderPass in cBasicShader.CurrentTechnique.Passes) {
 					//This is the all-important line that sets the effect, and all of its settings, on the graphics device
 					CurrShadderPass.Apply();
-					//cBasicShader.CurrentTechnique.Passes[0].Apply();
 
-					cGraphDev.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.TriangleList, aVertexes, 0, aVertexes.Length / 3);
+					cGraphDev.DrawUserPrimitives<VertexPositionTexture>(PrimitiveType.TriangleList, aVertexes, 0, aVertexes.Length / 3);
 				}
 
 				//Restore the rasterizer

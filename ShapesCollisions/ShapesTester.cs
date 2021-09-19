@@ -133,6 +133,7 @@ namespace ShapesCollisions
 			cPolyList = new List<ConvexPolygon>();
 			cPolyList.Add(new ConvexPolygon(cGraphDevMgr.GraphicsDevice));
 			cPolyList[0].LineColor = Color.Blue;
+			cPolyList[0].LineWidth = 2;
 
 			cPolyList[0].FillColor = Color.DarkOliveGreen;
 			cPolyList[0].FillShape = true;
@@ -152,6 +153,7 @@ namespace ShapesCollisions
 			cPolyList.Add(new ConvexPolygon(cGraphDevMgr.GraphicsDevice));
 			cPolyList[1].LineColor = Color.Green;
 			cPolyList[1].FillColor = Color.Wheat;
+			cPolyList[1].LineWidth = 2;
 
 			strFileName = INTERFACECONTENTDIR + "\\Ship.png";
 			FileLoad = new FileStream(strFileName, FileMode.Open);
@@ -180,6 +182,7 @@ namespace ShapesCollisions
 			cPolyList.Add(new ConvexPolygon(cGraphDevMgr.GraphicsDevice));
 			cPolyList[2].LineColor = Color.Gray;
 			cPolyList[2].FillColor = Color.BlueViolet;
+			cPolyList[2].LineWidth = 2;
 
 
 			//tmpTexture = new Texture2D(cGraphDevMgr.GraphicsDevice, 2, 2);
@@ -228,7 +231,7 @@ namespace ShapesCollisions
 				//Mouse was just clicked, see if its in range of a vertex
 				for (nPolyCtr = 0; nPolyCtr < cPolyList.Count; nPolyCtr++) {
 					VertList.Clear();
-					VertList.AddRange(cPolyList[nPolyCtr].GetVertexes());
+					VertList.AddRange(cPolyList[nPolyCtr].GetVertexes(false));
 
 					for (nVertCtr = 0; nVertCtr < VertList.Count; nVertCtr++) {
 						if (MGMath.IsPointInCircle(MousePt, VertList[nVertCtr], CIRCLERADIUS) == true) {
@@ -241,7 +244,7 @@ namespace ShapesCollisions
 				}
 
 				for (nPolyCtr = 0; cMousePoly == null && nPolyCtr < cPolyList.Count; nPolyCtr++) {
-					if (MGMath.PointInConvexPolygon(MousePt, cPolyList[nPolyCtr].GetVertexes()) == true) {
+					if (MGMath.PointInConvexPolygon(MousePt, cPolyList[nPolyCtr].GetVertexes(false)) == true) {
 						cMovePoly = cPolyList[nPolyCtr];
 						cMoveStart = MousePt;
 
@@ -312,7 +315,7 @@ namespace ShapesCollisions
 
 			for (nPolyCtr = 0; nPolyCtr < cPolyList.Count; nPolyCtr++) {
 				VertList.Clear();
-				VertList.AddRange(cPolyList[nPolyCtr].GetVertexes());
+				VertList.AddRange(cPolyList[nPolyCtr].GetVertexes(false));
 
 				//Draw circles at each vertex
 				for (nVertCtr = 0; nVertCtr < VertList.Count; nVertCtr++) {
@@ -324,7 +327,7 @@ namespace ShapesCollisions
 					cDrawBatch.Draw(cCircleTexture, CircleDest, Color.Gray);
 				}
 
-				//Draw thenCtrpolygons
+				//Draw the polygons
 				cPolyList[nPolyCtr].Draw();
 			}
 

@@ -19,8 +19,8 @@ namespace MDLN.MGTools {
 		private Texture2D cLineTexture;
 
 		private Texture2D cFillTexture;
-		private readonly GraphicsDevice cGraphDev;
-		private readonly BasicEffect cBasicShader;
+		private GraphicsDevice cGraphDev;
+		private BasicEffect cBasicShader;
 		private List<Vector2> caTexturePos;
 
 		private Vector2 cvBaseOffset;
@@ -252,6 +252,23 @@ namespace MDLN.MGTools {
 		public bool AddVertex(Vector2 NewVert) {
 			cavBaseVertexList.Add(NewVert);
 
+			if (caTexturePos.Count == 0) {
+				caTexturePos.Add(new Vector2(0, 0));
+			} else {
+				switch (caTexturePos.Count % 3) {
+				case 1:
+					caTexturePos.Add(new Vector2(0, 1));
+					break;
+				case 2:
+					caTexturePos.Add(new Vector2(1, 1));
+					break;
+				case 3:
+				default:
+					caTexturePos.Add(new Vector2(1, 0));
+					break;
+				}
+			}
+
 			RecalculateCoordinates();
 
 			return true;
@@ -266,34 +283,40 @@ namespace MDLN.MGTools {
 		/// <returns></returns>
 		public bool SetVertexes(IEnumerable<Vector2> avVertList) {
 			cavBaseVertexList.Clear();
+			caTexturePos.Clear();
+			
 			cavBaseVertexList.AddRange(avVertList);
 
-			RecalculateCoordinates();
-
-			if (cCollisionList.Vertexes.Count == 1) {
-				caTexturePos.Add(new Vector2(0, 0));
-			} else {
-				switch (cCollisionList.Vertexes.Count % 3) {
-				case 0:
-					caTexturePos.Add(new Vector2(0, 1));
-					break;
-				case 1:
-					caTexturePos.Add(new Vector2(1, 1));
-					break;
-				case 2:
-				default:
-					caTexturePos.Add(new Vector2(1, 0));
-					break;
+			foreach (Vector2 vVert in avVertList) {
+				if (caTexturePos.Count == 0) {
+					caTexturePos.Add(new Vector2(0, 0));
+				} else {
+					switch (caTexturePos.Count % 3) {
+					case 1:
+						caTexturePos.Add(new Vector2(0, 1));
+						break;
+					case 2:
+						caTexturePos.Add(new Vector2(1, 1));
+						break;
+					case 3:
+					default:
+						caTexturePos.Add(new Vector2(1, 0));
+						break;
+					}
 				}
 			}
+
+			RecalculateCoordinates();
 
 			return true;
 		}
 
 		public bool AddVertex(Vector2 NewVert, Vector2 TexturePos) {
-			cCollisionList.Vertexes.Add(NewVert);
+			cavBaseVertexList.Add(NewVert);
 
 			caTexturePos.Add(TexturePos);
+
+			RecalculateCoordinates();
 
 			return true;
 		}
@@ -388,7 +411,7 @@ namespace MDLN.MGTools {
 		}
 
 		/// <summary>
-		/// Specift the values for all transformations
+		/// Specify the values for all transformations
 		/// </summary>
 		/// <param name="vMove">Directional offset</param>
 		/// <param name="vScale">Scaling factors</param>
@@ -398,6 +421,18 @@ namespace MDLN.MGTools {
 			cvScale = vScale;
 			cnRotation = nRadians;
 
+			RecalculateCoordinates();
+
+			return;
+		}
+
+		/// <summary>
+		/// Move the polygon relative to its current position.
+		/// The amount specified here will increase the offset from its original vertex positions
+		/// </summary>
+		/// <param name="vMove"></param>
+		public void MoveShape(Vector2 vMove) {
+			cvMove += vMove;
 			RecalculateCoordinates();
 
 			return;
@@ -417,8 +452,12 @@ namespace MDLN.MGTools {
 		/// Retrieve a list of all vertexes for this shape
 		/// </summary>
 		/// <returns>A collection of all vertexes in this shape</returns>
-		public IEnumerable<Vector2> GetVertexes() {
-			return cavBaseVertexList;
+		public IEnumerable<Vector2> GetVertexes(bool bGetOriginal) {
+			if (bGetOriginal == true) {
+				return cavBaseVertexList;
+			} else {
+				return cCollisionList.Vertexes;
+			}
 		}
 
 		/// <summary>
@@ -431,7 +470,8 @@ namespace MDLN.MGTools {
 
 			//Create a basec shader to use when rendering the polygon
 			cBasicShader = new BasicEffect(cGraphDev) {
-				VertexColorEnabled = true,
+				//VertexColorEnabled = true,
+				TextureEnabled = true,
 				World = Matrix.CreateOrthographicOffCenter(0, cGraphDev.Viewport.Width, cGraphDev.Viewport.Height, 0, 0, 1),
 			};
 		}
@@ -449,11 +489,11 @@ namespace MDLN.MGTools {
 			VertexPositionTexture[] aVertexes;
 			VertexBuffer VtxBuff;
 
-			SpriteBatch DrawBatch = new SpriteBatch(cGraphDev);
-
-			DrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
-
 			if (DrawOutline == true) {
+				SpriteBatch DrawBatch = new SpriteBatch(cGraphDev);
+
+				DrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
+
 				RotOrigin.X = 0f;
 				RotOrigin.Y = 0.5f; //Rotation from texture, middle of left side
 
@@ -480,9 +520,9 @@ namespace MDLN.MGTools {
 					//Draw the rectangle rotated to create the line
 					DrawBatch.Draw(cLineTexture, LineRect, cLineTexture.Bounds, Color.White, (float)(LineSeg.Polar.Angle * Math.PI / 180), RotOrigin, SpriteEffects.None, 0);
 				}
-			}
 
-			DrawBatch.End();
+				DrawBatch.End();
+			}
 
 			if ((FillShape == true) && (cCollisionList.Vertexes.Count > 2)) {
 				//Draw the triangle fill (triangles needed is Vertexes -2, then 3 vertexes per triangle)
@@ -546,8 +586,8 @@ namespace MDLN.MGTools {
 			int nCtr;
 			Vector2 vScale, vRotate;
 
-			cvBaseOffset.X = 0;
-			cvBaseOffset.Y = 0;
+			cvBaseOffset.X = cvMove.X;
+			cvBaseOffset.Y = cvMove.Y;
 
 			//Now calculate the position of all the collision vertexes
 			cCollisionList.Vertexes.Clear();

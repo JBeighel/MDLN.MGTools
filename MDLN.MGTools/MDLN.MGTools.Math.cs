@@ -339,6 +339,110 @@ namespace MDLN.MGTools {
 			//The point wasn't in any of the triangles, outside the polygon
 			return false;
 		}
+
+		/// <summary>
+		/// Checks if two line segments intersect between the endpoints provided
+		/// 
+		/// </summary>
+		/// <param name="Line1End1"></param>
+		/// <param name="Line1End2"></param>
+		/// <param name="Line2End1"></param>
+		/// <param name="Line2End2"></param>
+		/// <returns></returns>
+		public static bool LineSegmentIntesection(Vector2 Line1End1, Vector2 Line1End2, Vector2 Line2End1, Vector2 Line2End2) {
+			float Line1M, Line1B, Line2M, Line2B;
+			Vector2 vIntersect;
+
+			//Start with general equation for bothe lines, aY = mX + b
+			//Calculate line slopes
+			if (Line1End1.X == Line1End2.X) {
+				//Line is vertical, infinite slope
+				Line1M = float.MaxValue;
+			} else {
+				Line1M = (Line1End1.Y - Line1End2.Y) / (Line1End1.X - Line1End2.X);
+			}
+
+			if (Line2End1.X == Line2End2.X) {
+				//Line is vertical, infinite slope
+				Line2M = float.MaxValue;
+			} else {
+				Line2M = (Line2End1.Y - Line2End2.Y) / (Line2End1.X - Line2End2.X);
+			}
+
+			if (Line1M == Line2M) {
+				//Lines are parallel and can't instersect
+				return false;
+			} 
+
+			//Calculate Y intercepts
+			Line1B = Line1End1.Y - (Line1M * Line1End1.X);
+			Line2B = Line2End1.Y - (Line2M * Line2End1.X);
+
+			if (Line1M == float.MaxValue) {
+				//Veritical Line 1 handling
+				//look for Y value in line 2 at line 1's X
+				vIntersect.X = Line1End1.X;
+				vIntersect.Y = (Line2M * vIntersect.X) + Line2B;
+			} else if (Line2M == float.MaxValue) {
+				//Veritical Line 2 handling
+				//look for Y value in line 1 at line 2's X
+				vIntersect.X = Line2End1.X;
+				vIntersect.Y = (Line1M * vIntersect.X) + Line1B;
+			} else {
+				//Find intersection X value
+				vIntersect.X = Line2B - Line1B;
+				vIntersect.X /= Line1M - Line2M;
+
+				//Find intersection Y value
+				//Sub X into either equation
+				vIntersect.Y = (Line1M * vIntersect.X) + Line1B;
+			}
+
+			//See if the X coordinate is inside both line segments
+			if (Line1End1.X < Line1End2.X) {
+				if ((Line1End1.X > vIntersect.X) || (vIntersect.X > Line1End2.X)) {
+					return false;
+				}
+			} else {
+				if ((Line1End2.X > vIntersect.X) || (vIntersect.X > Line1End1.X)) {
+					return false;
+				}
+			}
+
+			if (Line2End1.X < Line2End2.X) {
+				if ((Line2End1.X > vIntersect.X) || (vIntersect.X > Line2End2.X)) {
+					return false;
+				}
+			} else {
+				if ((Line2End2.X > vIntersect.X) || (vIntersect.X > Line2End1.X)) {
+					return false;
+				}
+			}
+
+			//See if the Y coordinate is inside both line segments
+			if (Line1End1.Y < Line1End2.Y) {
+				if ((Line1End1.Y > vIntersect.Y) || (vIntersect.Y > Line1End2.Y)) {
+					return false;
+				}
+			} else {
+				if ((Line1End2.Y > vIntersect.Y) || (vIntersect.Y > Line1End1.Y)) {
+					return false;
+				}
+			}
+
+			if (Line2End1.Y < Line2End2.Y) {
+				if ((Line2End1.Y > vIntersect.Y) || (vIntersect.Y > Line2End2.Y)) {
+					return false;
+				}
+			} else {
+				if ((Line2End2.Y > vIntersect.Y) || (vIntersect.Y > Line2End1.Y)) {
+					return false;
+				}
+			}
+
+			//The line segments do intersect
+			return true;
+		}
 	}
 }
 

@@ -415,7 +415,7 @@ namespace MDLN.MGTools {
 		/// </summary>
 		/// <returns>List of unmodified collision vertexes</returns>
 		public IEnumerable<Vector2> GetCollisionVertexes() {
-			return cPolyGon.GetVertexes();
+			return cPolyGon.GetVertexes(false);
 		}
 	}
 }

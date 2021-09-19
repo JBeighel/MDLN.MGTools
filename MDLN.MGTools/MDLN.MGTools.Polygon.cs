@@ -151,6 +151,8 @@ namespace MDLN.MGTools {
 			foreach (CollisionRegion CurrReg in TestRegions) {
 				switch (CurrReg.Type) {
 				case CollideType.ConvexPolygon:
+					Int32 nMeCtr, nThemCtr;
+
 					//See if this polygon is hitting the other one
 					foreach (Vector2 Vertex in cCollisionList.Vertexes) {
 						if (MGMath.PointInConvexPolygon(Vertex, CurrReg.Vertexes) == true) {
@@ -167,6 +169,13 @@ namespace MDLN.MGTools {
 
 					//Need a test for when edges completely span the other polygon.  
 					//Vertexes are all outside, edges intersect
+					for (nMeCtr = 1; nMeCtr < cCollisionList.Vertexes.Count; nMeCtr += 1) {
+						for (nThemCtr = 1; nThemCtr < CurrReg.Vertexes.Count; nThemCtr += 1) {
+							if (MGMath.LineSegmentIntesection(cCollisionList.Vertexes[nMeCtr], cCollisionList.Vertexes[nMeCtr - 1], CurrReg.Vertexes[nThemCtr], CurrReg.Vertexes[nThemCtr - 1]) == true) {
+								return true;
+							}
+						}
+					}
 
 					return false;
 				case CollideType.Rectangle:

@@ -11,7 +11,7 @@ namespace MDLN.AsteroidShooter {
 		private int cStrafeDirection;
 		private double cLastShot; 
 
-		public HunterShip() {
+		public HunterShip(GraphicsDevice GraphDev) : base(GraphDev) {
 			cRand = new Random(DateTime.Now.Millisecond);
 			cStrafeDirection = 0;
 		}

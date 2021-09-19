@@ -16,7 +16,7 @@ namespace MDLN.MGTools {
 		/// <summary>
 		/// List of all particles this object is managing
 		/// </summary>
-		private readonly List<Particle2D> cParticleList;
+		private readonly List<IParticle> cParticleList;
 
 		/// <summary>
 		/// If a particle reaches the edge of the screen should it appear on the opposite side or be removed
@@ -27,7 +27,7 @@ namespace MDLN.MGTools {
 		/// <summary>
 		/// List of all particles this object is managing
 		/// </summary>
-		public List<Particle2D> ParticleList { 
+		public List<IParticle> ParticleList { 
 			get {
 				return cParticleList;
 			}
@@ -54,7 +54,7 @@ namespace MDLN.MGTools {
 
 			cDrawBatch = new SpriteBatch(cGraphDev);
 
-			cParticleList = new List<Particle2D>();
+			cParticleList = new List<IParticle>();
 
 			DrawBlendingMode = BlendState.NonPremultiplied;
 
@@ -65,7 +65,7 @@ namespace MDLN.MGTools {
 		/// Add a new particle to be managed by this instance of the class
 		/// </summary>
 		/// <param name="NewParticle">Particle object to be managed.</param>
-		public void AddParticle(Particle2D NewParticle) {
+		public void AddParticle(IParticle NewParticle) {
 			cParticleList.Add(NewParticle);
 		}
 
@@ -98,7 +98,7 @@ namespace MDLN.MGTools {
 		/// <param name="SpeedY">Speed of the particle along the Y axis.</param>
 		/// <param name="Tint">Tint or color overlay for the particle.</param>
 		public void AddParticle(Texture2D Image, float Top, float Left, int Height, int Width, float SpeedX, float SpeedY, Color Tint) {
-			Particle2D NewBullet = new Particle2D();
+			Particle2D NewBullet = new Particle2D(cGraphDev);
 
 			NewBullet.TopLeft.X = (int)Left;
 			NewBullet.TopLeft.Y = (int)Top;
@@ -119,7 +119,7 @@ namespace MDLN.MGTools {
 		/// <param name="CurrTime">Current time in the game.</param>
 		public void Update(GameTime CurrTime) {
 			int Ctr;
-			Particle2D CurrBullet;
+			IParticle CurrBullet;
 			List<int> IndexesToRemove = new List<int>();
 
 			for (Ctr = 0; Ctr < cParticleList.Count; Ctr++) {
@@ -130,33 +130,33 @@ namespace MDLN.MGTools {
 					continue;
 				}
 
-				if ((CurrBullet.SpeedX <= 0) && (CurrBullet.TopLeft.X < -1 * cParticleList[Ctr].Width)) {  //Bullet moved off screen left
+				if ((CurrBullet.GetSpeedX() <= 0) && (CurrBullet.GetTopLeft().X < -1 * cParticleList[Ctr].GetWidth())) {  //Bullet moved off screen left
 					if (WrapScreenEdges == false) {
 						IndexesToRemove.Add(Ctr);
 						continue;
 					} else {
-						CurrBullet.TopLeft.X = cGraphDev.Viewport.Bounds.Width;
+						CurrBullet.SetTopLeft(cGraphDev.Viewport.Bounds.Width, CurrBullet.GetTopLeft().Y);
 					}
-				} else if ((CurrBullet.SpeedX >= 0) && (CurrBullet.TopLeft.X > cGraphDev.Viewport.Bounds.Width)) {  //Bullet moved off screen right
+				} else if ((CurrBullet.GetSpeedX() >= 0) && (CurrBullet.GetTopLeft().X > cGraphDev.Viewport.Bounds.Width)) {  //Bullet moved off screen right
 					if (WrapScreenEdges == false) {
 						IndexesToRemove.Add(Ctr);
 						continue;
 					} else {
-						CurrBullet.TopLeft.X = cParticleList[Ctr].Width * -1;
+						CurrBullet.SetTopLeft(cParticleList[Ctr].GetWidth() * -1, CurrBullet.GetTopLeft().Y);
 					}
-				} else if ((CurrBullet.SpeedY >= 0) && (CurrBullet.TopLeft.Y < -1 * cParticleList[Ctr].Height)) {  //Bullet moved off screen top
+				} else if ((CurrBullet.GetSpeedY() >= 0) && (CurrBullet.GetTopLeft().Y < -1 * cParticleList[Ctr].GetHeight())) {  //Bullet moved off screen top
 					if (WrapScreenEdges == false) {
 						IndexesToRemove.Add(Ctr);
 						continue;
 					} else {
-						CurrBullet.TopLeft.Y = cGraphDev.Viewport.Bounds.Height;
+						CurrBullet.SetTopLeft(CurrBullet.GetTopLeft().X, cGraphDev.Viewport.Bounds.Height);
 					}
-				} else if ((CurrBullet.SpeedY <= 0) && (CurrBullet.TopLeft.Y > cGraphDev.Viewport.Bounds.Height)) {  //Bullet moved off screen bottom
+				} else if ((CurrBullet.GetSpeedY() <= 0) && (CurrBullet.GetTopLeft().Y > cGraphDev.Viewport.Bounds.Height)) {  //Bullet moved off screen bottom
 					if (WrapScreenEdges == false) {
 						IndexesToRemove.Add(Ctr);
 						continue;
 					} else {
-						CurrBullet.TopLeft.Y = cParticleList[Ctr].Height * -1;
+						CurrBullet.SetTopLeft(CurrBullet.GetTopLeft().X, CurrBullet.GetHeight() * -1);
 					}
 				}
 
@@ -164,7 +164,7 @@ namespace MDLN.MGTools {
 			}
 
 			for (Ctr = IndexesToRemove.Count - 1; Ctr >= 0; Ctr--) {
-				cParticleList.RemoveAt(Ctr);
+				cParticleList.RemoveAt(IndexesToRemove[Ctr]);
 			}
 		}
 
@@ -172,17 +172,13 @@ namespace MDLN.MGTools {
 		/// Draw all of the particles to current render device
 		/// </summary>
 		public void Draw() {
-			cDrawBatch.Begin(SpriteSortMode.Immediate, DrawBlendingMode);
-
-			foreach (Particle2D CurrParticle in cParticleList) {
+			foreach (IParticle CurrParticle in cParticleList) {
 				if (ShaderEffect != null) {
 					//ShaderEffect.Parameters["TintColor"].SetValue(CurrParticle.Tint.ToVector4());
 					ShaderEffect.Techniques[0].Passes[0].Apply();
 				}
-				CurrParticle.Draw(cDrawBatch);
+				CurrParticle.Draw();
 			}
-
-			cDrawBatch.End();
 		}
 
 		/// <summary>
@@ -200,9 +196,46 @@ namespace MDLN.MGTools {
 	}
 
 	/// <summary>
+	/// Interface for objects that will be managed by the particle engine
+	/// </summary>
+	public interface IParticle : IVisible {
+		/// <summary>
+		/// Returns the width of the object in pixels
+		/// </summary>
+		/// <returns>Object Width</returns>
+		int GetWidth();
+		/// <summary>
+		/// Returns the height of the object in pixels
+		/// </summary>
+		/// <returns>Object Height</returns>
+		int GetHeight();
+		/// <summary>
+		/// Returns the speed of the object in the X direction in pixels
+		/// </summary>
+		/// <returns>X direction speed</returns>
+		float GetSpeedX();
+		/// <summary>
+		/// Returns the speed of the object in the Y direction in pixels
+		/// </summary>
+		/// <returns>Y Direction speed</returns>
+		float GetSpeedY();
+		/// <summary>
+		/// Retreives the top left coordinates of the object
+		/// </summary>
+		/// <returns>Top left coordinates</returns>
+		Vector2 GetTopLeft();
+		/// <summary>
+		/// Sets the top left coordinates of the object
+		/// </summary>
+		/// <param name="NewX">New X coordinate</param>
+		/// <param name="NewY">New Y coordinate</param>
+		void SetTopLeft(float NewX, float NewY);
+	}
+
+	/// <summary>
 	/// Structure that holds all information needed to manage a particle
 	/// </summary>
-	public class Particle2D : ICollidable, IVisible {
+	public class Particle2D : ICollidable, IVisible, IParticle {
 		/// <summary>
 		/// Color to tine the particle
 		/// </summary>
@@ -275,13 +308,17 @@ namespace MDLN.MGTools {
 		/// </summary>
 		private double ctLastUpdate;
 
+		private GraphicsDevice cGraphDev;
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="MDLN.MGTools.Particle2D"/> class.
 		/// </summary>
-		public Particle2D() {
+		public Particle2D(GraphicsDevice GraphDev) {
 			TimeToLive = 0;
 			AlphaFade = false;
 			cCreationTime = -1;
+
+			cGraphDev = GraphDev;
 		}
 
 		/// <summary>
@@ -417,6 +454,16 @@ namespace MDLN.MGTools {
 		}
 
 		/// <summary>
+		/// Function to use to draw this object.  It will generate its own SpriteBatch 
+		/// to group all the polygon draws needed for particles
+		/// </summary>
+		/// <returns>True on success, fals on any error</returns>
+		public virtual bool Draw() {
+			SpriteBatch DrawBatch = new SpriteBatch(cGraphDev);
+			return Draw(DrawBatch);
+		}
+
+		/// <summary>
 		/// Function to draw this particle to the screen
 		/// </summary>
 		/// <param name="DrawBatch">Draw batch.</param>
@@ -440,7 +487,7 @@ namespace MDLN.MGTools {
 			if (bSpiralPath == true) {
 				nLifePct = (ctLastUpdate - cCreationTime) / TimeToLive;
 				Origin.X += (float)(nLifePct * TotalDistance.X * Image.Bounds.Width / DrawRegion.Width / 8);
-				Origin.Y += (float)(nLifePct * TotalDistance.Y * Image.Bounds.Height / DrawRegion.Height /8);
+				Origin.Y += (float)(nLifePct * TotalDistance.Y * Image.Bounds.Height / DrawRegion.Height / 8);
 			}
 
 			DrawBatch.Draw(Image, DrawRegion, Image.Bounds, Tint, Rotation, Origin, SpriteEffects.None, 0);
@@ -458,6 +505,56 @@ namespace MDLN.MGTools {
 			Center.Y = TopLeft.Y + (Height / 2);
 
 			return Center;
+		}
+
+		/// <summary>
+		/// Retrieve the width of the object in pixels
+		/// </summary>
+		/// <returns>Object width</returns>
+		public int GetWidth() {
+			return Width;
+		}
+
+		/// <summary>
+		/// Retrieve the Height of the object in pixels
+		/// </summary>
+		/// <returns>Object height</returns>
+		public int GetHeight() {
+			return Height;
+		}
+
+		/// <summary>
+		/// Retrieve the X direction speed of the object
+		/// </summary>
+		/// <returns>X direction speed</returns>
+		public float GetSpeedX() {
+			return SpeedX;
+		}
+
+		/// <summary>
+		/// Retrieve the Y direction speed of the object
+		/// </summary>
+		/// <returns>Y direction speed</returns>
+		public float GetSpeedY() {
+			return SpeedY;
+		}
+
+		/// <summary>
+		/// Retrieve the top left coordinates of the object
+		/// </summary>
+		/// <returns>Top left coordinates</returns>
+		public Vector2 GetTopLeft() {
+			return TopLeft;
+		}
+
+		/// <summary>
+		/// Set the coordinates for the top left corner of the object
+		/// </summary>
+		/// <param name="NewX">New X coordinate</param>
+		/// <param name="NewY">New Y coordinate</param>
+		public void SetTopLeft(float NewX, float NewY) {
+			TopLeft = new Vector2(NewX, NewY);
+			return;
 		}
 	}
 
@@ -552,7 +649,6 @@ namespace MDLN.MGTools {
 		/// Tells the object to draw itself using the specified SpriteBatch for rendering the
 		/// visible components.
 		/// </summary>
-		/// <param name="DrawBatch"></param>
-		bool Draw(SpriteBatch DrawBatch);
+		bool Draw();
 	}
 }

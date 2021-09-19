@@ -91,7 +91,7 @@ namespace ParticleTest {
 
 				//Randomly generate the number of particles requested
 				for (nCtr = 0; nCtr < nNumParticles; nCtr++) {
-					NewParticle = new Particle2D();
+					NewParticle = new Particle2D(GraphicsDevice);
 					//Particle images should be grayscale, allowing this tint value to color them
 					NewParticle.Tint = new Color(cRand.Next(0, 255), cRand.Next(0, 255), cRand.Next(0, 255));
 					NewParticle.Image = cTextureDict[eTexture];
@@ -212,7 +212,7 @@ namespace ParticleTest {
 
 			if (eButton == MouseButton.Left) {
 				for (nCtr = 0; nCtr < nParticleCnt; nCtr++) {
-					NewParticle = new Particle2D();
+					NewParticle = new Particle2D(GraphicsDevice);
 					//Particle images should be grayscale, allowing this tint value to color them
 					NewParticle.Tint = new Color(cRand.Next((int)nRed.X, (int)nRed.Y), cRand.Next((int)nGreen.X, (int)nGreen.Y), cRand.Next((int)nBlue.X, (int)nBlue.Y));
 					NewParticle.Image = cTextureDict[eTexture];

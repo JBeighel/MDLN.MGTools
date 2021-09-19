@@ -11,16 +11,24 @@ namespace MDLN.MGTools {
 	/// <summary>
 	/// Class to manage and draw a 2D polygon shape using the provided GraphicsDevice
 	/// </summary>
-	public class ConvexPolygon : ICollidable
+	public class ConvexPolygon : ICollidable, IVisible
 	{
 		private CollisionRegion cCollisionList;
 		private Color cLineClr;
 		private Color cFillClr;
 		private Texture2D cLineTexture;
+
 		private Texture2D cFillTexture;
 		private readonly GraphicsDevice cGraphDev;
 		private readonly BasicEffect cBasicShader;
 		private List<Vector2> caTexturePos;
+
+		private Vector2 cvBaseOffset;
+		private Vector2 cvScale;
+		private Vector2 cvMove;
+		private float cnRotation;
+		private List<Vector2> cavBaseVertexList;
+
 
 		/// <summary>
 		/// Set true to draw perimeter lines around the shape
@@ -80,6 +88,20 @@ namespace MDLN.MGTools {
 		}
 
 		/// <summary>
+		/// Specifies the base offset, meaning the starting position, to be used for all
+		/// directional offsets
+		/// </summary>
+		public Vector2 BaseOffset {
+			get {
+				return cvBaseOffset;
+			}
+
+			set {
+				cvBaseOffset = value;
+			}
+		}
+
+		/// <summary>
 		/// Constructor for the class
 		/// </summary>
 		/// <param name="GraphDev">Graphics Device this object should use to draw though</param>
@@ -88,10 +110,18 @@ namespace MDLN.MGTools {
 			FillShape = true;
 			DrawOutline = true;
 			LineWidth = 1;
+			cnRotation = 0;
+
+			cavBaseVertexList = new List<Vector2>();
+
+			cvScale = new Vector2(1, 1);
+			cvMove = new Vector2(0, 0);
+			cvBaseOffset = new Vector2(0, 0);
 
 			caTexturePos = new List<Vector2>();
 
 			cGraphDev = GraphDev;
+
 			cLineClr = new Color(0, 0, 0, 0); //Black and fully transparent
 			cFillClr = new Color(0, 0, 0, 0); //Black and fully transparent
 			cCollisionList = new CollisionRegion {
@@ -99,11 +129,7 @@ namespace MDLN.MGTools {
 				Vertexes = new List<Vector2>()
 			};
 
-			//Create a basec shader to use when rendering the polygon
-			cBasicShader = new BasicEffect(GraphDev) {
-				TextureEnabled = true,
-				World = Matrix.CreateOrthographicOffCenter(0, cGraphDev.Viewport.Width, cGraphDev.Viewport.Height, 0, 0, 1)
-			};
+			UpdateGaphicsDevice(GraphDev);
 
 			return;
 		}
@@ -205,13 +231,44 @@ namespace MDLN.MGTools {
 		}
 
 		/// <summary>
+		/// Gets the coordinates that are the center of the shape
+		/// </summary>
+		/// <returns></returns>
+		public Vector2 GetCenterCoordinates() {
+			Vector2 vCoords = cvBaseOffset;
+
+			vCoords.X += cvMove.X;
+			vCoords.Y += cvMove.Y;
+
+			return vCoords;
+		}
+
+		/// <summary>
 		/// Add another vertex to the polygon.  These vertexes will not be sorted, so the order they 
 		/// are added must create a convex shape.
 		/// </summary>
 		/// <param name="NewVert">The coordinates of the new vertex</param>
 		/// <returns>True if the vertex was added</returns>
 		public bool AddVertex(Vector2 NewVert) {
-			cCollisionList.Vertexes.Add(NewVert);
+			cavBaseVertexList.Add(NewVert);
+
+			RecalculateCoordinates();
+
+			return true;
+		}
+
+		/// <summary>
+		/// Specify all base vertexes this polygon should use
+		/// These vertexes are as they appear before any of the transformations
+		/// Directional offsets, scaling, and rotation
+		/// </summary>
+		/// <param name="avVertList"></param>
+		/// <returns></returns>
+		public bool SetVertexes(IEnumerable<Vector2> avVertList) {
+			cavBaseVertexList.Clear();
+			cavBaseVertexList.AddRange(avVertList);
+
+			RecalculateCoordinates();
 
 			if (cCollisionList.Vertexes.Count == 1) {
 				caTexturePos.Add(new Vector2(0, 0));
@@ -248,36 +305,110 @@ namespace MDLN.MGTools {
 		/// <param name="Vert">New coordinates for the vertex</param>
 		/// <returns>True if the vertex was updated</returns>
 		public bool UpdateVertex(int nIdx, Vector2 Vert) {
-			if (nIdx >= cCollisionList.Vertexes.Count) { //Vertex does not exist
+			Vector2 vAdjVert;
+
+			if (nIdx >= cavBaseVertexList.Count) { //Vertex does not exist
 				return false;
 			}
 
-			//Update the array contents
-			cCollisionList.Vertexes[nIdx] = Vert;
+			//Undo all transformations, move and center offset
+			Vert.X -= cvMove.X + cvBaseOffset.X;
+			Vert.Y -= cvMove.Y + cvBaseOffset.Y;
+
+			//Rotation
+			vAdjVert.X = (float)((Vert.X * Math.Cos(-1 * cnRotation)) - (Vert.Y * Math.Sin(-1 * cnRotation)));
+			vAdjVert.Y = (float)((Vert.X * Math.Sin(-1 * cnRotation)) + (Vert.Y * Math.Cos(-1 * cnRotation)));
+
+			//Scaling
+			vAdjVert.X /= cvScale.X;
+			vAdjVert.Y /= cvScale.Y;
+
+			//Re-apply center offset
+			vAdjVert.X += cvBaseOffset.X;
+			vAdjVert.Y += cvBaseOffset.Y;
+
+			cavBaseVertexList[nIdx] = vAdjVert;
+
+			RecalculateCoordinates();
 
 			return true;
 		}
 
 		/// <summary>
-		/// Moves all of the vertexes of the shape by some X and/or Y distance
+		/// Specifies the center coordinates for this shape
 		/// </summary>
-		/// <param name="Move">Distance to move the shape in X and Y directions</param>
-		/// <returns>True if the shape was correctly repositioned</returns>
-		public bool MoveShape(Vector2 Move) {
-			int nCtr;
-			Vector2 Vert;
-
-			for (nCtr = 0; nCtr < cCollisionList.Vertexes.Count; nCtr++) {
-				//Get the vertex data
-				Vert = cCollisionList.Vertexes[nCtr];
-
-				//Move it the horizontal and vertical distance
-				Vert.X += Move.X;
-				Vert.Y += Move.Y;
-
-				//Update the vertex lest
-				cCollisionList.Vertexes[nCtr] = Vert;
+		public Vector2 CenterCoordinates {
+			get {
+				return cvMove;
 			}
+
+			set {
+				cvMove.X = value.X - cvBaseOffset.X;
+				cvMove.Y = value.Y - cvBaseOffset.Y;
+
+				RecalculateCoordinates();
+
+				return;
+			}
+		}
+
+		/// <summary>
+		/// Resize the polygon proportional to its current size
+		/// The scalign will have its origin be the shape's center coordinates
+		/// </summary>
+		public Vector2 ScaleShape {
+			get {
+				return cvScale;
+			}
+
+			set {
+				cvScale = value;
+
+				RecalculateCoordinates();
+
+				return;
+			}
+		}
+
+		/// <summary>
+		/// Rotate the shape around the center coordinates this amount in Radians
+		/// </summary>
+		public float RotateShape {
+			get {
+				return cnRotation;
+			}
+
+			set {
+				cnRotation = value;
+
+				RecalculateCoordinates();
+
+				return;
+			}
+		}
+
+		/// <summary>
+		/// Specift the values for all transformations
+		/// </summary>
+		/// <param name="vMove">Directional offset</param>
+		/// <param name="vScale">Scaling factors</param>
+		/// <param name="nRadians">Radians of rotation</param>
+		public void SetPositionOffsets(Vector2 vMove, Vector2 vScale, float nRadians) {
+			cvMove = vMove;
+			cvScale = vScale;
+			cnRotation = nRadians;
+
+			RecalculateCoordinates();
+
+			return;
+		}
+
+		/// <summary>
+		/// Removes all vertexes from the polygon
+		/// </summary>
+		/// <returns>True upon success, false on error</returns>
+		public bool RemoveAllVertexes() {
+			cCollisionList.Vertexes.Clear();
 
 			return true;
 		}
@@ -287,15 +418,29 @@ namespace MDLN.MGTools {
 		/// </summary>
 		/// <returns>A collection of all vertexes in this shape</returns>
 		public IEnumerable<Vector2> GetVertexes() {
-			return cCollisionList.Vertexes;
+			return cavBaseVertexList;
+		}
+
+		/// <summary>
+		/// If the graphics device being used is modified externally this must be called for
+		/// the changes to be reflected in this objects rendering
+		/// </summary>
+		/// <param name="NewGraphDev">Modified graphics device</param>
+		public void UpdateGaphicsDevice(GraphicsDevice NewGraphDev) {
+			cGraphDev = NewGraphDev;
+
+			//Create a basec shader to use when rendering the polygon
+			cBasicShader = new BasicEffect(cGraphDev) {
+				VertexColorEnabled = true,
+				World = Matrix.CreateOrthographicOffCenter(0, cGraphDev.Viewport.Width, cGraphDev.Viewport.Height, 0, 0, 1),
+			};
 		}
 
 		/// <summary>
 		/// Call to render this shape through the specified graphics device
 		/// </summary>
-		/// <param name="DrawBatch">Specify a SpriteBatch to use to render the perimeter</param>
 		/// <returns>True if the shape was drawn successfully</returns>
-		public bool Draw(SpriteBatch DrawBatch) {
+		public bool Draw() {
 			Rectangle LineRect;
 			int nCtr, nPrevVert, nSurfNum;
 			Vector2 LineFromOrigin, RotOrigin;
@@ -303,6 +448,10 @@ namespace MDLN.MGTools {
 			RasterizerState PriorRaster, NewRaster;
 			VertexPositionTexture[] aVertexes;
 			VertexBuffer VtxBuff;
+
+			SpriteBatch DrawBatch = new SpriteBatch(cGraphDev);
+
+			DrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
 
 			if (DrawOutline == true) {
 				RotOrigin.X = 0f;
@@ -333,7 +482,9 @@ namespace MDLN.MGTools {
 				}
 			}
 
-			if (FillShape == true) {
+			DrawBatch.End();
+
+			if ((FillShape == true) && (cCollisionList.Vertexes.Count > 2)) {
 				//Draw the triangle fill (triangles needed is Vertexes -2, then 3 vertexes per triangle)
 				aVertexes = new VertexPositionTexture[(cCollisionList.Vertexes.Count - 2) * 3];
 
@@ -354,8 +505,10 @@ namespace MDLN.MGTools {
 
 				//Save off the current rasterizer, then make sure all primitives are drawn
 				PriorRaster = cGraphDev.RasterizerState;
-				NewRaster = new RasterizerState();
-				NewRaster.CullMode = CullMode.None;
+				NewRaster = new RasterizerState {
+					CullMode = CullMode.None
+				};
+
 				cGraphDev.RasterizerState = NewRaster;
 
 				cBasicShader.Texture = cFillTexture;
@@ -377,6 +530,46 @@ namespace MDLN.MGTools {
 			}
 
 			return true;
+		}
+
+		/// <summary>
+		/// Any routine adjustments that this object needs to make regularly are handled
+		/// by this function
+		/// </summary>
+		/// <param name="CurrTime">Current time in the game</param>
+		/// <returns></returns>
+		public bool Update(GameTime CurrTime) {
+			return true;
+		}
+
+		private void RecalculateCoordinates() {
+			int nCtr;
+			Vector2 vScale, vRotate;
+
+			cvBaseOffset.X = 0;
+			cvBaseOffset.Y = 0;
+
+			//Now calculate the position of all the collision vertexes
+			cCollisionList.Vertexes.Clear();
+			for (nCtr = 0; nCtr < cavBaseVertexList.Count; nCtr++) {
+				vScale.X = cavBaseVertexList[nCtr].X - cvBaseOffset.X;
+				vScale.Y = cavBaseVertexList[nCtr].Y - cvBaseOffset.Y;
+
+				//With Center as the origin Scale first
+				vScale.X *= cvScale.X;
+				vScale.Y *= cvScale.Y;
+
+				//With center as origin, handle the rotation next
+				vRotate.X = (float)((vScale.X * Math.Cos(cnRotation)) - (vScale.Y * Math.Sin(cnRotation)));
+				vRotate.Y = (float)((vScale.X * Math.Sin(cnRotation)) + (vScale.Y * Math.Cos(cnRotation)));
+
+				//Finally apply any movement (put back in the cente offset as well)
+				vRotate.X += cvMove.X + cvBaseOffset.X;
+				vRotate.Y += cvMove.Y + cvBaseOffset.Y;
+
+				//Add this to the collision list
+				cCollisionList.Vertexes.Add(vRotate);
+			}
 		}
 	}
 }

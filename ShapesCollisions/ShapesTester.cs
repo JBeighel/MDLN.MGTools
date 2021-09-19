@@ -133,6 +133,7 @@ namespace ShapesCollisions
 			cPolyList = new List<ConvexPolygon>();
 			cPolyList.Add(new ConvexPolygon(cGraphDevMgr.GraphicsDevice));
 			cPolyList[0].LineColor = Color.Blue;
+
 			cPolyList[0].FillColor = Color.DarkOliveGreen;
 			cPolyList[0].FillShape = true;
 
@@ -150,6 +151,7 @@ namespace ShapesCollisions
 
 			cPolyList.Add(new ConvexPolygon(cGraphDevMgr.GraphicsDevice));
 			cPolyList[1].LineColor = Color.Green;
+			cPolyList[1].FillColor = Color.Wheat;
 
 			strFileName = INTERFACECONTENTDIR + "\\Ship.png";
 			FileLoad = new FileStream(strFileName, FileMode.Open);
@@ -178,6 +180,7 @@ namespace ShapesCollisions
 			cPolyList.Add(new ConvexPolygon(cGraphDevMgr.GraphicsDevice));
 			cPolyList[2].LineColor = Color.Gray;
 			cPolyList[2].FillColor = Color.BlueViolet;
+
 
 			//tmpTexture = new Texture2D(cGraphDevMgr.GraphicsDevice, 2, 2);
 			//tmpTexture.SetData(new Color[] { Color.RosyBrown, Color.Aqua, Color.DarkOrchid, Color.PaleGreen });
@@ -322,7 +325,7 @@ namespace ShapesCollisions
 				}
 
 				//Draw thenCtrpolygons
-				cPolyList[nPolyCtr].Draw(cDrawBatch);
+				cPolyList[nPolyCtr].Draw();
 			}
 
 			//Always draw console last

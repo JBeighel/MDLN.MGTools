@@ -328,12 +328,12 @@ namespace MDLN.MGTools {
 		/// <value>The client region.</value>
 		protected Rectangle ClientRegion {
 			get {
-				Rectangle Region = new Rectangle();
-
-				Region.X = 0;
-				Region.Y = 0;
-				Region.Width = cFullDrawRegion.Width;
-				Region.Height = cFullDrawRegion.Height;
+				Rectangle Region = new Rectangle {
+					X = 0,
+					Y = 0,
+					Width = cFullDrawRegion.Width,
+					Height = cFullDrawRegion.Height
+				};
 
 				return Region;
 			}

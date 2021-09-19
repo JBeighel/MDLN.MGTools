@@ -36,6 +36,8 @@ namespace ShapesCollisions
 		private MouseState cPriorMouse;
 
 		private ConvexPolygon cMousePoly;
+		private ConvexPolygon cMovePoly;
+		private Vector2 cMoveStart;
 		private List<ConvexPolygon> cPolyList;
 		private int cMouseVertIdx;
 
@@ -131,7 +133,9 @@ namespace ShapesCollisions
 			cPolyList = new List<ConvexPolygon>();
 			cPolyList.Add(new ConvexPolygon(cGraphDevMgr.GraphicsDevice));
 			cPolyList[0].LineColor = Color.Blue;
-			cPolyList[0].FillColor = Color.Wheat;
+
+			cPolyList[0].FillColor = Color.DarkOliveGreen;
+			cPolyList[0].FillShape = true;
 
 			Vert.X = 100;
 			Vert.Y = 100;
@@ -149,45 +153,58 @@ namespace ShapesCollisions
 			cPolyList[1].LineColor = Color.Green;
 			cPolyList[1].FillColor = Color.Wheat;
 
+			strFileName = INTERFACECONTENTDIR + "\\Ship.png";
+			FileLoad = new FileStream(strFileName, FileMode.Open);
+			Texture2D tmpTexture = Texture2D.FromStream(cGraphDevMgr.GraphicsDevice, FileLoad);
+			FileLoad.Close();
+
+			cPolyList[1].FillTexture = tmpTexture;
+			cPolyList[1].FillShape = true;
+
 			Vert.X = 300;
 			Vert.Y = 300;
-			cPolyList[1].AddVertex(Vert);
+			cPolyList[1].AddVertex(Vert, new Vector2(0, 1));
 
 			Vert.X = 200;
 			Vert.Y = 300;
-			cPolyList[1].AddVertex(Vert);
+			cPolyList[1].AddVertex(Vert, new Vector2(0, 0));
 
 			Vert.X = 200;
 			Vert.Y = 200;
-			cPolyList[1].AddVertex(Vert);
+			cPolyList[1].AddVertex(Vert, new Vector2(1, 0));
 
 			Vert.X = 300;
 			Vert.Y = 200;
-			cPolyList[1].AddVertex(Vert);
+			cPolyList[1].AddVertex(Vert, new Vector2(1, 1));
 
 			cPolyList.Add(new ConvexPolygon(cGraphDevMgr.GraphicsDevice));
 			cPolyList[2].LineColor = Color.Gray;
-			cPolyList[2].FillColor = Color.Wheat;
+			cPolyList[2].FillColor = Color.BlueViolet;
 
-			Vert.X = 400;
-			Vert.Y = 300;
-			cPolyList[2].AddVertex(Vert);
 
-			Vert.X = 400;
-			Vert.Y = 200;
-			cPolyList[2].AddVertex(Vert);
+			//tmpTexture = new Texture2D(cGraphDevMgr.GraphicsDevice, 2, 2);
+			//tmpTexture.SetData(new Color[] { Color.RosyBrown, Color.Aqua, Color.DarkOrchid, Color.PaleGreen });
+			cPolyList[2].FillTexture = tmpTexture;
 
 			Vert.X = 450;
 			Vert.Y = 150;
-			cPolyList[2].AddVertex(Vert);
+			cPolyList[2].AddVertex(Vert, new Vector2(0.5f, 0));
 
 			Vert.X = 500;
 			Vert.Y = 200;
-			cPolyList[2].AddVertex(Vert);
+			cPolyList[2].AddVertex(Vert, new Vector2(1f, 0));
 
 			Vert.X = 500;
 			Vert.Y = 300;
-			cPolyList[2].AddVertex(Vert);
+			cPolyList[2].AddVertex(Vert, new Vector2(1f, 1));
+
+			Vert.X = 400;
+			Vert.Y = 300;
+			cPolyList[2].AddVertex(Vert, new Vector2(0f, 1));
+
+			Vert.X = 400;
+			Vert.Y = 200;
+			cPolyList[2].AddVertex(Vert, new Vector2(0f, 0));
 
 			return;
 		}
@@ -222,16 +239,32 @@ namespace ShapesCollisions
 						}
 					}
 				}
+
+				for (nPolyCtr = 0; cMousePoly == null && nPolyCtr < cPolyList.Count; nPolyCtr++) {
+					if (MGMath.PointInConvexPolygon(MousePt, cPolyList[nPolyCtr].GetVertexes()) == true) {
+						cMovePoly = cPolyList[nPolyCtr];
+						cMoveStart = MousePt;
+
+						break;
+					}
+				}
 			}
 
 			if ((CurrMouse.LeftButton == ButtonState.Released) && (cPriorMouse.LeftButton == ButtonState.Pressed)) {
 				//Mouse was just released
 				cMousePoly = null;
+				cMovePoly = null;
 			}
 
 			if ((CurrMouse.LeftButton == ButtonState.Pressed) && (cMousePoly != null)) {
 				//Update the position of the selected vetex
 				cMousePoly.UpdateVertex(cMouseVertIdx, MousePt);
+			}
+
+			if ((CurrMouse.LeftButton == ButtonState.Pressed) && (cMovePoly != null)) {
+				//Update the position of the selected polygon
+				cMovePoly.MoveShape(MousePt - cMoveStart);
+				cMoveStart = MousePt;
 			}
 
 			cPriorMouse = CurrMouse;
@@ -257,7 +290,7 @@ namespace ShapesCollisions
 					}
 				}
 			}
-			
+
 			cDevConsole.Update(gameTime);
 
 			//Use monogame update

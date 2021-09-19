@@ -47,6 +47,8 @@ namespace MDLN.MGTools {
 
 		/// <summary>
 		/// Used to set/get the color to fill the shape with
+		/// This will ignore any FillTexture specified, replacing that texture with
+		/// this color.
 		/// </summary>
 		public Color FillColor {
 			get {
@@ -81,6 +83,11 @@ namespace MDLN.MGTools {
 			}
 		}
 
+		/// <summary>
+		/// Specify a 2D texture to use to fill the polygon.
+		/// This will ignore any FillColor value specified replacing that color with
+		/// this texture
+		/// </summary>
 		public Texture2D FillTexture {
 			set {
 				cFillTexture = value;
@@ -320,6 +327,15 @@ namespace MDLN.MGTools {
 			return true;
 		}
 
+		/// <summary>
+		/// Add another vertex to the polygon.  These vertexes will not be sorted, so the order they 
+		/// are added must create a convex shape.
+		/// </summary>
+		/// <param name="NewVert">The coordinates of the new vertex</param>
+		/// <param name="TexturePos">The coordinates in the texture for this point.  This value
+		/// must be between 0 and 1, where 0 is the left edge of the texture and 1 is the right
+		/// edge.  In effect this is the percentage across the texture that this vertex exists</param>
+		/// <returns>True if the vertex was added</returns>
 		public bool AddVertex(Vector2 NewVert, Vector2 TexturePos) {
 			cavBaseVertexList.Add(NewVert);
 

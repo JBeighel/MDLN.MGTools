@@ -342,13 +342,12 @@ namespace MDLN.MGTools {
 
 		/// <summary>
 		/// Checks if two line segments intersect between the endpoints provided
-		/// 
 		/// </summary>
-		/// <param name="Line1End1"></param>
-		/// <param name="Line1End2"></param>
-		/// <param name="Line2End1"></param>
-		/// <param name="Line2End2"></param>
-		/// <returns></returns>
+		/// <param name="Line1End1">First endpoint of line 1</param>
+		/// <param name="Line1End2">Second end point of line 1</param>
+		/// <param name="Line2End1">First endpoint of line 2</param>
+		/// <param name="Line2End2">Second endpoint of line 2</param>
+		/// <returns>True if the lines intesect within the endpoints provided, false if not</returns>
 		public static bool LineSegmentIntesection(Vector2 Line1End1, Vector2 Line1End2, Vector2 Line2End1, Vector2 Line2End2) {
 			float Line1M, Line1B, Line2M, Line2B;
 			Vector2 vIntersect;

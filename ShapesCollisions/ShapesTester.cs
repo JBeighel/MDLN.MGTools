@@ -162,21 +162,22 @@ namespace ShapesCollisions
 
 			cPolyList[1].FillTexture = tmpTexture;
 			cPolyList[1].FillShape = true;
+			cPolyList[1].MoveShape(new Vector2(250, 250));
 
-			Vert.X = 300;
-			Vert.Y = 300;
+			Vert.X = 50;
+			Vert.Y = 50;
 			cPolyList[1].AddVertex(Vert, new Vector2(0, 1));
 
-			Vert.X = 200;
-			Vert.Y = 300;
+			Vert.X = -50;
+			Vert.Y = 50;
 			cPolyList[1].AddVertex(Vert, new Vector2(0, 0));
 
-			Vert.X = 200;
-			Vert.Y = 200;
+			Vert.X = -50;
+			Vert.Y = -50;
 			cPolyList[1].AddVertex(Vert, new Vector2(1, 0));
 
-			Vert.X = 300;
-			Vert.Y = 200;
+			Vert.X = 50;
+			Vert.Y = -50;
 			cPolyList[1].AddVertex(Vert, new Vector2(1, 1));
 
 			cPolyList.Add(new ConvexPolygon(cGraphDevMgr.GraphicsDevice));
@@ -251,16 +252,26 @@ namespace ShapesCollisions
 						break;
 					}
 				}
+			} else if ((CurrMouse.LeftButton == ButtonState.Released) && (CurrMouse.RightButton == ButtonState.Pressed) && (cPriorMouse.RightButton == ButtonState.Released)) {
+				//Mouse was just clicked, see if its in range of a vertex
+				for (nPolyCtr = 0; cMousePoly == null && nPolyCtr < cPolyList.Count; nPolyCtr++) {
+					if (MGMath.PointInConvexPolygon(MousePt, cPolyList[nPolyCtr].GetVertexes(false)) == true) {
+						cMousePoly = cPolyList[nPolyCtr];
+						cMoveStart = MousePt;
+
+						break;
+					}
+				}
 			}
 
-			if ((CurrMouse.LeftButton == ButtonState.Released) && (cPriorMouse.LeftButton == ButtonState.Pressed)) {
+			if ((CurrMouse.LeftButton == ButtonState.Released) && (CurrMouse.RightButton == ButtonState.Released) && ((cPriorMouse.LeftButton == ButtonState.Pressed) || (cPriorMouse.RightButton == ButtonState.Pressed))) {
 				//Mouse was just released
 				cMousePoly = null;
 				cMovePoly = null;
 			}
 
 			if ((CurrMouse.LeftButton == ButtonState.Pressed) && (cMousePoly != null)) {
-				//Update the position of the selected vetex
+				//Update the position of the selected vertex
 				cMousePoly.UpdateVertex(cMouseVertIdx, MousePt);
 			}
 
@@ -268,6 +279,11 @@ namespace ShapesCollisions
 				//Update the position of the selected polygon
 				cMovePoly.MoveShape(MousePt - cMoveStart);
 				cMoveStart = MousePt;
+			}
+
+			if ((CurrMouse.LeftButton == ButtonState.Released) && (CurrMouse.RightButton == ButtonState.Pressed) && (cMousePoly != null)) {
+				//Update the rotation of the selected vertex
+				cMousePoly.RotateShape = MGMath.GetAngleFromPoints(cMoveStart, MousePt);
 			}
 
 			cPriorMouse = CurrMouse;

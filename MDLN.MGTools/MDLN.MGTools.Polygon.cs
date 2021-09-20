@@ -607,12 +607,18 @@ namespace MDLN.MGTools {
 			return true;
 		}
 
+		/// <summary>
+		/// Call to adjust all the collision vertexes
+		/// Will apply all transforms stored to the base vertexes in order 
+		/// to calculate where the collision vertexes are and where to draw 
+		/// the polygon.
+		/// </summary>
 		private void RecalculateCoordinates() {
 			int nCtr;
 			Vector2 vScale, vRotate;
 
-			cvBaseOffset.X = cvMove.X;
-			cvBaseOffset.Y = cvMove.Y;
+			cvBaseOffset.X = 0;
+			cvBaseOffset.Y = 0;
 
 			//Now calculate the position of all the collision vertexes
 			cCollisionList.Vertexes.Clear();

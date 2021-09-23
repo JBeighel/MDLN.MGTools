@@ -409,6 +409,11 @@ namespace MDLN.MGTools {
 			return cPolyGon.TestCollision(aRegions);
 		}
 
+		public virtual void ReportCollision(GameTime CurrTime, PhysicalObject oCollider) {
+			
+			return;
+		}
+
 		/// <summary>
 		/// This retreives the list of collision vertexes before any transforms are done.
 		/// The coordinates will be before movement, scaling, or rotations.

@@ -147,7 +147,9 @@ namespace MDLN
 			foreach (PhysicalObject CurrObj in aTargetList) {
 				if (CurrObj.TestCollision(this) == true) {
 					//Hit a target! (tell it that it was hit)
+					CurrObj.ReportCollision(CurrTime, this);
 					bRetVal = false;
+					break;
 				}
 			}
 
@@ -156,9 +158,6 @@ namespace MDLN
 			vNewPos.X += Speed.X;
 			vNewPos.Y += Speed.Y;
 			CenterPoint = vNewPos;
-
-			
-			
 
 			if ((ParticleHandler != null) && (bRetVal == false)) {
 				//Missile is expiring, throw some particles

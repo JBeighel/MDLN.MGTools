@@ -108,7 +108,11 @@ namespace MDLN.MGTools {
 				} else {
 					nNewDir -= (float)(Math.PI / 2);//this is screen clockwise
 
-					if (nNewDir < Math.PI) { //Crossed Y axis
+					if (nNewDir > Math.PI) { //Crossed Y axis
+						nNewDir -= (float)(2 * Math.PI);
+					}
+
+					if (nNewDir < -1 * Math.PI) { //Crossed Y axis
 						nNewDir += (float)(2 * Math.PI);
 					}
 				}

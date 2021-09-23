@@ -8,12 +8,17 @@ using MDLN.MGTools;
 
 namespace MDLN {
 	class EnemyShip : PhysicalObject {
+		private const Int32 ctHitFlashDuration = 500;
+
 		private float cnMaxSpeed;
 		private float cnMaxTurn;
 		private float cnMaxStrafeDist, cnMinStrafeDist;
 		private Vector2 cvCurrSpeed;
 		private ObjectManager cObjMgr;
 		private Int32 cnTargetGroupID;
+		private double ctHitFlashUntil;
+		private Color cclrNormalColor;
+		private bool cbStrafeCW;
 
 		private int cnLastMove = 0;
 		public GameConsole cDevConsole;
@@ -27,7 +32,27 @@ namespace MDLN {
 			cnMaxStrafeDist = 300;
 			cnMinStrafeDist = 150;
 
-			TintColor = Color.CornflowerBlue;
+			ctHitFlashUntil = 0;
+			cbStrafeCW = true;
+
+			cclrNormalColor = Color.CornflowerBlue;
+			TintColor = cclrNormalColor;
+
+			return;
+		}
+
+		public void RandomizeAttributes(Random Rand) {
+			cnMaxTurn = (float)(5 + (4 * (0.5 - Rand.NextDouble())));
+			cnMaxTurn *= (float)(Math.PI / 180); //Convert to radians
+			cnMaxSpeed = (float)(5 + (3 * (0.5 - Rand.NextDouble())));
+			cnMaxStrafeDist = (float)(300 + (200 * (0.5 - Rand.NextDouble())));
+			cnMinStrafeDist = (float)(150 + (100 * (0.5 - Rand.NextDouble())));
+
+			if (Rand.NextDouble() > 0.5) {
+				cbStrafeCW = true;
+			} else {
+				cbStrafeCW = false;
+			}
 
 			return;
 		}
@@ -89,7 +114,7 @@ namespace MDLN {
 						cDevConsole?.AddText("Strafe");
 					}
 					cnLastMove = 3;
-					nCurrDist = AITools.SteerToCircleTarget(CenterPoint, aTargetList[nBestTargetID].CenterPoint, ObjectRotation, cnMaxTurn, true);
+					nCurrDist = AITools.SteerToCircleTarget(CenterPoint, aTargetList[nBestTargetID].CenterPoint, ObjectRotation, cnMaxTurn, cbStrafeCW);
 				}
 
 				//Set the new movement direction, but don't change the speed
@@ -103,8 +128,24 @@ namespace MDLN {
 
 			CenterPoint = vNewPos;
 
+			if (ctHitFlashUntil > CurrTime.TotalGameTime.TotalMilliseconds) {
+				//Flash red when being hit
+				this.TintColor = Color.Red;
+			} else {
+				//Normal condition is white, for no tint
+				this.TintColor = cclrNormalColor;
+			}
+
 			//Return True to keep this alive, false to have it removed
 			return true;
+		}
+
+		public override void ReportCollision(GameTime CurrTime, PhysicalObject oCollider) {
+			ctHitFlashUntil = CurrTime.TotalGameTime.TotalMilliseconds + ctHitFlashDuration;
+
+			//Figure out what hit this and apply damage?
+
+			return;
 		}
 	}
 }

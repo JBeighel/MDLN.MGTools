@@ -500,6 +500,18 @@ namespace MDLN.MGTools {
 
 			return true;
 		}
+
+		public static bool CubicBezierCurveBoundaries(Vector2 vCurveStart, Vector2 vCurveEnd, Vector2 vPt1, Vector2 vPt2, out Rectangle rectBoundary) {
+			//First derivitave equation
+			//vCurveStart = P0
+			//vPt1 = P1
+			//vPt2 = P2
+			//vCurveEnd = P3
+			//d(Pt) = 3 * (1-n)^2 * (P1 - P0)  + 6 * (1-n)n * (P2 - P1) + 3n^2 * (P3 - P2)
+			//Solve for n, then find output where n = 0
+			//Each n=0 point is where the curve changes direction
+			//Those inflection points and the ends will set ranges for the bounding box
+		}
 	}
 }
 

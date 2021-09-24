@@ -442,6 +442,64 @@ namespace MDLN.MGTools {
 			//The line segments do intersect
 			return true;
 		}
+
+		public static bool CubicBezierCurvePoints(Vector2 vCurveStart, Vector2 vCurveEnd, Vector2 vPt1, Vector2 vPt2, UInt32 nNumPoints, out List<Vector2> avCurvePts) {
+			//vCurveStart = X0, Y0
+			//vPt1 = X1, Y1
+			//vPt2 = X2, Y2
+			//vCurveEnd = X3, Y3
+			//X(n) = [(3n)^0 * (1 - n)^3 * X0] + [(3n)^1 * (1 - n)^2 * X1] + [(3n)^2 * (1 - n)^1 X2] + [(3n)^3 * (1 - n)^0 X3]
+			//Y(n) = [(3n)^0 * (1 - n)^3 * Y0] + [(3n)^1 * (1 - n)^2 * Y1] + [(3n)^2 * (1 - n)^1 Y2] + [(3n)^3 * (1 - n)^0 Y3]
+			//n must be a value from 0 to 1
+
+			UInt32 nCtr;
+			double nStepSize, nCurrStep;
+			Vector2 vPoint, vOffset;
+
+			avCurvePts = new List<Vector2>();
+
+			vOffset = vCurveEnd;
+
+			avCurvePts.Add(vCurveStart);//Always start at the origin
+			vCurveStart -= vOffset;
+
+			vCurveEnd -= vOffset;
+
+			vPt1 -= vOffset;
+
+			vPt2 -= vOffset;
+
+			//Make the steps even, this will not evenly space the points on the curve
+			nStepSize = 1 / (double)nNumPoints;
+
+			nCurrStep = nStepSize; 
+			for (nCtr = 1; nCtr < nNumPoints; nCtr += 1) {
+				vPoint = new Vector2(0, 0);
+
+				//Calcualte the X coordinate
+				vPoint.X = (float)Math.Pow(1 - nCurrStep, 3) * vCurveStart.X;
+				vPoint.X += (float)(3 * nCurrStep * Math.Pow(1 - nCurrStep, 2) * vPt1.X);
+				vPoint.X += (float)(3 * Math.Pow(nCurrStep, 2) * (1 - nCurrStep) * vPt2.X);
+				vPoint.X += (float)(3 * Math.Pow(nCurrStep, 3) * vCurveEnd.X);
+
+				//Calculate the Y coordinate
+				vPoint.Y = (float)Math.Pow(1 - nCurrStep, 3) * vCurveStart.Y;
+				vPoint.Y += (float)(3 * nCurrStep * Math.Pow(1 - nCurrStep, 2) * vPt1.Y);
+				vPoint.Y += (float)(3 * Math.Pow(nCurrStep, 2) * (1 - nCurrStep) * vPt2.Y);
+				vPoint.Y += (float)(3 * Math.Pow(nCurrStep, 3) * vCurveEnd.Y);
+
+				//Put the point into the list
+				avCurvePts.Add(vPoint + vOffset);
+
+				//Move to the next step
+				nCurrStep += nStepSize;
+			}
+
+			vCurveEnd += vOffset;
+			avCurvePts.Add(vCurveEnd);
+
+			return true;
+		}
 	}
 }
 

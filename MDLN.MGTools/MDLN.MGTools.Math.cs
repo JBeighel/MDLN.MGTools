@@ -508,9 +508,116 @@ namespace MDLN.MGTools {
 			//vPt2 = P2
 			//vCurveEnd = P3
 			//d(Pt) = 3 * (1-n)^2 * (P1 - P0)  + 6 * (1-n)n * (P2 - P1) + 3n^2 * (P3 - P2)
-			//Solve for n, then find output where n = 0
-			//Each n=0 point is where the curve changes direction
+			//Find values of n where the result is zero
+			//Set equation to zero and solve for n
+			//0 = (3 - 6n + n^2)(P1-P0) + (6n - n^2)(P2 - P1) + 3n^2(P3 - P2)
+			//Algebra that to...
+			//0 = (-3P0 + 9P1 - 9P2 + 3P3)n^2 + (6P0 - 12P1 + 6P2)n + (-3P0 + 3P1)
+			//Into Quadratic formula: An^2 + Bn + C = 0
+			//(-B +/- sqrt(B^2 - 4AC)) / 2A
 			//Those inflection points and the ends will set ranges for the bounding box
+
+			List<double> aTestPts = new List<double>();
+			double nA, nB, nC, nValue;
+			Vector2 vOffset;
+
+			//Always check the endpoints of the curve
+			aTestPts.Add(0);
+			aTestPts.Add(1);
+
+			//Curve equation requires the ending to be the origin
+			vOffset = vCurveEnd;
+
+			//Correct all the points so the ending is the origin
+			vCurveStart -= vOffset;
+			vPt1 -= vOffset;
+			vPt2 -= vOffset;
+			vCurveEnd = new Vector2(0, 0);
+
+			//Find X inflection points
+			nA = (-3* vCurveStart.X) + (9 * vPt1.X) + (-9 * vPt2.X) + (3 * vCurveEnd.X);
+			nB = (6 * vCurveStart.X) + (-12 * vPt1.X) + (6 * vPt2.X);
+			nC = (-3 * vCurveStart.X) + (3 * vPt1.X);
+
+			if (nA != 0) {
+				nValue = ((-1 * nB) + Math.Sqrt((nB * nB) + (-4 * nA * nC))) / (2 * nA);
+				if ((nValue > 0) && (nValue < 1)) {
+					aTestPts.Add(nValue);
+				}
+
+				nValue = ((-1 * nB) - Math.Sqrt((nB * nB) + (-4 * nA * nC))) / (2 * nA);
+				if ((nValue > 0) && (nValue < 1)) {
+					aTestPts.Add(nValue);
+				}
+			} else {
+				//X starts and ends at same point, try the middle?
+				aTestPts.Add(0.5);
+			}
+
+			nA = (-3 * vCurveStart.Y) + (9 * vPt1.Y) + (-9 * vPt2.Y) + (3 * vCurveEnd.Y);
+			nB = (6 * vCurveStart.Y) + (-12 * vPt1.Y) + (6 * vPt2.Y);
+			nC = (-3 * vCurveStart.Y) + (3 * vPt1.Y);
+
+			if (nA != 0) {
+				nValue = ((-1 * nB) + Math.Sqrt((nB * nB) + (-4 * nA * nC))) / (2 * nA);
+				if ((nValue > 0) && (nValue < 1)) {
+					aTestPts.Add(nValue);
+				}
+
+				nValue = ((-1 * nB) - Math.Sqrt((nB * nB) + (-4 * nA * nC))) / (2 * nA);
+				if ((nValue > 0) && (nValue < 1)) {
+					aTestPts.Add(nValue);
+				}
+			} else {
+				//Y starts and ends at same point, try the middle?
+				aTestPts.Add(0.5);
+			}
+
+			//Loop through all the test points
+			rectBoundary = new Rectangle(0, 0, 0, 0);
+
+			List<double> anX = new List<double>();;
+			List<double> anY = new List<double>();
+			foreach (double nCurr in aTestPts) {
+				//Calcualte the X coordinate
+				nValue = Math.Pow(1 - nCurr, 3) * vCurveStart.X;
+				nValue += (3 * nCurr * Math.Pow(1 - nCurr, 2) * vPt1.X);
+				nValue += (3 * Math.Pow(nCurr, 2) * (1 - nCurr) * vPt2.X);
+				nValue += (3 * Math.Pow(nCurr, 3) * vCurveEnd.X);
+
+				anX.Add(nValue);
+
+				if ((nValue < 0) && (nValue < rectBoundary.X)) { //Rectangle starts left of offset point
+					rectBoundary.X = (int)(nValue - 1);
+				} else if (nValue > rectBoundary.Width) {
+					rectBoundary.Width = 1 + (int)nValue;
+				}
+
+				//Calculate the Y coordinate
+				nValue = Math.Pow(1 - nCurr, 3) * vCurveStart.Y;
+				nValue += (3 * nCurr * Math.Pow(1 - nCurr, 2) * vPt1.Y);
+				nValue += (3 * Math.Pow(nCurr, 2) * (1 - nCurr) * vPt2.Y);
+				nValue += (3 * Math.Pow(nCurr, 3) * vCurveEnd.Y);
+
+				anY.Add(nValue);
+
+				if ((nValue < 0) && (nValue < rectBoundary.Y)) { //Rectangle starts above offset point
+					rectBoundary.Y = (int)(nValue - 1);
+				} else if (nValue > rectBoundary.Height) {
+					rectBoundary.Height = 1 + (int)nValue;
+				}
+			}
+
+			//If the start isn't the offset, adjust dimensions to account for it
+			rectBoundary.Width -= rectBoundary.X;
+			rectBoundary.Height -= rectBoundary.Y;
+
+			//Reposition the rectangle to the offset
+			rectBoundary.X += (int)vOffset.X;
+			rectBoundary.Y += (int)vOffset.Y;
+			
+
+			return true;
 		}
 	}
 }

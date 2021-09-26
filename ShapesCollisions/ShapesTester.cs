@@ -326,8 +326,7 @@ namespace ShapesCollisions
 			int nVertCtr, nPolyCtr;
 			List<Vector2> VertList = new List<Vector2>();
 			List<Vector2> CurveVerts;
-			Vector LineSeg = new Vector();
-			Rectangle LineRect = new Rectangle();
+			Rectangle rectCurveBounds;
 			Texture2D LineTexture = new Texture2D(GraphicsDevice, 1, 1);
 
 			LineTexture.SetData(new[] { Color.Cyan });
@@ -356,18 +355,11 @@ namespace ShapesCollisions
 			VertList.Clear();
 			VertList.AddRange(cPolyList[1].GetVertexes(false));
 			MGMath.CubicBezierCurvePoints(VertList[0], VertList[3], VertList[1], VertList[2], 10, out CurveVerts);
-			for (nVertCtr = 0; nVertCtr < CurveVerts.Count - 1; nVertCtr += 1) {
-				//Draw lines from CurveVerts[nVertCtr] to CurveVerts[nVertCtr + 1]
 
-				LineSeg.SetRectangularCoordinates(CurveVerts[nVertCtr].X - CurveVerts[nVertCtr + 1].X, CurveVerts[nVertCtr].Y - CurveVerts[nVertCtr + 1].Y);
-				
-				LineRect.X = (int)CurveVerts[nVertCtr + 1].X;
-				LineRect.Y = (int)CurveVerts[nVertCtr + 1].Y;
-				LineRect.Width = (int)(LineSeg.Polar.Length + 1);
-				LineRect.Height = 2;
+			MGMath.CubicBezierCurveBoundaries(VertList[0], VertList[3], VertList[1], VertList[2], out rectCurveBounds);
 
-				cDrawBatch.Draw(LineTexture, LineRect, LineTexture.Bounds, Color.White, (float)(LineSeg.Polar.Angle * Math.PI / 180), new Vector2(0, 0.5f), SpriteEffects.None, 0);
-			}
+			DrawTools.DrawLineSeries(GraphicsDevice, cDrawBatch, Color.LightYellow, 2, CurveVerts);
+			DrawTools.DrawRectangle(GraphicsDevice, cDrawBatch, Color.RosyBrown, 2, rectCurveBounds);
 
 			//Always draw console last
 			cDevConsole.Draw(cDrawBatch);

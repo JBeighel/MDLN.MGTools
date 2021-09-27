@@ -443,6 +443,27 @@ namespace MDLN.MGTools {
 			return true;
 		}
 
+		/// <summary>
+		/// Calculates a set of points that will create a smooth curve.  The 
+		/// start and end points will be expressly defined.  The curve shape 
+		/// will be controlled by two other points.
+		/// 
+		/// The first control point will define the angle the curve leaves the 
+		/// starting point as well as how sharp the curve begins.
+		/// 
+		/// The second control point will define the angle the curve approaches
+		/// the ending point as well as how sharp the curve ends.
+		/// </summary>
+		/// <param name="vCurveStart">Starting point of the curve</param>
+		/// <param name="vCurveEnd">Ending point of the curve</param>
+		/// <param name="vPt1">First control point</param>
+		/// <param name="vPt2">Second control point</param>
+		/// <param name="nNumPoints">Number of line segments to calculate that
+		/// comprise the curve</param>
+		/// <param name="avCurvePts">Points defining the line segments.  Each 
+		/// point will end the previous line segment and start the next line
+		/// segment</param>
+		/// <returns>True on success, false on any error</returns>
 		public static bool CubicBezierCurvePoints(Vector2 vCurveStart, Vector2 vCurveEnd, Vector2 vPt1, Vector2 vPt2, UInt32 nNumPoints, out List<Vector2> avCurvePts) {
 			//vCurveStart = X0, Y0
 			//vPt1 = X1, Y1
@@ -501,6 +522,23 @@ namespace MDLN.MGTools {
 			return true;
 		}
 
+		/// <summary>
+		/// Calculates a bounding box that encloses a smooth curve.  The 
+		/// start and end points will be expressly defined.  The curve shape 
+		/// will be controlled by two other points.
+		/// 
+		/// The first control point will define the angle the curve leaves the 
+		/// starting point as well as how sharp the curve begins.
+		/// 
+		/// The second control point will define the angle the curve approaches
+		/// the ending point as well as how sharp the curve ends.
+		/// </summary>
+		/// <param name="vCurveStart">Starting point of the curve</param>
+		/// <param name="vCurveEnd">Ending point of the curve</param>
+		/// <param name="vPt1">First control point</param>
+		/// <param name="vPt2">Second control point</param>
+		/// <param name="rectBoundary">Rectangle that contains the entire curve</param>
+		/// <returns>True on success, false on any error</returns>
 		public static bool CubicBezierCurveBoundaries(Vector2 vCurveStart, Vector2 vCurveEnd, Vector2 vPt1, Vector2 vPt2, out Rectangle rectBoundary) {
 			//First derivitave equation
 			//vCurveStart = P0

@@ -24,7 +24,7 @@ namespace MDLN
 			cObjMgr = ObjManager;
 			cnTargetGroupID = nTargetGroupID;
 
-			cnMaxTurn = (float)(5 * Math.PI / 180);
+			cnMaxTurn = (float)(10 * Math.PI / 180);
 
 			ctTimeToLive = 2000;
 			ctCreated = -1;

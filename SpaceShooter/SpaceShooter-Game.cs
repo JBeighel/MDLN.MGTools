@@ -306,7 +306,7 @@ namespace MDLN.SpaceShooter
 						Projectile_t NewShot = new Projectile_t(cGraphDevMgr.GraphicsDevice, cTextureAtlas, cObjManager, (int)eObjGroups_t.Enemies, eProjectileType_t.Straight);
 						cObjManager.ImportGameObject(NewShot, "bullet02", (Int32)eObjGroups_t.PlayerBullets);
 						NewShot.SetPosition(Player.CenterPoint, new Vector2(1.5f, 1.5f), nDirection);
-						NewShot.SetMovement(nDirection, 10);
+						NewShot.SetMovement(nDirection, 15);
 						NewShot.ParticleHandler = cParticles;
 						NewShot.Rand = cRand;
 
@@ -320,7 +320,7 @@ namespace MDLN.SpaceShooter
 				//Gamepad Buttons
 				if ((CurrPad.Buttons.A == ButtonState.Pressed) && (cPriorPad.Buttons.A == ButtonState.Released)) {
 					//Button A was just pushed
-					EnemyShip NewShip = new EnemyShip(cGraphDevMgr.GraphicsDevice, cTextureAtlas, cObjManager, (int)eObjGroups_t.Player);
+					EnemyShip NewShip = new EnemyShip(cGraphDevMgr.GraphicsDevice, cTextureAtlas, cObjManager, (int)eObjGroups_t.Player, (int)eObjGroups_t.PlayerBullets);
 					cObjManager.ImportGameObject(NewShip, "ship02", (int)eObjGroups_t.Enemies);
 					NewShip.SetPosition(new Vector2(0, 0), new Vector2(0.25f, 0.25f), 0);
 					NewShip.RandomizeAttributes(cRand);
@@ -333,7 +333,7 @@ namespace MDLN.SpaceShooter
 						Projectile_t NewShot = new Projectile_t(cGraphDevMgr.GraphicsDevice, cTextureAtlas, cObjManager, (int)eObjGroups_t.Enemies, eProjectileType_t.Tracking);
 						cObjManager.ImportGameObject(NewShot, "missile01", (Int32)eObjGroups_t.PlayerBullets);
 						NewShot.SetPosition(Player.CenterPoint, new Vector2(0.1f, 0.1f), nDirection);
-						NewShot.SetMovement(nDirection, 5);
+						NewShot.SetMovement(nDirection, 10);
 						NewShot.ParticleHandler = cParticles;
 						NewShot.Rand = cRand;
 

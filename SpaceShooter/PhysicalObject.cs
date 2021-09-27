@@ -13,6 +13,8 @@ using MDLN.MGTools;
 namespace MDLN.MGTools {
 	public delegate bool PhysicalObjectEvent(PhysicalObject CurrObj, GameTime CurrTime);
 
+	public delegate bool PhysicalObjectDrawEvent(PhysicalObject CurrObj, GraphicsDevice gdDevice, SpriteBatch dbDraw);
+
 	public class PhysicalObject : ICollidable, IVisible {
 		/// <summary>
 		/// Size of handles used when editing collision vertexes
@@ -69,6 +71,8 @@ namespace MDLN.MGTools {
 		/// Event called when this object is performing its regular update
 		/// </summary>
 		public event PhysicalObjectEvent Updating;
+
+		public event PhysicalObjectDrawEvent Drawing;
 
 		/// <summary>
 		/// Name of the texture in the texture atlas to use when drawing this object
@@ -323,6 +327,7 @@ namespace MDLN.MGTools {
 
 		public bool Draw() {
 			Rectangle rectBlock;
+			bool bRetVal = true;
 
 			rectBlock = crectExtents;
 			rectBlock.Width = (int)(rectBlock.Width * cvScale.X); // Resize the rendered image
@@ -334,6 +339,10 @@ namespace MDLN.MGTools {
 			SpriteBatch DrawBatch = new SpriteBatch(cGraphDev);
 			DrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
 			cImgAtlas.DrawTile(TextureName, DrawBatch, rectBlock, TintColor, cnTextureRotation + cnRotation);
+
+			if (Drawing != null) {
+				bRetVal = Drawing.Invoke(this, cGraphDev, DrawBatch);
+			}
 			DrawBatch.End();
 
 			if (cbVertexEdits == true) {
@@ -354,7 +363,7 @@ namespace MDLN.MGTools {
 				DrawBatch.End();
 			}
 
-			return true;
+			return bRetVal;
 		}
 
 		public void SetCollisionVertexes(IEnumerable<Vector2> VertexList) {

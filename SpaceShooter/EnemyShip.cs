@@ -16,16 +16,20 @@ namespace MDLN {
 		private Vector2 cvCurrSpeed;
 		private ObjectManager cObjMgr;
 		private Int32 cnTargetGroupID;
+		private Int32 cnAvoidGroupID;
 		private double ctHitFlashUntil;
 		private Color cclrNormalColor;
 		private bool cbStrafeCW;
+		private PhysicalObject cTarget;
+		private PhysicalObject cAvoid;
 
 		private int cnLastMove = 0;
 		public GameConsole cDevConsole;
 
-		public EnemyShip(GraphicsDevice GraphDev, TextureAtlas TxtrAtlas, ObjectManager ObjManager, Int32 nTargetGroupID) : base(GraphDev, TxtrAtlas) {
+		public EnemyShip(GraphicsDevice GraphDev, TextureAtlas TxtrAtlas, ObjectManager ObjManager, Int32 nTargetGroupID, Int32 nAvoidGroupID) : base(GraphDev, TxtrAtlas) {
 			cObjMgr = ObjManager;
 			cnTargetGroupID = nTargetGroupID;
+			cnAvoidGroupID = nAvoidGroupID;
 
 			cnMaxTurn = (float)(5 * Math.PI / 180);
 			cnMaxSpeed = 5;
@@ -38,7 +42,21 @@ namespace MDLN {
 			cclrNormalColor = Color.CornflowerBlue;
 			TintColor = cclrNormalColor;
 
+			Drawing += DrawHandle;
+
 			return;
+		}
+
+		private bool DrawHandle(PhysicalObject CurrObj, GraphicsDevice gdDevice, SpriteBatch dbDraw) {
+			if (cTarget != null) {
+				DrawTools.DrawLine(gdDevice, dbDraw, Color.Red, 2, CenterPoint, cTarget.CenterPoint);
+			}
+
+			if (cAvoid != null) {
+				DrawTools.DrawLine(gdDevice, dbDraw, Color.Cyan, 2, CenterPoint, cAvoid.CenterPoint);
+			}
+
+			return true;
 		}
 
 		public void RandomizeAttributes(Random Rand) {
@@ -74,12 +92,16 @@ namespace MDLN {
 		}
 
 		public override bool Update(GameTime CurrTime) {
-			int nCtr, nBestTargetID = -1;
-			float nBestTargetDist = 0, nCurrDist;
+			int nCtr, nBestTargetID = -1, nBestAvoidID = -1;
+			float nBestTargetDist = 0, nBestAvoidDist = 0, nCurrDist;
 			Vector2 vNewPos;
 			List<PhysicalObject> aTargetList = cObjMgr[cnTargetGroupID];
+			List<PhysicalObject> aAvoidList = cObjMgr[cnAvoidGroupID];
 
 			base.Update(CurrTime);
+
+			cTarget = null;
+			cAvoid = null;
 
 			//Find a target to track
 			for (nCtr = 0; nCtr < aTargetList.Count; nCtr++) {
@@ -88,10 +110,31 @@ namespace MDLN {
 				if (nBestTargetID == -1) { //No target picked
 					nBestTargetID = nCtr;
 					nBestTargetDist = nCurrDist;
+					cTarget = aTargetList[nCtr];
 				} else if (nCurrDist < nBestTargetDist) {
 					nBestTargetID = nCtr;
 					nBestTargetDist = nCurrDist;
+					cTarget = aTargetList[nCtr];
 				}
+			}
+
+			for (nCtr = 0; nCtr < aAvoidList.Count; nCtr += 1) {
+				nCurrDist = MGMath.SquaredDistanceBetweenPoints(CenterPoint, aAvoidList[nCtr].CenterPoint);
+
+				if (nBestAvoidID == -1) { //No target picked
+					nBestAvoidID = nCtr;
+					nBestAvoidDist = nCurrDist;
+					cAvoid = aAvoidList[nCtr];
+				} else if (nCurrDist < nBestAvoidDist) {
+					nBestAvoidID = nCtr;
+					nBestAvoidDist = nCurrDist;
+					cAvoid = aAvoidList[nCtr];
+				}
+			}
+
+			if ((nBestAvoidID != -1) && (nBestAvoidDist < nBestTargetDist) && (nBestAvoidDist < cnMaxStrafeDist * cnMaxStrafeDist)) {
+				//Thing to avoid is closer than the target, it gets priority
+				nBestTargetID = -1;
 			}
 
 			if (nBestTargetID != -1) { //Found a valid target, attack it
@@ -119,6 +162,10 @@ namespace MDLN {
 
 				//Set the new movement direction, but don't change the speed
 				SetMovement(nCurrDist, cnMaxSpeed);
+			} else if (nBestAvoidID != -1) {
+				nCurrDist = AITools.SteerAwayFromTarget(CenterPoint, aAvoidList[nBestAvoidID].CenterPoint, ObjectRotation, cnMaxTurn);
+
+				SetMovement(nCurrDist, cnMaxSpeed);
 			}
 
 			//Apply current speed
@@ -139,7 +186,7 @@ namespace MDLN {
 			//Return True to keep this alive, false to have it removed
 			return true;
 		}
-
+		
 		public override void ReportCollision(GameTime CurrTime, PhysicalObject oCollider) {
 			ctHitFlashUntil = CurrTime.TotalGameTime.TotalMilliseconds + ctHitFlashDuration;
 

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 
 namespace MDLN.MGTools {
-	static class AITools {
+	public static class AITools {
 		public static float SteerTowardTarget(Vector2 vMyPos, Vector2 vTargetPos, float nMyCurrDir, float nMaxTurn) {
 			float nNewDir;
 			Vector2 vMeToTarget = new Vector2() {

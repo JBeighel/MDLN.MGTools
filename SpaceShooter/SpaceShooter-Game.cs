@@ -44,7 +44,7 @@ namespace MDLN.SpaceShooter
 
 		public SpaceShooter() {
 			cGraphDevMgr = new GraphicsDeviceManager(this);
-
+			
 			IsMouseVisible = true;
 			Window.AllowUserResizing = true;
 			Window.ClientSizeChanged += FormResizeHandler;
@@ -56,8 +56,13 @@ namespace MDLN.SpaceShooter
 		}
 
 		private void FormResizeHandler(object Sender, EventArgs Args) {
-			cDevConsole.Width = Window.ClientBounds.Width;
-			cObjManager.UpdateGraphicsDevice(cGraphDevMgr.GraphicsDevice);
+			if (cDevConsole != null) {
+				cDevConsole.Width = Window.ClientBounds.Width;
+			}
+
+			if (cObjManager != null) {
+				cObjManager.UpdateGraphicsDevice(cGraphDevMgr.GraphicsDevice);
+			}
 
 			return;
 		}
@@ -117,6 +122,10 @@ namespace MDLN.SpaceShooter
 			
 			//Initializes monogame
 			base.Initialize();
+
+			cGraphDevMgr.PreferredBackBufferWidth = 1280;
+			cGraphDevMgr.PreferredBackBufferHeight = 720;
+			cGraphDevMgr.ApplyChanges();
 
 			return;
 		}

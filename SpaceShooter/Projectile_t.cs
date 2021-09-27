@@ -15,12 +15,12 @@ namespace MDLN
 		private ObjectManager cObjMgr;
 		private Int32 cnTargetGroupID;
 		private eProjectileType_t ceProjType;
-		
+
 		public ParticleEngine2D ParticleHandler;
 		public Vector2 Speed;
 		public Random Rand;
 
-		public Projectile_t(GraphicsDevice GraphDev, TextureAtlas TxtrAtlas, ObjectManager ObjManager, Int32 nTargetGroupID, eProjectileType_t eType) : base (GraphDev, TxtrAtlas) {
+		public Projectile_t(GraphicsDevice GraphDev, TextureAtlas TxtrAtlas, ObjectManager ObjManager, Int32 nTargetGroupID, eProjectileType_t eType) : base(GraphDev, TxtrAtlas) {
 			cObjMgr = ObjManager;
 			cnTargetGroupID = nTargetGroupID;
 
@@ -31,6 +31,12 @@ namespace MDLN
 			ceProjType = eType;
 
 			return;
+		}
+
+		public eProjectileType_t ProjectileType {
+			get {
+				return ceProjType;
+			}
 		}
 
 		public void SetMovement(float nDirection, float nVelocity) {
@@ -210,7 +216,7 @@ namespace MDLN
 		}
 	}
 
-	enum eProjectileType_t {
+	public enum eProjectileType_t {
 		Straight,
 		Tracking,
 	}

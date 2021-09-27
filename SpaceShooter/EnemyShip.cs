@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using MDLN.MGTools;
+using MDLN.Tools;
 
 namespace MDLN {
 	class EnemyShip : PhysicalObject {
@@ -22,6 +23,7 @@ namespace MDLN {
 		private bool cbStrafeCW;
 		private PhysicalObject cTarget;
 		private PhysicalObject cAvoid;
+		private Int32 cnHealth;
 
 		private int cnLastMove = 0;
 		public GameConsole cDevConsole;
@@ -30,6 +32,8 @@ namespace MDLN {
 			cObjMgr = ObjManager;
 			cnTargetGroupID = nTargetGroupID;
 			cnAvoidGroupID = nAvoidGroupID;
+
+			cnHealth = 100;
 
 			cnMaxTurn = (float)(5 * Math.PI / 180);
 			cnMaxSpeed = 5;
@@ -48,6 +52,8 @@ namespace MDLN {
 		}
 
 		private bool DrawHandle(PhysicalObject CurrObj, GraphicsDevice gdDevice, SpriteBatch dbDraw) {
+			//Debug stuff to help with movement algorithm
+			/*
 			if (cTarget != null) {
 				DrawTools.DrawLine(gdDevice, dbDraw, Color.Red, 2, CenterPoint, cTarget.CenterPoint);
 			}
@@ -55,6 +61,16 @@ namespace MDLN {
 			if (cAvoid != null) {
 				DrawTools.DrawLine(gdDevice, dbDraw, Color.Cyan, 2, CenterPoint, cAvoid.CenterPoint);
 			}
+			*/
+
+			Vector vHealthBar = new Vector();
+			Vector2 vHealthStart, vHealthEnd;
+
+			vHealthBar.SetPolarCoordinates(50f * (cnHealth / 100f), 0);
+
+			vHealthStart = CenterPoint + new Vector2(-25, 25);
+			vHealthEnd = vHealthStart + new Vector2((float)vHealthBar.Rectangular.Real, (float)vHealthBar.Rectangular.Imaginary);
+			DrawTools.DrawLine(gdDevice, dbDraw, Color.Red, 5, vHealthStart, vHealthEnd);
 
 			return true;
 		}
@@ -93,12 +109,19 @@ namespace MDLN {
 
 		public override bool Update(GameTime CurrTime) {
 			int nCtr, nBestTargetID = -1, nBestAvoidID = -1;
-			float nBestTargetDist = 0, nBestAvoidDist = 0, nCurrDist;
+			float nBestTargetDist = 0, nBestAvoidDist = 0, nCurrDist, nAvoidDir, nTargetDir;
 			Vector2 vNewPos;
 			List<PhysicalObject> aTargetList = cObjMgr[cnTargetGroupID];
 			List<PhysicalObject> aAvoidList = cObjMgr[cnAvoidGroupID];
 
 			base.Update(CurrTime);
+
+			if (cnHealth <= 0) {
+				//This enemy is dead :(
+				//Should fire off some explosion particles
+
+				return false;
+			}
 
 			cTarget = null;
 			cAvoid = null;
@@ -132,9 +155,10 @@ namespace MDLN {
 				}
 			}
 
-			if ((nBestAvoidID != -1) && (nBestAvoidDist < nBestTargetDist) && (nBestAvoidDist < cnMaxStrafeDist * cnMaxStrafeDist)) {
-				//Thing to avoid is closer than the target, it gets priority
-				nBestTargetID = -1;
+			if (nBestAvoidDist > cnMaxStrafeDist * cnMaxStrafeDist) {
+				//Thing to avoid is too far away to worry about
+				nBestAvoidID = -1;
+				cAvoid = null;
 			}
 
 			if (nBestTargetID != -1) { //Found a valid target, attack it
@@ -144,29 +168,46 @@ namespace MDLN {
 					}
 					cnLastMove = 1;
 					//Too far away to strafe, move closer
-					nCurrDist = AITools.SteerTowardTarget(CenterPoint, aTargetList[nBestTargetID].CenterPoint, ObjectRotation, cnMaxTurn);
+					nTargetDir = AITools.SteerTowardTarget(CenterPoint, aTargetList[nBestTargetID].CenterPoint, ObjectRotation, cnMaxTurn);
 				} else if (nBestTargetDist < cnMinStrafeDist * cnMinStrafeDist) {
 					if (cnLastMove != 2) {
 						cDevConsole?.AddText("Back away");
 					}
 					cnLastMove = 2;
 					//Too close, steer away from target
-					nCurrDist = AITools.SteerAwayFromTarget(CenterPoint, aTargetList[nBestTargetID].CenterPoint, ObjectRotation, cnMaxTurn);
+					nTargetDir = AITools.SteerAwayFromTarget(CenterPoint, aTargetList[nBestTargetID].CenterPoint, ObjectRotation, cnMaxTurn);
 				}  else { //Close enough, strafe around the target
 					if (cnLastMove != 3) {
 						cDevConsole?.AddText("Strafe");
 					}
 					cnLastMove = 3;
-					nCurrDist = AITools.SteerToCircleTarget(CenterPoint, aTargetList[nBestTargetID].CenterPoint, ObjectRotation, cnMaxTurn, cbStrafeCW);
+					nTargetDir = AITools.SteerToCircleTarget(CenterPoint, aTargetList[nBestTargetID].CenterPoint, ObjectRotation, cnMaxTurn, cbStrafeCW);
 				}
-
-				//Set the new movement direction, but don't change the speed
-				SetMovement(nCurrDist, cnMaxSpeed);
-			} else if (nBestAvoidID != -1) {
-				nCurrDist = AITools.SteerAwayFromTarget(CenterPoint, aAvoidList[nBestAvoidID].CenterPoint, ObjectRotation, cnMaxTurn);
-
-				SetMovement(nCurrDist, cnMaxSpeed);
+			} else {
+				nTargetDir = 0;
 			}
+			
+			if (nBestAvoidID != -1) {
+				nAvoidDir = AITools.SteerAwayFromTarget(CenterPoint, aAvoidList[nBestAvoidID].CenterPoint, ObjectRotation, cnMaxTurn);
+			} else {
+				nAvoidDir = 0;
+			}
+
+			if (cnTargetGroupID != -1) {
+				if ((nBestAvoidID != -1) && (nBestAvoidDist < nBestTargetDist)) {
+					//Thing to avoid is closer than the target, it gets priority
+					nCurrDist = (0.75f * nAvoidDir) + (0.25f * nTargetDir);
+				} else {
+					//Target is closer, go for the kill
+					nCurrDist = nTargetDir;
+				}
+			} else {
+				//No target so just avoid?
+				nCurrDist = nAvoidDir;
+			}
+
+			//Set the new movement direction, but don't change the speed
+			SetMovement(nCurrDist, cnMaxSpeed);
 
 			//Apply current speed
 			vNewPos = CenterPoint;
@@ -191,6 +232,22 @@ namespace MDLN {
 			ctHitFlashUntil = CurrTime.TotalGameTime.TotalMilliseconds + ctHitFlashDuration;
 
 			//Figure out what hit this and apply damage?
+			if (oCollider is Projectile_t) {
+				switch (((Projectile_t)oCollider).ProjectileType) {
+				case eProjectileType_t.Straight:
+					cnHealth -= 15;
+					break;
+				case eProjectileType_t.Tracking:
+					cnHealth -= 10;
+					break;
+				default:
+					break;
+				}
+
+				if (cnHealth < 0) {
+					cnHealth = 0;
+				}
+			}
 
 			return;
 		}

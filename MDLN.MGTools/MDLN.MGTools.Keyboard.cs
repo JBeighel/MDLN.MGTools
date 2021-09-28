@@ -16,7 +16,7 @@ namespace MDLN.MGTools {
 		public static string GetTypedChars(KeyboardState CurrKeys, KeyboardState PriorKeys) {
 			Keys[] PressedList = CurrKeys.GetPressedKeys();
 			string NewKeys = "";
-			bool ShiftDown = false;
+			bool ShiftDown;
 
 			if ((CurrKeys.IsKeyDown(Keys.LeftShift) == true) || (CurrKeys.IsKeyDown(Keys.RightShift) == true)) {
 				ShiftDown = true;
@@ -99,6 +99,24 @@ namespace MDLN.MGTools {
 							NewKeys += "}";
 						} else {
 							NewKeys += "]";
+						}
+					} else if (CurrKey == Keys.OemComma) {
+						if (ShiftDown == true) {
+							NewKeys += "<";
+						} else {
+							NewKeys += ",";
+						}
+					} else if (CurrKey == Keys.OemPeriod) {
+						if (ShiftDown == true) {
+							NewKeys += ">";
+						} else {
+							NewKeys += ".";
+						}
+					} else if (CurrKey == Keys.OemQuestion) {
+						if (ShiftDown == true) {
+							NewKeys += "?";
+						} else {
+							NewKeys += "/";
 						}
 					} else if (CurrKey == Keys.Space) {
 						NewKeys += " ";

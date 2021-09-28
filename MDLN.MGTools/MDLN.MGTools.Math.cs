@@ -339,6 +339,324 @@ namespace MDLN.MGTools {
 			//The point wasn't in any of the triangles, outside the polygon
 			return false;
 		}
+
+		/// <summary>
+		/// Checks if two line segments intersect between the endpoints provided
+		/// </summary>
+		/// <param name="Line1End1">First endpoint of line 1</param>
+		/// <param name="Line1End2">Second end point of line 1</param>
+		/// <param name="Line2End1">First endpoint of line 2</param>
+		/// <param name="Line2End2">Second endpoint of line 2</param>
+		/// <returns>True if the lines intesect within the endpoints provided, false if not</returns>
+		public static bool LineSegmentIntesection(Vector2 Line1End1, Vector2 Line1End2, Vector2 Line2End1, Vector2 Line2End2) {
+			float Line1M, Line1B, Line2M, Line2B;
+			Vector2 vIntersect;
+
+			//Start with general equation for bothe lines, aY = mX + b
+			//Calculate line slopes
+			if (Line1End1.X == Line1End2.X) {
+				//Line is vertical, infinite slope
+				Line1M = float.MaxValue;
+			} else {
+				Line1M = (Line1End1.Y - Line1End2.Y) / (Line1End1.X - Line1End2.X);
+			}
+
+			if (Line2End1.X == Line2End2.X) {
+				//Line is vertical, infinite slope
+				Line2M = float.MaxValue;
+			} else {
+				Line2M = (Line2End1.Y - Line2End2.Y) / (Line2End1.X - Line2End2.X);
+			}
+
+			if (Line1M == Line2M) {
+				//Lines are parallel and can't instersect
+				return false;
+			} 
+
+			//Calculate Y intercepts
+			Line1B = Line1End1.Y - (Line1M * Line1End1.X);
+			Line2B = Line2End1.Y - (Line2M * Line2End1.X);
+
+			if (Line1M == float.MaxValue) {
+				//Veritical Line 1 handling
+				//look for Y value in line 2 at line 1's X
+				vIntersect.X = Line1End1.X;
+				vIntersect.Y = (Line2M * vIntersect.X) + Line2B;
+			} else if (Line2M == float.MaxValue) {
+				//Veritical Line 2 handling
+				//look for Y value in line 1 at line 2's X
+				vIntersect.X = Line2End1.X;
+				vIntersect.Y = (Line1M * vIntersect.X) + Line1B;
+			} else {
+				//Find intersection X value
+				vIntersect.X = Line2B - Line1B;
+				vIntersect.X /= Line1M - Line2M;
+
+				//Find intersection Y value
+				//Sub X into either equation
+				vIntersect.Y = (Line1M * vIntersect.X) + Line1B;
+			}
+
+			//See if the X coordinate is inside both line segments
+			if (Line1End1.X < Line1End2.X) {
+				if ((Line1End1.X > vIntersect.X) || (vIntersect.X > Line1End2.X)) {
+					return false;
+				}
+			} else {
+				if ((Line1End2.X > vIntersect.X) || (vIntersect.X > Line1End1.X)) {
+					return false;
+				}
+			}
+
+			if (Line2End1.X < Line2End2.X) {
+				if ((Line2End1.X > vIntersect.X) || (vIntersect.X > Line2End2.X)) {
+					return false;
+				}
+			} else {
+				if ((Line2End2.X > vIntersect.X) || (vIntersect.X > Line2End1.X)) {
+					return false;
+				}
+			}
+
+			//See if the Y coordinate is inside both line segments
+			if (Line1End1.Y < Line1End2.Y) {
+				if ((Line1End1.Y > vIntersect.Y) || (vIntersect.Y > Line1End2.Y)) {
+					return false;
+				}
+			} else {
+				if ((Line1End2.Y > vIntersect.Y) || (vIntersect.Y > Line1End1.Y)) {
+					return false;
+				}
+			}
+
+			if (Line2End1.Y < Line2End2.Y) {
+				if ((Line2End1.Y > vIntersect.Y) || (vIntersect.Y > Line2End2.Y)) {
+					return false;
+				}
+			} else {
+				if ((Line2End2.Y > vIntersect.Y) || (vIntersect.Y > Line2End1.Y)) {
+					return false;
+				}
+			}
+
+			//The line segments do intersect
+			return true;
+		}
+
+		/// <summary>
+		/// Calculates a set of points that will create a smooth curve.  The 
+		/// start and end points will be expressly defined.  The curve shape 
+		/// will be controlled by two other points.
+		/// 
+		/// The first control point will define the angle the curve leaves the 
+		/// starting point as well as how sharp the curve begins.
+		/// 
+		/// The second control point will define the angle the curve approaches
+		/// the ending point as well as how sharp the curve ends.
+		/// </summary>
+		/// <param name="vCurveStart">Starting point of the curve</param>
+		/// <param name="vCurveEnd">Ending point of the curve</param>
+		/// <param name="vPt1">First control point</param>
+		/// <param name="vPt2">Second control point</param>
+		/// <param name="nNumPoints">Number of line segments to calculate that
+		/// comprise the curve</param>
+		/// <param name="avCurvePts">Points defining the line segments.  Each 
+		/// point will end the previous line segment and start the next line
+		/// segment</param>
+		/// <returns>True on success, false on any error</returns>
+		public static bool CubicBezierCurvePoints(Vector2 vCurveStart, Vector2 vCurveEnd, Vector2 vPt1, Vector2 vPt2, UInt32 nNumPoints, out List<Vector2> avCurvePts) {
+			//vCurveStart = X0, Y0
+			//vPt1 = X1, Y1
+			//vPt2 = X2, Y2
+			//vCurveEnd = X3, Y3
+			//X(n) = [(3n)^0 * (1 - n)^3 * X0] + [(3n)^1 * (1 - n)^2 * X1] + [(3n)^2 * (1 - n)^1 X2] + [(3n)^3 * (1 - n)^0 X3]
+			//Y(n) = [(3n)^0 * (1 - n)^3 * Y0] + [(3n)^1 * (1 - n)^2 * Y1] + [(3n)^2 * (1 - n)^1 Y2] + [(3n)^3 * (1 - n)^0 Y3]
+			//n must be a value from 0 to 1
+
+			UInt32 nCtr;
+			double nStepSize, nCurrStep;
+			Vector2 vPoint, vOffset;
+
+			avCurvePts = new List<Vector2>();
+
+			vOffset = vCurveEnd;
+
+			avCurvePts.Add(vCurveStart);//Always start at the origin
+			vCurveStart -= vOffset;
+
+			vCurveEnd -= vOffset;
+
+			vPt1 -= vOffset;
+
+			vPt2 -= vOffset;
+
+			//Make the steps even, this will not evenly space the points on the curve
+			nStepSize = 1 / (double)nNumPoints;
+
+			nCurrStep = nStepSize; 
+			for (nCtr = 1; nCtr < nNumPoints; nCtr += 1) {
+				vPoint = new Vector2(0, 0);
+
+				//Calcualte the X coordinate
+				vPoint.X = (float)Math.Pow(1 - nCurrStep, 3) * vCurveStart.X;
+				vPoint.X += (float)(3 * nCurrStep * Math.Pow(1 - nCurrStep, 2) * vPt1.X);
+				vPoint.X += (float)(3 * Math.Pow(nCurrStep, 2) * (1 - nCurrStep) * vPt2.X);
+				vPoint.X += (float)(3 * Math.Pow(nCurrStep, 3) * vCurveEnd.X);
+
+				//Calculate the Y coordinate
+				vPoint.Y = (float)Math.Pow(1 - nCurrStep, 3) * vCurveStart.Y;
+				vPoint.Y += (float)(3 * nCurrStep * Math.Pow(1 - nCurrStep, 2) * vPt1.Y);
+				vPoint.Y += (float)(3 * Math.Pow(nCurrStep, 2) * (1 - nCurrStep) * vPt2.Y);
+				vPoint.Y += (float)(3 * Math.Pow(nCurrStep, 3) * vCurveEnd.Y);
+
+				//Put the point into the list
+				avCurvePts.Add(vPoint + vOffset);
+
+				//Move to the next step
+				nCurrStep += nStepSize;
+			}
+
+			vCurveEnd += vOffset;
+			avCurvePts.Add(vCurveEnd);
+
+			return true;
+		}
+
+		/// <summary>
+		/// Calculates a bounding box that encloses a smooth curve.  The 
+		/// start and end points will be expressly defined.  The curve shape 
+		/// will be controlled by two other points.
+		/// 
+		/// The first control point will define the angle the curve leaves the 
+		/// starting point as well as how sharp the curve begins.
+		/// 
+		/// The second control point will define the angle the curve approaches
+		/// the ending point as well as how sharp the curve ends.
+		/// </summary>
+		/// <param name="vCurveStart">Starting point of the curve</param>
+		/// <param name="vCurveEnd">Ending point of the curve</param>
+		/// <param name="vPt1">First control point</param>
+		/// <param name="vPt2">Second control point</param>
+		/// <param name="rectBoundary">Rectangle that contains the entire curve</param>
+		/// <returns>True on success, false on any error</returns>
+		public static bool CubicBezierCurveBoundaries(Vector2 vCurveStart, Vector2 vCurveEnd, Vector2 vPt1, Vector2 vPt2, out Rectangle rectBoundary) {
+			//First derivitave equation
+			//vCurveStart = P0
+			//vPt1 = P1
+			//vPt2 = P2
+			//vCurveEnd = P3
+			//d(Pt) = 3 * (1-n)^2 * (P1 - P0)  + 6 * (1-n)n * (P2 - P1) + 3n^2 * (P3 - P2)
+			//Find values of n where the result is zero
+			//Set equation to zero and solve for n
+			//0 = (3 - 6n + n^2)(P1-P0) + (6n - n^2)(P2 - P1) + 3n^2(P3 - P2)
+			//Algebra that to...
+			//0 = (-3P0 + 9P1 - 9P2 + 3P3)n^2 + (6P0 - 12P1 + 6P2)n + (-3P0 + 3P1)
+			//Into Quadratic formula: An^2 + Bn + C = 0
+			//(-B +/- sqrt(B^2 - 4AC)) / 2A
+			//Those inflection points and the ends will set ranges for the bounding box
+
+			List<double> aTestPts = new List<double>();
+			double nA, nB, nC, nValue;
+			Vector2 vOffset;
+
+			//Always check the endpoints of the curve
+			aTestPts.Add(0);
+			aTestPts.Add(1);
+
+			//Curve equation requires the ending to be the origin
+			vOffset = vCurveEnd;
+
+			//Correct all the points so the ending is the origin
+			vCurveStart -= vOffset;
+			vPt1 -= vOffset;
+			vPt2 -= vOffset;
+			vCurveEnd = new Vector2(0, 0);
+
+			//Find X inflection points
+			nA = (-3* vCurveStart.X) + (9 * vPt1.X) + (-9 * vPt2.X) + (3 * vCurveEnd.X);
+			nB = (6 * vCurveStart.X) + (-12 * vPt1.X) + (6 * vPt2.X);
+			nC = (-3 * vCurveStart.X) + (3 * vPt1.X);
+
+			if (nA != 0) {
+				nValue = ((-1 * nB) + Math.Sqrt((nB * nB) + (-4 * nA * nC))) / (2 * nA);
+				if ((nValue > 0) && (nValue < 1)) {
+					aTestPts.Add(nValue);
+				}
+
+				nValue = ((-1 * nB) - Math.Sqrt((nB * nB) + (-4 * nA * nC))) / (2 * nA);
+				if ((nValue > 0) && (nValue < 1)) {
+					aTestPts.Add(nValue);
+				}
+			} else {
+				//X starts and ends at same point, try the middle?
+				aTestPts.Add(0.5);
+			}
+
+			nA = (-3 * vCurveStart.Y) + (9 * vPt1.Y) + (-9 * vPt2.Y) + (3 * vCurveEnd.Y);
+			nB = (6 * vCurveStart.Y) + (-12 * vPt1.Y) + (6 * vPt2.Y);
+			nC = (-3 * vCurveStart.Y) + (3 * vPt1.Y);
+
+			if (nA != 0) {
+				nValue = ((-1 * nB) + Math.Sqrt((nB * nB) + (-4 * nA * nC))) / (2 * nA);
+				if ((nValue > 0) && (nValue < 1)) {
+					aTestPts.Add(nValue);
+				}
+
+				nValue = ((-1 * nB) - Math.Sqrt((nB * nB) + (-4 * nA * nC))) / (2 * nA);
+				if ((nValue > 0) && (nValue < 1)) {
+					aTestPts.Add(nValue);
+				}
+			} else {
+				//Y starts and ends at same point, try the middle?
+				aTestPts.Add(0.5);
+			}
+
+			//Loop through all the test points
+			rectBoundary = new Rectangle(0, 0, 0, 0);
+
+			List<double> anX = new List<double>();;
+			List<double> anY = new List<double>();
+			foreach (double nCurr in aTestPts) {
+				//Calcualte the X coordinate
+				nValue = Math.Pow(1 - nCurr, 3) * vCurveStart.X;
+				nValue += (3 * nCurr * Math.Pow(1 - nCurr, 2) * vPt1.X);
+				nValue += (3 * Math.Pow(nCurr, 2) * (1 - nCurr) * vPt2.X);
+				nValue += (3 * Math.Pow(nCurr, 3) * vCurveEnd.X);
+
+				anX.Add(nValue);
+
+				if ((nValue < 0) && (nValue < rectBoundary.X)) { //Rectangle starts left of offset point
+					rectBoundary.X = (int)(nValue - 1);
+				} else if (nValue > rectBoundary.Width) {
+					rectBoundary.Width = 1 + (int)nValue;
+				}
+
+				//Calculate the Y coordinate
+				nValue = Math.Pow(1 - nCurr, 3) * vCurveStart.Y;
+				nValue += (3 * nCurr * Math.Pow(1 - nCurr, 2) * vPt1.Y);
+				nValue += (3 * Math.Pow(nCurr, 2) * (1 - nCurr) * vPt2.Y);
+				nValue += (3 * Math.Pow(nCurr, 3) * vCurveEnd.Y);
+
+				anY.Add(nValue);
+
+				if ((nValue < 0) && (nValue < rectBoundary.Y)) { //Rectangle starts above offset point
+					rectBoundary.Y = (int)(nValue - 1);
+				} else if (nValue > rectBoundary.Height) {
+					rectBoundary.Height = 1 + (int)nValue;
+				}
+			}
+
+			//If the start isn't the offset, adjust dimensions to account for it
+			rectBoundary.Width -= rectBoundary.X;
+			rectBoundary.Height -= rectBoundary.Y;
+
+			//Reposition the rectangle to the offset
+			rectBoundary.X += (int)vOffset.X;
+			rectBoundary.Y += (int)vOffset.Y;
+			
+
+			return true;
+		}
 	}
 }
 

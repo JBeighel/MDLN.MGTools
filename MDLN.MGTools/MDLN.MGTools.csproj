@@ -36,6 +36,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MDLN.MGTools.Container.cs" />
+    <Compile Include="MDLN.MGTools.DrawTools.cs" />
     <Compile Include="MDLN.MGTools.Polygon.cs" />
     <Compile Include="MDLN.MGTools.SpriteManager.cs" />
     <Compile Include="MDLN.MGTools.TextureFont.cs" />

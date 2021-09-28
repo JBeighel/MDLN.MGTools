@@ -133,6 +133,8 @@ namespace ShapesCollisions
 			cPolyList = new List<ConvexPolygon>();
 			cPolyList.Add(new ConvexPolygon(cGraphDevMgr.GraphicsDevice));
 			cPolyList[0].LineColor = Color.Blue;
+			cPolyList[0].LineWidth = 2;
+
 			cPolyList[0].FillColor = Color.DarkOliveGreen;
 			cPolyList[0].FillShape = true;
 
@@ -150,6 +152,8 @@ namespace ShapesCollisions
 
 			cPolyList.Add(new ConvexPolygon(cGraphDevMgr.GraphicsDevice));
 			cPolyList[1].LineColor = Color.Green;
+			cPolyList[1].FillColor = Color.Wheat;
+			cPolyList[1].LineWidth = 2;
 
 			strFileName = INTERFACECONTENTDIR + "\\Ship.png";
 			FileLoad = new FileStream(strFileName, FileMode.Open);
@@ -158,26 +162,29 @@ namespace ShapesCollisions
 
 			cPolyList[1].FillTexture = tmpTexture;
 			cPolyList[1].FillShape = true;
+			cPolyList[1].MoveShape(new Vector2(250, 250));
 
-			Vert.X = 300;
-			Vert.Y = 300;
+			Vert.X = 50;
+			Vert.Y = 50;
 			cPolyList[1].AddVertex(Vert, new Vector2(0, 1));
 
-			Vert.X = 200;
-			Vert.Y = 300;
+			Vert.X = -50;
+			Vert.Y = 50;
 			cPolyList[1].AddVertex(Vert, new Vector2(0, 0));
 
-			Vert.X = 200;
-			Vert.Y = 200;
+			Vert.X = -50;
+			Vert.Y = -50;
 			cPolyList[1].AddVertex(Vert, new Vector2(1, 0));
 
-			Vert.X = 300;
-			Vert.Y = 200;
+			Vert.X = 50;
+			Vert.Y = -50;
 			cPolyList[1].AddVertex(Vert, new Vector2(1, 1));
 
 			cPolyList.Add(new ConvexPolygon(cGraphDevMgr.GraphicsDevice));
 			cPolyList[2].LineColor = Color.Gray;
 			cPolyList[2].FillColor = Color.BlueViolet;
+			cPolyList[2].LineWidth = 2;
+
 
 			//tmpTexture = new Texture2D(cGraphDevMgr.GraphicsDevice, 2, 2);
 			//tmpTexture.SetData(new Color[] { Color.RosyBrown, Color.Aqua, Color.DarkOrchid, Color.PaleGreen });
@@ -225,7 +232,7 @@ namespace ShapesCollisions
 				//Mouse was just clicked, see if its in range of a vertex
 				for (nPolyCtr = 0; nPolyCtr < cPolyList.Count; nPolyCtr++) {
 					VertList.Clear();
-					VertList.AddRange(cPolyList[nPolyCtr].GetVertexes());
+					VertList.AddRange(cPolyList[nPolyCtr].GetVertexes(false));
 
 					for (nVertCtr = 0; nVertCtr < VertList.Count; nVertCtr++) {
 						if (MGMath.IsPointInCircle(MousePt, VertList[nVertCtr], CIRCLERADIUS) == true) {
@@ -238,8 +245,18 @@ namespace ShapesCollisions
 				}
 
 				for (nPolyCtr = 0; cMousePoly == null && nPolyCtr < cPolyList.Count; nPolyCtr++) {
-					if (MGMath.PointInConvexPolygon(MousePt, cPolyList[nPolyCtr].GetVertexes()) == true) {
+					if (MGMath.PointInConvexPolygon(MousePt, cPolyList[nPolyCtr].GetVertexes(false)) == true) {
 						cMovePoly = cPolyList[nPolyCtr];
+						cMoveStart = MousePt;
+
+						break;
+					}
+				}
+			} else if ((CurrMouse.LeftButton == ButtonState.Released) && (CurrMouse.RightButton == ButtonState.Pressed) && (cPriorMouse.RightButton == ButtonState.Released)) {
+				//Mouse was just clicked, see if its in range of a vertex
+				for (nPolyCtr = 0; cMousePoly == null && nPolyCtr < cPolyList.Count; nPolyCtr++) {
+					if (MGMath.PointInConvexPolygon(MousePt, cPolyList[nPolyCtr].GetVertexes(false)) == true) {
+						cMousePoly = cPolyList[nPolyCtr];
 						cMoveStart = MousePt;
 
 						break;
@@ -247,14 +264,14 @@ namespace ShapesCollisions
 				}
 			}
 
-			if ((CurrMouse.LeftButton == ButtonState.Released) && (cPriorMouse.LeftButton == ButtonState.Pressed)) {
+			if ((CurrMouse.LeftButton == ButtonState.Released) && (CurrMouse.RightButton == ButtonState.Released) && ((cPriorMouse.LeftButton == ButtonState.Pressed) || (cPriorMouse.RightButton == ButtonState.Pressed))) {
 				//Mouse was just released
 				cMousePoly = null;
 				cMovePoly = null;
 			}
 
 			if ((CurrMouse.LeftButton == ButtonState.Pressed) && (cMousePoly != null)) {
-				//Update the position of the selected vetex
+				//Update the position of the selected vertex
 				cMousePoly.UpdateVertex(cMouseVertIdx, MousePt);
 			}
 
@@ -262,6 +279,11 @@ namespace ShapesCollisions
 				//Update the position of the selected polygon
 				cMovePoly.MoveShape(MousePt - cMoveStart);
 				cMoveStart = MousePt;
+			}
+
+			if ((CurrMouse.LeftButton == ButtonState.Released) && (CurrMouse.RightButton == ButtonState.Pressed) && (cMousePoly != null)) {
+				//Update the rotation of the selected vertex
+				cMousePoly.RotateShape = MGMath.GetAngleFromPoints(cMoveStart, MousePt);
 			}
 
 			cPriorMouse = CurrMouse;
@@ -303,13 +325,18 @@ namespace ShapesCollisions
 			Rectangle CircleDest;
 			int nVertCtr, nPolyCtr;
 			List<Vector2> VertList = new List<Vector2>();
+			List<Vector2> CurveVerts;
+			Rectangle rectCurveBounds;
+			Texture2D LineTexture = new Texture2D(GraphicsDevice, 1, 1);
+
+			LineTexture.SetData(new[] { Color.Cyan });
 
 			cGraphDevMgr.GraphicsDevice.Clear(Color.Black);
 			cDrawBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
 
 			for (nPolyCtr = 0; nPolyCtr < cPolyList.Count; nPolyCtr++) {
 				VertList.Clear();
-				VertList.AddRange(cPolyList[nPolyCtr].GetVertexes());
+				VertList.AddRange(cPolyList[nPolyCtr].GetVertexes(false));
 
 				//Draw circles at each vertex
 				for (nVertCtr = 0; nVertCtr < VertList.Count; nVertCtr++) {
@@ -321,9 +348,18 @@ namespace ShapesCollisions
 					cDrawBatch.Draw(cCircleTexture, CircleDest, Color.Gray);
 				}
 
-				//Draw thenCtrpolygons
-				cPolyList[nPolyCtr].Draw(cDrawBatch);
+				//Draw the polygons
+				cPolyList[nPolyCtr].Draw();
 			}
+
+			VertList.Clear();
+			VertList.AddRange(cPolyList[1].GetVertexes(false));
+			MGMath.CubicBezierCurvePoints(VertList[0], VertList[3], VertList[1], VertList[2], 10, out CurveVerts);
+
+			MGMath.CubicBezierCurveBoundaries(VertList[0], VertList[3], VertList[1], VertList[2], out rectCurveBounds);
+
+			DrawTools.DrawLineSeries(GraphicsDevice, cDrawBatch, Color.LightYellow, 2, CurveVerts);
+			DrawTools.DrawRectangle(GraphicsDevice, cDrawBatch, Color.RosyBrown, 2, rectCurveBounds);
 
 			//Always draw console last
 			cDevConsole.Draw(cDrawBatch);

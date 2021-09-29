@@ -39,6 +39,7 @@
     <Compile Include="MDLN.MGTools.DrawTools.cs" />
     <Compile Include="MDLN.MGTools.Polygon.cs" />
     <Compile Include="MDLN.MGTools.SpriteManager.cs" />
+    <Compile Include="MDLN.MGTools.TextureAtlas.cs" />
     <Compile Include="MDLN.MGTools.TextureFont.cs" />
     <Compile Include="MDLN.MGTools.AssemblyInfo.cs" />
     <Compile Include="MDLN.MGTools.Math.cs" />

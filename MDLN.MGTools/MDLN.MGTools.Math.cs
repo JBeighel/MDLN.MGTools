@@ -7,7 +7,7 @@ namespace MDLN.MGTools {
 	/// <summary>
 	/// Functions for common mathmatecal calculations that are useful in mono game projects
 	/// </summary>
-	public static class MGMath { 
+	public static class MGMath {
 		/// <summary>
 		/// Calculates the X and Y components of a line that has an angle and magnitude.
 		/// </summary>
@@ -292,14 +292,14 @@ namespace MDLN.MGTools {
 			nDet1 = GetTriangleDeterminant(Pt, Vert2, Vert3);
 
 			nDet2 = GetTriangleDeterminant(Vert1, Pt, Vert3);
-			
+
 			if (((nDet1 < 0) && (nDet2 > 0)) || ((nDet1 > 0) && (nDet2 < 0))) {
 				//Mismatched signs mean point is outside the triangle
 				return false;
 			}
 
 			nDet1 += nDet2; //In case 1 or 2 is zero make sure the sign isn't lost
-			//The signs of the first 2 determinants match, so we only need to check against 1 of them
+							//The signs of the first 2 determinants match, so we only need to check against 1 of them
 			nDet3 = GetTriangleDeterminant(Vert1, Vert2, Pt);
 			if (((nDet1 < 0) && (nDet3 > 0)) || ((nDet1 > 0) && (nDet3 < 0))) {
 				//Mismatched signs mean point is outside the triangle
@@ -371,7 +371,7 @@ namespace MDLN.MGTools {
 			if (Line1M == Line2M) {
 				//Lines are parallel and can't instersect
 				return false;
-			} 
+			}
 
 			//Calculate Y intercepts
 			Line1B = Line1End1.Y - (Line1M * Line1End1.X);
@@ -493,7 +493,7 @@ namespace MDLN.MGTools {
 			//Make the steps even, this will not evenly space the points on the curve
 			nStepSize = 1 / (double)nNumPoints;
 
-			nCurrStep = nStepSize; 
+			nCurrStep = nStepSize;
 			for (nCtr = 1; nCtr < nNumPoints; nCtr += 1) {
 				vPoint = new Vector2(0, 0);
 
@@ -573,7 +573,7 @@ namespace MDLN.MGTools {
 			vCurveEnd = new Vector2(0, 0);
 
 			//Find X inflection points
-			nA = (-3* vCurveStart.X) + (9 * vPt1.X) + (-9 * vPt2.X) + (3 * vCurveEnd.X);
+			nA = (-3 * vCurveStart.X) + (9 * vPt1.X) + (-9 * vPt2.X) + (3 * vCurveEnd.X);
 			nB = (6 * vCurveStart.X) + (-12 * vPt1.X) + (6 * vPt2.X);
 			nC = (-3 * vCurveStart.X) + (3 * vPt1.X);
 
@@ -614,7 +614,7 @@ namespace MDLN.MGTools {
 			//Loop through all the test points
 			rectBoundary = new Rectangle(0, 0, 0, 0);
 
-			List<double> anX = new List<double>();;
+			List<double> anX = new List<double>(); ;
 			List<double> anY = new List<double>();
 			foreach (double nCurr in aTestPts) {
 				//Calcualte the X coordinate
@@ -653,9 +653,135 @@ namespace MDLN.MGTools {
 			//Reposition the rectangle to the offset
 			rectBoundary.X += (int)vOffset.X;
 			rectBoundary.Y += (int)vOffset.Y;
-			
+
 
 			return true;
+		}
+
+		/// <summary>
+		/// Applies a scale transformation to a set of 2D vertexes
+		/// Maxrix math
+		/// ---    ---   --- ---   ---                 ---
+		/// | A1, B1 |   | A'1 |   | A1 * A'1 + B1 * A12 |
+		/// | A2, B2 | * | A'2 | = | A2 * A'1 + B2 * A12 |
+		/// ---    ---   --- ---   ---                 ---
+		///
+		/// Scale transformation matrix, Xs is X axis scale, Ys is Y axis scale
+		/// ---    ---   --- ---   ---                ---   ---      ---
+		/// | Xs, 0  |   | PtX |   | Xs * PtX + 0 * PtY |   | Xs * PtX |
+		/// | 0,  Ys | * | PtY | = | 0 * PtX + Ys * PtY | = | Ys * PtY |
+		/// ---    ---   --- ---   ---                ---   ---      ---
+		/// </summary>
+		/// <param name="avOriginal">Original vertex coordinates</param>
+		/// <param name="vScaleCenter">Coordinate of where the scaling should be centered
+		/// Equal growth/shrinking from this point</param>
+		/// <param name="nScaleX">Amount to scale the shape along the X axis</param>
+		/// <param name="nScaleY">Amount to scale the shape along the Y axis</param>
+		/// <returns>A set of vertexes corresponding to the original set scaled
+		/// around the specified center point</returns>
+		public static List<Vector2> Transform2DScale(IEnumerable<Vector2> avOriginal, Vector2 vScaleCenter, float nScaleX, float nScaleY) {
+			List<Vector2> avScaled = new List<Vector2>();
+			Vector2 vPt;
+
+			foreach (Vector2 vVertex in avOriginal) {
+				vPt = vVertex - vScaleCenter; //Adjust coordinates so scaling is from center point
+
+				//Apply scale factors
+				vPt.X *= nScaleX;
+				vPt.Y *= nScaleY;
+
+				//Remove center adjustment
+				vPt += vScaleCenter;
+
+				avScaled.Add(vPt);
+			}
+
+			//Return the list of calculated points
+			return avScaled;
+		}
+
+		public static List<Vector2> Transform2D(IEnumerable<Vector2> avOriginal, Vector2 vXFormCenter, float nScaleX, float nScaleY, float nRotCCWRadians) {
+			float[,] anTransform, anVertex, anResult;
+			List<Vector2> avScaled = new List<Vector2>();
+			Vector2 vPt;
+
+			anVertex = new float[2, 1];
+			anTransform = new float[2, 2];
+
+			//Create the transformation matrix
+			anTransform[0, 0] = nScaleX * (float)Math.Cos(nRotCCWRadians);
+			anTransform[0, 1] = nScaleY * -1 * (float)Math.Sin(nRotCCWRadians);
+			anTransform[1, 0] = nScaleX * (float)Math.Sin(nRotCCWRadians);
+			anTransform[1, 1] = nScaleY * (float)Math.Cos(nRotCCWRadians);
+
+			foreach (Vector2 vVertex in avOriginal) {
+				//Adjust coordinates so scaling is from center point
+				anVertex[0, 0] = vVertex.X - vXFormCenter.X;
+				anVertex[1, 0] = vVertex.Y - vXFormCenter.Y;
+
+				//Apply transformation
+				anResult = MatrixMult(anTransform, anVertex);
+
+				//Remove center adjustment
+				vPt.X = anResult[0, 0] + vXFormCenter.X;
+				vPt.Y = anResult[1, 0] + vXFormCenter.Y;
+
+				avScaled.Add(vPt);
+			}
+
+			//Return the list of calculated points
+			return avScaled;
+		}
+
+		/// <summary>
+		/// Multiplies two matrices together and returns the result.
+		/// 
+		/// THe first index of the multidmensional array is the Row.  The 
+		/// second index is the column.
+		/// { { 00, 01, 02 },
+		///   { 10, 11, 12 },
+		///   { 20, 21, 22 } }
+		/// </summary>
+		/// <param name="anMatrix1">First matrix to multiply</param>
+		/// <param name="anMatrix2">Second matrix to multiply</param>
+		/// <returns>Matrix result of the multiplication</returns>
+		public static float[,] MatrixMult (float[,] anMatrix1, float[,] anMatrix2) {
+			float[,] anResult;
+			float nValue;
+			Int32 nRowCtr, nColCtr, nCalcCtr;
+
+			//Ensure the matrix sizes are compatible
+			if ((anMatrix1.GetLength(0) == 0) || (anMatrix1.GetLength(1) == 0)) {
+				throw new Exception("Unable to multiply matrices with a zero dimension");
+			} else if ((anMatrix2.GetLength(0) == 0) || (anMatrix2.GetLength(1) == 0)) {
+				throw new Exception("Unable to multiply matrices with a zero dimension");
+			}
+
+			if (anMatrix1.GetLength(1) != anMatrix2.GetLength(0)) {
+				throw new Exception("Unable to multiply matrices where first matrix columns (second index) doesn't match second matrix rows (first index)");
+			}
+
+			//Set the size of the results array
+			anResult = new float[anMatrix1.GetLength(0), anMatrix2.GetLength(1)];
+
+			//Loop through all rows in the resulting matrix
+			for (nRowCtr = 0; nRowCtr < anMatrix1.GetLength(0); nRowCtr += 1) {
+				//Loop through all columns in th eresulting matrix
+				for (nColCtr = 0; nColCtr < anMatrix2.GetLength(1); nColCtr += 1) {
+					nValue = 0;
+
+					//Loop through all calculations needed for the cell
+					for (nCalcCtr = 0; nCalcCtr < anMatrix1.GetLength(1); nCalcCtr += 1) {
+						//Multiply every value in matrix 1 row with matrix 2 column, sum the products
+						nValue += anMatrix1[nRowCtr, nCalcCtr] * anMatrix2[nCalcCtr, nColCtr];
+					}
+
+					//Put the calculated value into the results array
+					anResult[nRowCtr, nColCtr] = nValue;
+				}
+			}
+
+			return anResult;
 		}
 	}
 }

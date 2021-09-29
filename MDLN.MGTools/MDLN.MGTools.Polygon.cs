@@ -495,7 +495,6 @@ namespace MDLN.MGTools {
 
 			//Create a basec shader to use when rendering the polygon
 			cBasicShader = new BasicEffect(cGraphDev) {
-				//VertexColorEnabled = true,
 				TextureEnabled = true,
 				World = Matrix.CreateOrthographicOffCenter(0, cGraphDev.Viewport.Width, cGraphDev.Viewport.Height, 0, 0, 1),
 			};
@@ -614,32 +613,11 @@ namespace MDLN.MGTools {
 		/// the polygon.
 		/// </summary>
 		private void RecalculateCoordinates() {
-			int nCtr;
-			Vector2 vScale, vRotate;
-
-			cvBaseOffset.X = 0;
-			cvBaseOffset.Y = 0;
-
 			//Now calculate the position of all the collision vertexes
 			cCollisionList.Vertexes.Clear();
-			for (nCtr = 0; nCtr < cavBaseVertexList.Count; nCtr++) {
-				vScale.X = cavBaseVertexList[nCtr].X - cvBaseOffset.X;
-				vScale.Y = cavBaseVertexList[nCtr].Y - cvBaseOffset.Y;
 
-				//With Center as the origin Scale first
-				vScale.X *= cvScale.X;
-				vScale.Y *= cvScale.Y;
-
-				//With center as origin, handle the rotation next
-				vRotate.X = (float)((vScale.X * Math.Cos(cnRotation)) - (vScale.Y * Math.Sin(cnRotation)));
-				vRotate.Y = (float)((vScale.X * Math.Sin(cnRotation)) + (vScale.Y * Math.Cos(cnRotation)));
-
-				//Finally apply any movement (put back in the cente offset as well)
-				vRotate.X += cvMove.X + cvBaseOffset.X;
-				vRotate.Y += cvMove.Y + cvBaseOffset.Y;
-
-				//Add this to the collision list
-				cCollisionList.Vertexes.Add(vRotate);
+			foreach (Vector2 vPt in MGMath.Transform2D(cavBaseVertexList, new Vector2(0, 0), cvScale.X, cvScale.Y, cnRotation)) {
+				cCollisionList.Vertexes.Add(vPt + cvMove);
 			}
 		}
 	}

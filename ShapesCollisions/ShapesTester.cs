@@ -41,6 +41,8 @@ namespace ShapesCollisions
 		private List<ConvexPolygon> cPolyList;
 		private int cMouseVertIdx;
 
+		private TextureAtlas cAtlas;
+
 		public ShapesTester() {
 			cGraphDevMgr = new GraphicsDeviceManager(this);
 			IsMouseVisible = true;
@@ -210,6 +212,8 @@ namespace ShapesCollisions
 			Vert.Y = 200;
 			cPolyList[2].AddVertex(Vert, new Vector2(0f, 0));
 
+			cAtlas = new TextureAtlas(cGraphDevMgr.GraphicsDevice, "content\\spaceShooter2_spritesheet.png", "content\\spaceShooter2_spritesheet.xml");
+
 			return;
 		}
 
@@ -310,6 +314,13 @@ namespace ShapesCollisions
 				}
 			}
 
+			List<Vector2> avCorners = new List<Vector2>();
+			avCorners.Add(new Vector2(200, 25));
+			avCorners.Add(new Vector2(300, 25));
+			avCorners.Add(new Vector2(300, 125));
+			avCorners.Add(new Vector2(200, 125));
+			cAtlas.EnqueueImageDraw("spaceAstronauts_001.png", avCorners);
+
 			cDevConsole.Update(gameTime);
 
 			//Use monogame update
@@ -365,6 +376,8 @@ namespace ShapesCollisions
 			cDevConsole.Draw(cDrawBatch);
 
 			cDrawBatch.End();
+
+			cAtlas.Draw();
 
 			//Use monogame draw
 			base.Draw(gameTime);
